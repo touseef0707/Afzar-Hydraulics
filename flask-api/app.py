@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS  # Import CORS
+from components import Component, Feed, Pipe
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -22,3 +23,24 @@ def sum_numbers():
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
+
+def index():
+    # This is an example of how to run the components.
+    # In a real application, you might trigger this from a specific API endpoint.
+
+    # 1. Create a data feed
+    text_feed = Feed(name="Text Feed", data_source="hello world, this is a test.")
+
+    # 2. Create a destination component to receive the final data
+    output_component = Component(name="Output Handler")
+
+    # 3. Create a pipe to connect the feed to the output
+    processing_pipe = Pipe(name="Main Pipe", source=text_feed, destination=output_component)
+
+    # 4. Start the data flow
+    processing_pipe.flow()
+
+    return "Component flow executed! Check your console for output."
+
+if __name__ == '__main__':
+    app.run(debug=True)
