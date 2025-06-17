@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS  # Import CORS
-from components import Component, Feed, Pipe
+from flask_cors import CORS 
+from components import Feed, Pipe
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -21,9 +21,6 @@ def sum_numbers():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(port=5000, debug=True)
-
 def index():
     # This is an example of how to run the components.
     # In a real application, you might trigger this from a specific API endpoint.
@@ -43,4 +40,4 @@ def index():
     return "Component flow executed! Check your console for output."
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5000, debug=True)
