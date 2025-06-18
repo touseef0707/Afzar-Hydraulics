@@ -1,24 +1,19 @@
-import React from 'react';
+// components/ProjectTile.tsx
+import Link from 'next/link';
 
-// Define the shape of a single project object
 interface Project {
   id: number;
   name: string;
   description: string;
 }
 
-// Define the props for this component
-interface Props {
-  project: Project;
-}
-
-const ProjectTile: React.FC<Props> = ({ project }) => {
+export default function ProjectTile({ project }: { project: Project }) {
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 m-2 w-72 border border-gray-200">
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{project.name}</h3>
-      <p className="text-gray-600">{project.description}</p>
-    </div>
+    <Link href={`/dashboard/canvas/${project.id}`}>
+      <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 cursor-pointer h-full">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{project.name}</h3>
+        <p className="text-gray-600">{project.description}</p>
+      </div>
+    </Link>
   );
-};
-
-export default ProjectTile;
+}
