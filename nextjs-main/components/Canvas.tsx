@@ -29,7 +29,7 @@ export default function Canvas() {
         position,
         data: { label: type.charAt(0).toUpperCase() + type.slice(1) },
       };
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nodes) => nodes.concat(newNode));
     },
     [reactFlowInstance, setNodes]
   );
@@ -39,7 +39,7 @@ export default function Canvas() {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onConnect = useCallback((params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+  const onConnect = useCallback((params: Edge | Connection) => setEdges((edges) => addEdge(params, edges)), [setEdges]);
 
   return (
     <div ref={reactFlowWrapper} className="flex-1 h-[80vh] bg-gray-100 rounded-lg shadow-lg">
