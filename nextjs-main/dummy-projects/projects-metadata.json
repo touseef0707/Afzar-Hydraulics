@@ -1,0 +1,37 @@
+[
+  {
+    "id": "proj_001",
+    "name": "Chemical Plant A",
+    "description": "Primary production line for Polymer X",
+    "lastModified": "2024-03-15T09:24:00Z",
+    "thumbnailUrl": "/thumbnails/chem_plant_a.png"
+  },
+  {
+    "id": "proj_002",
+    "name": "Refinery System B",
+    "description": "Crude oil distillation unit",
+    "lastModified": "2024-03-10T14:45:00Z",
+    "thumbnailUrl": "/thumbnails/refinery_b.png"
+  },
+  {
+    "id": "proj_003",
+    "name": "Water Treatment C",
+    "description": "Reverse osmosis filtration system",
+    "lastModified": "2024-02-28T11:12:00Z",
+    "thumbnailUrl": "/thumbnails/water_system_c.png"
+  },
+  {
+    "id": "proj_004",
+    "name": "Gas Pipeline D",
+    "description": "Natural gas distribution network",
+    "lastModified": "2024-01-20T16:30:00Z",
+    "thumbnailUrl": "/thumbnails/gas_pipeline_d.png"
+  },
+  {
+    "id": "proj_005",
+    "name": "Reactor E",
+    "description": "Catalytic cracking reactor setup",
+    "lastModified": "2023-12-05T08:15:00Z",
+    "thumbnailUrl": "/thumbnails/reactor_e.png"
+  }
+]

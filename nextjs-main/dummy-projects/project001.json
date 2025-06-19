@@ -1,0 +1,85 @@
+{
+    "id": "proj_001",
+    "name": "Solvent Blending System",
+    "description": "Methanol/Water mixing with pressure control",
+    "nodes": [
+      {
+        "id": "feed_1",
+        "type": "feed",
+        "position": { "x": 50, "y": 100 },
+        "data": {
+          "fluid": "Methanol",
+          "flowRate": 120,  
+          "temperature": 25,
+          "pressure": 2.1  
+        }
+      },
+      {
+        "id": "feed_2",
+        "type": "feed",
+        "position": { "x": 50, "y": 300 },
+        "data": {
+          "fluid": "Water",
+          "flowRate": 80,
+          "temperature": 30,
+          "pressure": 1.8
+        }
+      },
+      {
+        "id": "valve_1",
+        "type": "valve",
+        "position": { "x": 250, "y": 100 },
+        "data": {
+          "valveType": "globe",
+          "cvFactor": 4.8,
+          "opening": 75  
+        }
+      },
+      {
+        "id": "splitter_1",
+        "type": "splitter/mixer",
+        "position": { "x": 400, "y": 200 },
+        "data": {
+          "outputs": 2,
+          "splitRatios": [0.6, 0.4]
+        }
+      },
+      {
+        "id": "product_1",
+        "type": "product",
+        "position": { "x": 600, "y": 150 },
+        "data": {
+          "targetFlow": 120,
+          "collectionTank": "T-101"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "pipe_1",
+        "source": "feed_1",
+        "target": "valve_1",
+        "data": {
+          "diameter": 0.05,  
+          "length": 8.2,
+          "material": "stainless_steel",
+          "density": 7900,  
+          "flowRate": 120,
+          "pressureDrop": 0.15  
+        }
+      },
+      {
+        "id": "pipe_2",
+        "source": "valve_1",
+        "target": "splitter_1",
+        "data": {
+          "diameter": 0.04,
+          "length": 5.7,
+          "material": "pvc",
+          "density": 1450,
+          "flowRate": 115,
+          "pressureDrop": 0.22
+        }
+      }
+    ]
+  }
