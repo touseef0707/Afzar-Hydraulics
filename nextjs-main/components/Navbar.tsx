@@ -5,8 +5,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // Corrected path if needed: '@/contexts/AuthContext'
 import { auth } from '@/firebase/clientApp';
+
+
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -57,14 +59,25 @@ const Navbar = () => {
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="nav-link">Home</Link>
-            <Link href="/about" className="nav-link">About</Link>
+            {/* Nav Link with Underline Hover Effect */}
+            <Link href="/" className="nav-link group relative">
+              Home
+              <span className="underline-span"></span>
+            </Link>
+            <Link href="/about" className="nav-link group relative">
+              About
+              <span className="underline-span"></span>
+            </Link>
             {user && (
-              <Link href="/dashboard" className="nav-link">
+              <Link href="/dashboard" className="nav-link group relative">
                 Dashboard
+                <span className="underline-span"></span>
               </Link>
             )}
-            <Link href="/contact" className="nav-link">Contact</Link>
+            <Link href="/contact" className="nav-link group relative">
+              Contact
+              <span className="underline-span"></span>
+            </Link>
           </div>
 
           {/* Secondary Nav - Desktop & Auth/Profile Section */}
@@ -74,7 +87,6 @@ const Navbar = () => {
               <div className="relative ml-3">
                 <button
                   onClick={toggleProfileMenu}
-                  // Added hover:bg-gray-100 and hover:shadow-md
                   className="flex items-center max-w-xs rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-100 hover:shadow-md"
                   id="user-menu"
                   aria-haspopup="true"
@@ -155,14 +167,25 @@ const Navbar = () => {
       {/* Mobile Menu Content */}
       <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden border-t border-gray-200`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
-          <Link href="/about" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>About</Link>
+          {/* Mobile Nav Link with Underline Hover Effect */}
+          <Link href="/" className="mobile-nav-link group relative" onClick={() => setIsMobileMenuOpen(false)}>
+            Home
+            <span className="underline-span"></span>
+          </Link>
+          <Link href="/about" className="mobile-nav-link group relative" onClick={() => setIsMobileMenuOpen(false)}>
+            About
+            <span className="underline-span"></span>
+          </Link>
           {user && (
-            <Link href="/dashboard" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/dashboard" className="mobile-nav-link group relative" onClick={() => setIsMobileMenuOpen(false)}>
               Dashboard
+              <span className="underline-span"></span>
             </Link>
           )}
-          <Link href="/contact" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Contact</Link>
+          <Link href="/contact" className="mobile-nav-link group relative" onClick={() => setIsMobileMenuOpen(false)}>
+            Contact
+            <span className="underline-span"></span>
+          </Link>
           {user ? (
             <div className="pt-4 pb-3 border-t border-gray-200 mt-2">
               <div className="flex items-center px-5 mb-3">
@@ -176,14 +199,14 @@ const Navbar = () => {
               <div className="space-y-1">
                 <Link
                   href="/profile"
-                  className="mobile-nav-link"
+                  className="mobile-nav-link group relative"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Your Profile
+                  <span className="underline-span"></span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  // Added hover:text-blue-600 hover:bg-gray-50
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors duration-150"
                 >
                   Sign out

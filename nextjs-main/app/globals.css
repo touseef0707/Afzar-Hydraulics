@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -24,3 +25,55 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.underline-span {
+  @apply absolute inset-x-0 bottom-0 h-0.5 bg-blue-600 transform scale-x-0 origin-left transition-transform duration-300;
+}
+.group:hover .underline-span {
+  @apply scale-x-100;
+}
+
+/* Ensure existing nav-link and mobile-nav-link styles are suitable */
+.nav-link {
+  @apply px-3 py-2 rounded-md text-sm font-medium text-gray-700 transition-colors duration-200;
+}
+.nav-link:hover {
+  @apply text-blue-600;
+}
+
+.nav-link-button-primary {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+.nav-link-button-primary:hover {
+  @apply bg-blue-700;
+}
+
+.nav-link-button-secondary {
+  @apply text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+.nav-link-button-secondary:hover {
+  @apply text-blue-600 bg-gray-100;
+}
+
+.mobile-nav-link {
+  @apply block px-3 py-2 rounded-md text-base font-medium text-gray-700 transition-colors duration-150;
+}
+.mobile-nav-link:hover {
+  @apply text-blue-600 bg-gray-50;
+}
+
+.mobile-nav-link-button-primary {
+  @apply block w-full px-3 py-2 rounded-md text-base font-medium text-blue-600 transition-colors duration-150;
+}
+.mobile-nav-link-button-primary:hover {
+  @apply text-blue-700 bg-blue-50;
+}
+
+.mobile-nav-link-button-secondary {
+  @apply block w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 transition-colors duration-150;
+}
+.mobile-nav-link-button-secondary:hover {
+  @apply text-blue-600 bg-gray-50;
+}
+
+
