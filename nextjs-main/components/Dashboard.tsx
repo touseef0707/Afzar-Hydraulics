@@ -5,6 +5,7 @@ import ProjectTile from './ProjectTile';
 import NewProjectForm, { NewProjectData } from './NewProjectForm';
 import Popup from './Popup';
 import { PlusCircle } from 'lucide-react'; // Using Lucide React icons
+import ProtectedRoute from './ProtectedRoute';
 
 interface Project {
   id: number;
@@ -43,6 +44,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8 relative">
       {/* Floating Action Button (FAB) */}
       <button
@@ -66,6 +68,7 @@ const Dashboard: React.FC = () => {
         </Popup>
       )}
     </div>
+    </ProtectedRoute>
   );
 };
 
