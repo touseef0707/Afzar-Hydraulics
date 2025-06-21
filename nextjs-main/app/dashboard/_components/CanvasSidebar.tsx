@@ -3,12 +3,12 @@
 import React from 'react';
 
 const COMPONENTS = [
-  { type: 'valve', label: 'Control Valve' },
-  { type: 'pump', label: 'Pump' },
-  { type: 'pipe', label: 'Pipe' },
-  { type: 'splitter', label: 'Splitter/Mixer' },
-  { type: 'product', label: 'Product' },
-  { type: 'feed', label: 'Feed' },
+  { type: 'valve', label: 'Control Valve' , icon:'♻️'},
+  { type: 'pump', label: 'Pump' , icon:''},
+  { type: 'pipe', label: 'Pipe' , icon:'🪈'},
+  { type: 'splitter', label: 'Splitter/Mixer' , icon:'🚰'},
+  { type: 'product', label: 'Product' , icon:'🚰'},
+  { type: 'feed', label: 'Feed' , icon:'🚰'},
 ];
 
 export default function CanvasSidebar() {
