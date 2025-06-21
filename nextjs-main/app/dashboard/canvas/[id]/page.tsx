@@ -1,6 +1,7 @@
 import React from 'react';
 import CanvasSidebar from '@/components/CanvasSidebar';
 import Canvas from '@/components/Canvas';
+import { ReactFlowProvider } from '@xyflow/react';
 
 interface CanvasPageProps {
   params: { id: string };
@@ -16,7 +17,9 @@ const CanvasPage = async ({ params }: CanvasPageProps) => {
       </div>
       <div className="flex flex-1 w-full max-w-7xl mx-auto gap-4">
         <CanvasSidebar />
+        <ReactFlowProvider>
         <Canvas />
+        </ReactFlowProvider>
       </div>
     </div>
   );

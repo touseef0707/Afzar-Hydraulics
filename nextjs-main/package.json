@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.10",
+    "@types/firebase": "^2.4.32",
     "@types/nodemailer": "^6.4.17",
     "@xyflow/react": "^12.7.0",
     "autoprefixer": "^10.4.21",
