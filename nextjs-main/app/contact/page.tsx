@@ -1,4 +1,5 @@
-import Link from 'next/link';
+// app/contact/page.tsx
+import ContactForm from '@/components/ContactForm';
 
 export default function ContactPage() {
   return (
@@ -38,8 +39,8 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">Address</h3>
                     <p className="text-gray-600">
-                      123 Business Avenue<br />
-                      Tech City, TC 10001
+                      123 Industrial Park<br />
+                      Tehran, Iran 12345
                     </p>
                   </div>
                 </div>
@@ -53,8 +54,8 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">Phone</h3>
                     <p className="text-gray-600">
-                      +1 (555) 123-4567<br />
-                      Support: +1 (555) 987-6543
+                      +98 (21) 1234-5678<br />
+                      Support: +98 (21) 9876-5432
                     </p>
                   </div>
                 </div>
@@ -68,8 +69,8 @@ export default function ContactPage() {
                   <div>
                     <h3 className="text-lg font-medium text-gray-900">Email</h3>
                     <p className="text-gray-600">
-                      info@company.com<br />
-                      support@company.com
+                      info@afzarhydraulics.com<br />
+                      support@afzarhydraulics.com
                     </p>
                   </div>
                 </div>
@@ -82,11 +83,11 @@ export default function ContactPage() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-700">Monday - Friday</span>
-                  <span className="text-gray-900 font-medium">9:00 AM - 6:00 PM</span>
+                  <span className="text-gray-900 font-medium">8:00 AM - 5:00 PM</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Saturday</span>
-                  <span className="text-gray-900 font-medium">10:00 AM - 4:00 PM</span>
+                  <span className="text-gray-900 font-medium">9:00 AM - 2:00 PM</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-700">Sunday</span>
@@ -98,106 +99,5 @@ export default function ContactPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ContactForm() {
-  async function handleSubmit(formData: FormData) {
-    'use server';
-    
-    // Extract form data
-    const rawFormData = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      message: formData.get('message')
-    };
-
-    // Validate data
-    if (!rawFormData.name || !rawFormData.email || !rawFormData.message) {
-      throw new Error('Name, email, and message are required');
-    }
-
-    try {
-      // Replace with your actual API endpoint
-      const response = await fetch('https://api.yourdomain.com/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(rawFormData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      throw new Error('Failed to submit form. Please try again.');
-    }
-  }
-
-  return (
-    <form action={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Full Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number
-        </label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-          Your Message <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          rows={4}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        ></textarea>
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-150 ease-in-out"
-        >
-          Send Message
-        </button>
-      </div>
-    </form>
   );
 }
