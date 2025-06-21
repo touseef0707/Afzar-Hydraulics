@@ -1,28 +1,32 @@
-import React from 'react';
-import CanvasSidebar from '../../_components/CanvasSidebar';
-import Canvas from '../../_components/Canvas';
-import { ReactFlowProvider } from '@xyflow/react';
+// app/dashboard/canvas/[id]/page.tsx
+import { FlowProvider } from '@/context/FlowContext';
+import CanvasSidebar from '@/app/dashboard/_components/CanvasSidebar';
+import Canvas from '@/app/dashboard/_components/Canvas';
 
-interface CanvasPageProps {
-  params: { id: string };
+interface PageProps {
+  params: {
+    id: string;
+  };
 }
 
-const CanvasPage = async ({ params }: CanvasPageProps) => {
-  const { id } = await params;
+interface CanvasPageProps {
+  params: {
+    id: string;
+  };
+}
+
+
+export default async function CanvasPage({ params }: PageProps) {
+  const param = await params;
+  const id = param.id;
   return (
-    <div className="flex flex-col min-h-screen py-10">
-      <div className="px-8 mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Project Canvas</h1>
-        <p className="text-lg text-gray-700">Project ID: <span className="font-mono text-blue-600">{id}</span></p>
-      </div>
-      <div className="flex flex-1 w-full max-w-7xl mx-auto gap-4">
-        <CanvasSidebar />
-        <ReactFlowProvider>
-        <Canvas />
-        </ReactFlowProvider>
-      </div>
+    <div className="flex flex-col h-screen">
+      <FlowProvider flowId={id}>
+        <div className="flex flex-1 w-full max-w-7xl mx-auto gap-4">
+          <CanvasSidebar />
+          <Canvas />
+        </div>
+      </FlowProvider>
     </div>
   );
 };
-
-export default CanvasPage;
