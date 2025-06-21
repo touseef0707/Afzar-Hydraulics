@@ -15,10 +15,10 @@ import {
 import { auth } from '@/firebase/clientApp'; // Import auth instance for signOut and reauth
 import { useAuth } from '@/context/AuthContext'; // NEW: Import the useAuth hook
 import ProtectedRoute from '@/components/ProtectedRoute'; // Your route protector
-import ProfileInfo from '@/components/profile/ProfileInfo'; // Assumed path
-import ProjectsList from '@/components/profile/ProjectsList'; // Assumed path
-import SettingsPanel from '@/components/profile/SettingsPanel'; // Assumed path
-import { HydraulicProject } from '@/components/profile/types'; // Assumed path
+import ProfileInfo from '@/app/profile/_components/ProfileInfo'; // Assumed path
+import ProjectsList from '@/app/profile/_components/ProjectsList'; // Assumed path
+import SettingsPanel from '@/app/profile/_components/SettingsPanel'; // Assumed path
+import { HydraulicProject } from '@/app/profile/_components/types'; // Assumed path
 
 export default function ProfilePage() {
   // Use the global authentication context instead of local state and listener

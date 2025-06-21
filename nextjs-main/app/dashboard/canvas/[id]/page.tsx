@@ -1,30 +1,28 @@
-"use client"
-
 import React from 'react';
-import CanvasSidebar from '@/components/CanvasSidebar';
-import Canvas from '@/components/Canvas';
-import { useProjects } from '@/context/ProjectsContext';
-import { usePathname } from 'next/navigation';
+import CanvasSidebar from '../../_components/CanvasSidebar';
+import Canvas from '../../_components/Canvas';
+import { ReactFlowProvider } from '@xyflow/react';
 
-const CanvasPage = () => {
-  const pathname = usePathname();
-  const { projects } = useProjects();
+interface CanvasPageProps {
+  params: { id: string };
+}
 
-  // Extract project ID from URL
-  const match = pathname.match(/canvas\/(\w+)/);
-  const projectId = match ? match[1] : '';
-
-  // Find the project with matching ID
-  const projectData = projects.find(project => project.id === projectId);
-
+const CanvasPage = async ({ params }: CanvasPageProps) => {
+  const { id } = await params;
   return (
-    <div className="flex flex-col max-h-screen py-5">
+    <div className="flex flex-col min-h-screen py-10">
+      <div className="px-8 mb-6">
+        <h1 className="text-3xl font-bold text-blue-700">Project Canvas</h1>
+        <p className="text-lg text-gray-700">Project ID: <span className="font-mono text-blue-600">{id}</span></p>
+      </div>
       <div className="flex flex-1 w-full max-w-7xl mx-auto gap-4">
-        <CanvasSidebar projectData={projectData} />
+        <CanvasSidebar />
+        <ReactFlowProvider>
         <Canvas />
+        </ReactFlowProvider>
       </div>
     </div>
   );
 };
 
-export default CanvasPage;
+export default CanvasPage;
