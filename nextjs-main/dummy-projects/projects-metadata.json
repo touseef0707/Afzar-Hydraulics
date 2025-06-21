@@ -1,37 +1,82 @@
 [
   {
-    "id": "proj_001",
-    "name": "Chemical Plant A",
-    "description": "Primary production line for Polymer X",
-    "lastModified": "2024-03-15T09:24:00Z",
-    "thumbnailUrl": "/thumbnails/chem_plant_a.png"
+    "id": "proj001",
+    "name": "Solvent Blending System",
+    "description": "Methanol/Water mixing with pressure control",
+    "type": "chemical_mixing",
+    "status": "active",
+    "lastModified": "2024-03-18T14:30:00Z",
+    "createdBy": "user_chem45",
+    "tags": ["methanol", "water", "pressure_control"],
+    "stats": {
+      "nodeCount": 5,
+      "edgeCount": 2,
+      "lastSimulationRun": "2024-03-15T09:12:00Z"
+    },
+    "thumbnail": "https://picsum.photos/200/300"
   },
   {
-    "id": "proj_002",
-    "name": "Refinery System B",
-    "description": "Crude oil distillation unit",
-    "lastModified": "2024-03-10T14:45:00Z",
-    "thumbnailUrl": "/thumbnails/refinery_b.png"
+    "id": "proj002",
+    "name": "Diesel Fuel Header",
+    "description": "Distribution to storage tanks",
+    "type": "fuel_distribution",
+    "status": "active",
+    "lastModified": "2024-03-12T11:20:00Z",
+    "createdBy": "user_fuel22",
+    "tags": ["diesel", "pumping", "header"],
+    "stats": {
+      "nodeCount": 5,
+      "edgeCount": 2,
+      "lastSimulationRun": "2024-03-10T16:45:00Z"
+    },
+    "thumbnail": "https://picsum.photos/200/300"
   },
   {
-    "id": "proj_003",
-    "name": "Water Treatment C",
-    "description": "Reverse osmosis filtration system",
-    "lastModified": "2024-02-28T11:12:00Z",
-    "thumbnailUrl": "/thumbnails/water_system_c.png"
+    "id": "proj003",
+    "name": "Acid Neutralization Line",
+    "description": "HCl neutralization with NaOH",
+    "type": "waste_treatment",
+    "status": "draft",
+    "lastModified": "2024-02-28T08:15:00Z",
+    "createdBy": "user_safety1",
+    "tags": ["hcl", "naoh", "neutralization"],
+    "stats": {
+      "nodeCount": 4,
+      "edgeCount": 3,
+      "lastSimulationRun": null
+    },
+    "thumbnail": "https://picsum.photos/200/300"
   },
   {
-    "id": "proj_004",
-    "name": "Gas Pipeline D",
-    "description": "Natural gas distribution network",
-    "lastModified": "2024-01-20T16:30:00Z",
-    "thumbnailUrl": "/thumbnails/gas_pipeline_d.png"
+    "id": "proj004",
+    "name": "LPG Vaporizer System",
+    "description": "Propane vaporization for burner feed",
+    "type": "gas_processing",
+    "status": "archived",
+    "lastModified": "2024-01-05T13:40:00Z",
+    "createdBy": "user_gas33",
+    "tags": ["lpg", "vaporizer", "propane"],
+    "stats": {
+      "nodeCount": 6,
+      "edgeCount": 5,
+      "lastSimulationRun": "2023-12-22T10:30:00Z"
+    },
+    "thumbnail": "https://picsum.photos/200/300"
   },
   {
-    "id": "proj_005",
-    "name": "Reactor E",
-    "description": "Catalytic cracking reactor setup",
-    "lastModified": "2023-12-05T08:15:00Z",
-    "thumbnailUrl": "/thumbnails/reactor_e.png"
+    "id": "proj005",
+    "name": "Cooling Water Network",
+    "description": "Plant-wide cooling water circulation",
+    "type": "utility_system",
+    "status": "active",
+    "lastModified": "2024-03-20T09:05:00Z",
+    "createdBy": "user_ops7",
+    "tags": ["cooling", "water", "heat_exchange"],
+    "stats": {
+      "nodeCount": 8,
+      "edgeCount": 7,
+      "lastSimulationRun": "2024-03-18T14:15:00Z"
+    },
+    "thumbnail": "https://picsum.photos/200/300"
   }
 ]
