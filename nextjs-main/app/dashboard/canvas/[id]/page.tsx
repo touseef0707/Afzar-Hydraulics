@@ -1,6 +1,6 @@
 import React from 'react';
-import CanvasSidebar from '@/components/CanvasSidebar';
-import Canvas from '@/components/Canvas';
+import CanvasSidebar from '../../_components/CanvasSidebar';
+import Canvas from '../../_components/Canvas';
 import { ReactFlowProvider } from '@xyflow/react';
 
 interface CanvasPageProps {
@@ -25,4 +25,4 @@ const CanvasPage = async ({ params }: CanvasPageProps) => {
   );
 };
 
-export default CanvasPage;
+export default CanvasPage;

@@ -1,0 +1,84 @@
+{
+    "id": "proj_002",
+    "name": "Diesel Fuel Header",
+    "description": "Distribution to storage tanks",
+    "nodes": [
+      {
+        "id": "feed_1",
+        "type": "feed",
+        "position": { "x": 100, "y": 50 },
+        "data": {
+          "fluid": "Diesel",
+          "flowRate": 500,
+          "temperature": 40,
+          "pressure": 3.5
+        }
+      },
+      {
+        "id": "pump_1",
+        "type": "pump",
+        "position": { "x": 300, "y": 50 },
+        "data": {
+          "type": "centrifugal",
+          "power": 7.5,  
+          "efficiency": 68  
+        }
+      },
+      {
+        "id": "splitter_1",
+        "type": "splitter/mixer",
+        "position": { "x": 500, "y": 50 },
+        "data": {
+          "outputs": 3,
+          "splitRatios": [0.5, 0.3, 0.2]
+        }
+      },
+      {
+        "id": "product_1",
+        "type": "product",
+        "position": { "x": 700, "y": 20 },
+        "data": {
+          "targetFlow": 250,
+          "collectionTank": "TK-201"
+        }
+      },
+      {
+        "id": "valve_1",
+        "type": "valve",
+        "position": { "x": 650, "y": 100 },
+        "data": {
+          "valveType": "ball",
+          "cvFactor": 12.3,
+          "opening": 90
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "pipe_1",
+        "source": "feed_1",
+        "target": "pump_1",
+        "data": {
+          "diameter": 0.08,
+          "length": 12.5,
+          "material": "carbon_steel",
+          "density": 7850,
+          "flowRate": 500,
+          "pressureDrop": 0.08
+        }
+      },
+      {
+        "id": "pipe_2",
+        "source": "pump_1",
+        "target": "splitter_1",
+        "data": {
+          "diameter": 0.07,
+          "length": 9.3,
+          "material": "carbon_steel",
+          "density": 7850,
+          "flowRate": 490,
+          "pressureDrop": 0.12
+        }
+      }
+    ]
+  }
