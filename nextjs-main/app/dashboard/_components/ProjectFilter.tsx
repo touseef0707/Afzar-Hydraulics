@@ -63,14 +63,14 @@ const ProjectFilter: React.FC<ProjectFilterProps> = ({ onFilterChange, projectTy
           {/* <label htmlFor="status" className="block text-xs font-medium text-black mb-1">Status</label> */}
           <select
             id="status"
-            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm"
+            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm hover:cursor-pointer"
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
           >
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
+            <option className='hover:cursor-pointer' value="all">All Statuses</option>
+            <option className='hover:cursor-pointer' value="active">Active</option>
+            <option className='hover:cursor-pointer' value="draft">Draft</option>
+            <option className='hover:cursor-pointer' value="archived">Archived</option>
           </select>
         </div>
 
@@ -79,7 +79,7 @@ const ProjectFilter: React.FC<ProjectFilterProps> = ({ onFilterChange, projectTy
           {/* <label htmlFor="type" className="block text-xs font-medium text-black mb-1">Type</label> */}
           <select
             id="type"
-            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm"
+            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm hover:cursor-pointer"
             value={filters.type}
             onChange={(e) => handleFilterChange('type', e.target.value)}
           >
@@ -95,16 +95,16 @@ const ProjectFilter: React.FC<ProjectFilterProps> = ({ onFilterChange, projectTy
           {/* <label htmlFor="sort" className="block text-xs font-medium text-black mb-1">Sort By</label> */}
           <select
             id="sort"
-            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm"
+            className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent text-black text-sm hover:cursor-pointer"
             value={`${filters.sortBy}-${filters.sortOrder}`}
             onChange={handleSortChange}
           >
-            <option value="name-asc">Name (A-Z)</option>
-            <option value="name-desc">Name (Z-A)</option>
-            <option value="lastModified-desc">Newest</option>
-            <option value="lastModified-asc">Oldest</option>
-            <option value="status-asc">Status (A-Z)</option>
-            <option value="status-desc">Status (Z-A)</option>
+            <option className='hover:cursor-pointer' value="name-asc">Name (A-Z)</option>
+            <option className='hover:cursor-pointer' value="name-desc">Name (Z-A)</option>
+            <option className='hover:cursor-pointer' value="lastModified-desc">Newest</option>
+            <option className='hover:cursor-pointer' value="lastModified-asc">Oldest</option>
+            <option className='hover:cursor-pointer' value="status-asc">Status (A-Z)</option>
+            <option className='hover:cursor-pointer' value="status-desc">Status (Z-A)</option>
           </select>
         </div>
         </div>

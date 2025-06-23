@@ -108,13 +108,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Link href={`/dashboard/canvas/${project.id}`} className="flex-grow">
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors duration-200">
+            <button className="w-full bg-blue-600 hover:bg-blue-700 hover:cursor-pointer text-white py-2 rounded-md transition-colors duration-200">
               Open Project
             </button>
           </Link>
           <button 
             onClick={() => setShowDeleteModal(true)} 
-            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-md transition-colors duration-200"
+            className="bg-red-500 hover:bg-red-600 hover:cursor-pointer text-white p-2 rounded-md transition-colors duration-200"
             aria-label="Delete project"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
