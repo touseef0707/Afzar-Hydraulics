@@ -1,4 +1,5 @@
 'use client';
+
 import { SettingsPanelProps } from './types'; // Ensure this path is correct
 
 export default function SettingsPanel({

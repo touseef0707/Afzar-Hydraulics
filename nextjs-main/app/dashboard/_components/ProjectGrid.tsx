@@ -1,9 +1,9 @@
-// components/ProjectGrid.tsx
 'use client';
 
 import React from 'react';
 import ProjectCard from './ProjectCard';
 import { Project } from '@/context/ProjectContext';
+import CreateProjectButton from './CreateProjectButton';
 
 interface ProjectGridProps {
   projects: Project[];
@@ -55,9 +55,9 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
       <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-6 text-center">
         <h3 className="text-lg font-medium mb-2">No Projects Found</h3>
         <p className="mb-4">You don't have any projects yet. Create your first project to get started.</p>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200">
-          Create New Project
-        </button>
+        <div className='flex justify-center'>
+          <CreateProjectButton/>
+        </div>
       </div>
     );
   }

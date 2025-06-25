@@ -1,20 +1,7 @@
-// types.ts
-import { User } from 'firebase/auth'; // Make sure this import is present
-
-export interface HydraulicProject {
-    id: string;
-    name: string;
-    description: string;
-    status: 'Planning' | 'In Progress' | 'Completed' | 'On Hold';
-    startDate: string;
-    endDate?: string;
-    client: string;
-    systemType: string;
-}
+import { User } from 'firebase/auth'; 
 
 export interface ProfileTabProps {
     user: User | null;
-    projects?: HydraulicProject[];
     currentPassword?: string;
     newPassword?: string;
     confirmPassword?: string;
@@ -52,8 +39,4 @@ export interface SettingsPanelProps {
 
     // Logout related props
     onLogout?: () => void;
-}
-
-export interface ProjectsPanelProps {
-    projects?: HydraulicProject[];
 }

@@ -1,8 +1,7 @@
-// context/ProjectContext.tsx
 'use client';
 
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { ref, onValue, off, get, query, orderByChild, equalTo } from 'firebase/database';
+import { ref, onValue, off, get } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
 import { useAuth } from './AuthContext';
 
