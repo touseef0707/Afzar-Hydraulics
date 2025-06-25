@@ -1,4 +1,3 @@
-// src/components/Contact.tsx
 import React, { useState } from 'react';
 
 const ContactPage: React.FC = () => {

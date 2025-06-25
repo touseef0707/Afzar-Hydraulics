@@ -1,4 +1,3 @@
-// components/CreateProjectButton.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -139,7 +138,7 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="projectName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="projectName" className="block text-sm text-left font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Project Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -153,10 +152,8 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
                   />
                 </div>
                 
-
-                
                 <div>
-                  <label htmlFor="projectDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="projectDescription" className="block text-sm text-left font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <textarea
@@ -170,7 +167,7 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
                 </div>
                 
                 <div>
-                  <label htmlFor="projectTags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label htmlFor="projectTags" className="block text-sm text-left font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Tags
                   </label>
                   <div className="flex flex-wrap gap-2 mb-2">

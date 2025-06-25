@@ -1,16 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useProjects, Project } from '@/context/ProjectContext';
-import { useAuth } from '@/context/AuthContext';
+import { useProjects } from '@/context/ProjectContext';
 import ProjectGrid from '@/app/dashboard/_components/ProjectGrid';
 import ProjectFilter, { FilterState } from '@/app/dashboard/_components/ProjectFilter';
 import CreateProjectButton from '@/app/dashboard/_components/CreateProjectButton';
-import SeedProjectsButton from '@/app/dashboard/_components/SeedProjectsButton';
 
 const DashboardPage = () => {
   const { projects, loading, error } = useProjects();
-  const { user } = useAuth();
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: 'all',
@@ -79,10 +76,6 @@ const DashboardPage = () => {
           </p>
         </div>
         <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
-          {/* Only show seed button in development environment */}
-          {process.env.NODE_ENV === 'development' && (
-            <SeedProjectsButton />
-          )}
           <CreateProjectButton />
         </div>
       </div>

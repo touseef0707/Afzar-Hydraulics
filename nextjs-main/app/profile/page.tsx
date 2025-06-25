@@ -1,4 +1,3 @@
-// app/profile/page.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -12,21 +11,18 @@ import {
   updateProfile,
   AuthError // Ensure AuthError is imported
 } from 'firebase/auth';
-import { auth } from '@/firebase/clientApp'; // Import auth instance for signOut and reauth
-import { useAuth } from '@/context/AuthContext'; // NEW: Import the useAuth hook
-import ProtectedRoute from '@/components/ProtectedRoute'; // Your route protector
-import ProfileInfo from '@/app/profile/_components/ProfileInfo'; // Assumed path
-import ProjectsList from '@/app/profile/_components/ProjectsList'; // Assumed path
-import SettingsPanel from '@/app/profile/_components/SettingsPanel'; // Assumed path
-import { HydraulicProject } from '@/app/profile/_components/types'; // Assumed path
+import { auth } from '@/firebase/clientApp'; 
+import { useAuth } from '@/context/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute'; 
+import ProfileInfo from '@/app/profile/_components/ProfileInfo';  
+import SettingsPanel from '@/app/profile/_components/SettingsPanel'; 
+
 
 export default function ProfilePage() {
   // Use the global authentication context instead of local state and listener
   const { user, loading } = useAuth();
   const router = useRouter();
-
-  const [projects, setProjects] = useState<HydraulicProject[]>([]);
-  const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'settings'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
 
   // Password-related states
   const [currentPassword, setCurrentPassword] = useState('');
@@ -48,13 +44,6 @@ export default function ProfilePage() {
       setUsername(user.displayName || '');
     }
   }, [user]);
-
-  // Effect to fetch projects only when user is loaded and available
-  useEffect(() => {
-    if (user && !loading) {
-      fetchUserProjects(user.uid);
-    }
-  }, [user, loading]); // Depend on user and loading from AuthContext
 
   // Redirect to login if not authenticated after loading is complete
   useEffect(() => {
@@ -99,39 +88,6 @@ export default function ProfilePage() {
       setUsernameError(`Failed to update username: ${error.message || 'An unknown error occurred.'}`);
     } finally {
       setIsUpdatingUsername(false);
-    }
-  };
-
-  const fetchUserProjects = async (userId: string) => {
-    try {
-      // Simulate API call for projects
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const demoProjects: HydraulicProject[] = [
-        {
-          id: '1',
-          name: 'Industrial Press System',
-          description: '500-ton hydraulic press installation for metal forming',
-          status: 'Completed',
-          startDate: '2023-01-15',
-          endDate: '2023-05-20',
-          client: 'ABC Manufacturing',
-          systemType: 'Hydraulic Press'
-        },
-        {
-          id: '2',
-          name: 'Mobile Hydraulic Crane',
-          description: 'Maintenance and overhaul of crane hydraulic systems',
-          status: 'In Progress',
-          startDate: '2023-06-10',
-          client: 'XYZ Construction',
-          systemType: 'Mobile Hydraulics'
-        }
-      ];
-      setProjects(demoProjects);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      setProjects([]);
     }
   };
 
@@ -249,16 +205,7 @@ export default function ProfilePage() {
                 >
                   Profile
                 </button>
-                <button
-                  onClick={() => setActiveTab('projects')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
-                    activeTab === 'projects'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  My Projects ({projects.length})
-                </button>
+
                 <button
                   onClick={() => setActiveTab('settings')}
                   className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
@@ -274,10 +221,9 @@ export default function ProfilePage() {
 
             <div className="p-6">
               {activeTab === 'profile' && <ProfileInfo user={user} />}
-              {activeTab === 'projects' && <ProjectsList projects={projects} />}
               {activeTab === 'settings' && (
                 <SettingsPanel
-                  user={user} // Pass the user object for SettingsPanel to access displayName
+                  user={user}
                   // Username update props
                   username={username}
                   usernameError={usernameError}
