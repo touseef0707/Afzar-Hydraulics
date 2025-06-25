@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ref, push, serverTimestamp } from 'firebase/database';
+import { ref, push, serverTimestamp, set } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
 import { useAuth } from '@/context/AuthContext';
 
@@ -70,15 +70,24 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
           edgeCount: 0,
           lastSimulationRun: null
         },
+        flowId: null, // Initialize flowId as null
         thumbnail: `https://picsum.photos/seed/${Date.now()}/200/300` // Random placeholder image
       };
       
       // Push the new project to Firebase
       const newProjectRef = await push(projectsRef, newProject);
+      const projectId = newProjectRef.key;
+      
+      if (projectId) {
+        // Store the projectId in the user's projects list
+        const userProjectRef = ref(database, `users/${user.uid}/projects/${projectId}`);
+        await set(userProjectRef, true);
+        console.log(`[Database] Project ${projectId} added to user ${user.uid}`);
+      }
       
       // Close the modal and redirect to the new project
       closeModal();
-      router.push(`/dashboard/canvas/${newProjectRef.key}`);
+      router.push(`/dashboard/canvas/${projectId}`);
     } catch (err) {
       console.error('Error creating project:', err);
       setError('Failed to create project. Please check Firebase security rules and try again.');
