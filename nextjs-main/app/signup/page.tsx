@@ -10,7 +10,8 @@ import {
   AuthError,
   UserCredential
 } from 'firebase/auth';
-import { auth, googleProvider } from '@/firebase/clientApp';
+import { ref, set } from 'firebase/database';
+import { auth, googleProvider, database } from '@/firebase/clientApp';
 import Link from 'next/link';
 
 const SignUpPage = () => {
@@ -30,7 +31,7 @@ const SignUpPage = () => {
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
-    // NEW: Check if username is provided
+    // Check if username is provided
     if (!username.trim()) {
       return setError('Username is required');
     }
@@ -47,9 +48,19 @@ const SignUpPage = () => {
           displayName: username
         });
         console.log(`[Auth] Profile updated for ${userCredential.user.email} with username: ${username}`);
+        
+        // 3. Store user data in Firebase RTDB
+        const userRef = ref(database, `users/${userCredential.user.uid}`);
+        await set(userRef, {
+          username: username,
+          email: userCredential.user.email,
+          createdAt: new Date().toISOString(),
+          projects: {}
+        });
+        console.log(`[Database] User data stored for ${userCredential.user.uid}`);
       }
 
-      // 3. Redirect to the homepage
+      // 4. Redirect to the homepage
       router.push('/');
     } catch (err) {
       const error = err as AuthError;
@@ -67,6 +78,17 @@ const SignUpPage = () => {
       // Google sign-in automatically sets the user's displayName from their Google Account
       const result = await signInWithPopup(auth, googleProvider);
       console.log(`[Auth] Google sign-in successful for:`, result.user.displayName);
+      
+      // Store user data in Firebase RTDB
+      const userRef = ref(database, `users/${result.user.uid}`);
+      await set(userRef, {
+        username: result.user.displayName || 'Google User',
+        email: result.user.email,
+        createdAt: new Date().toISOString(),
+        projects: {}
+      });
+      console.log(`[Database] User data stored for ${result.user.uid}`);
+      
       router.push('/');
     } catch (err) {
       const error = err as AuthError;

@@ -51,23 +51,38 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      // Reference to the projects collection in Firebase
-      const projectsRef = ref(database, 'projects');
+      // Reference to the user's projects list
+      const userProjectsRef = ref(database, `users/${user.uid}/projects`);
       
-      // Query projects created by the current user
-      const userProjectsQuery = query(projectsRef, orderByChild('createdBy'), equalTo(user.uid));
+      // Get the user's project IDs
+      const userProjectsSnapshot = await get(userProjectsRef);
       
-      // Get projects data
-      const snapshot = await get(userProjectsQuery);
-      
-      if (snapshot.exists()) {
-        const projectsData = snapshot.val();
-        const projectsArray: Project[] = Object.keys(projectsData).map(key => ({
-          id: key,
-          ...projectsData[key]
-        }));
+      if (userProjectsSnapshot.exists()) {
+        const userProjectIds = Object.keys(userProjectsSnapshot.val());
         
-        setProjects(projectsArray);
+        if (userProjectIds.length === 0) {
+          setProjects([]);
+          return;
+        }
+        
+        // Fetch each project's details
+        const projectPromises = userProjectIds.map(async (projectId) => {
+          const projectRef = ref(database, `projects/${projectId}`);
+          const projectSnapshot = await get(projectRef);
+          
+          if (projectSnapshot.exists()) {
+            return {
+              id: projectId,
+              ...projectSnapshot.val()
+            };
+          }
+          return null;
+        });
+        
+        const projectsData = await Promise.all(projectPromises);
+        const validProjects = projectsData.filter(project => project !== null) as Project[];
+        
+        setProjects(validProjects);
       } else {
         // If no projects exist yet, set empty array
         setProjects([]);
@@ -83,20 +98,42 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   // Set up listener for real-time updates when user is authenticated
   useEffect(() => {
     if (user) {
-      const projectsRef = ref(database, 'projects');
+      // Reference to the user's projects list for real-time updates
+      const userProjectsRef = ref(database, `users/${user.uid}/projects`);
       
-      // Query projects created by the current user for real-time updates
-      const userProjectsQuery = query(projectsRef, orderByChild('createdBy'), equalTo(user.uid));
-      
-      const listener = onValue(userProjectsQuery, (snapshot) => {
+      const listener = onValue(userProjectsRef, async (snapshot) => {
         if (snapshot.exists()) {
-          const projectsData = snapshot.val();
-          const projectsArray: Project[] = Object.keys(projectsData).map(key => ({
-            id: key,
-            ...projectsData[key]
-          }));
+          const userProjectIds = Object.keys(snapshot.val());
           
-          setProjects(projectsArray);
+          if (userProjectIds.length === 0) {
+            setProjects([]);
+            setLoading(false);
+            return;
+          }
+          
+          try {
+            // Fetch each project's details
+            const projectPromises = userProjectIds.map(async (projectId) => {
+              const projectRef = ref(database, `projects/${projectId}`);
+              const projectSnapshot = await get(projectRef);
+              
+              if (projectSnapshot.exists()) {
+                return {
+                  id: projectId,
+                  ...projectSnapshot.val()
+                };
+              }
+              return null;
+            });
+            
+            const projectsData = await Promise.all(projectPromises);
+            const validProjects = projectsData.filter(project => project !== null) as Project[];
+            
+            setProjects(validProjects);
+          } catch (error) {
+            console.error('Error fetching project details:', error);
+            setError('Failed to fetch project details.');
+          }
         } else {
           setProjects([]);
         }
@@ -109,7 +146,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       });
 
       // Clean up listener on unmount
-      return () => off(userProjectsQuery, 'value', listener);
+      return () => off(userProjectsRef, 'value', listener);
     } else {
       // If user is not authenticated, clear projects
       setProjects([]);
