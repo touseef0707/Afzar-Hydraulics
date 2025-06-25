@@ -12,7 +12,7 @@
     "@tailwindcss/postcss": "^4.1.10",
     "@types/firebase": "^2.4.32",
     "@types/nodemailer": "^6.4.17",
-    "@xyflow/react": "^12.7.0",
+    "@xyflow/react": "^12.7.1",
     "autoprefixer": "^10.4.21",
     "firebase": "^11.9.1",
     "lucide-react": "^0.516.0",
@@ -21,7 +21,9 @@
     "postcss": "^8.5.6",
     "react": "^19.0.0",
     "react-dom": "^19.1.0",
-    "react-firebase-hooks": "^5.1.1"
+    "react-firebase-hooks": "^5.1.1",
+    "reactflow": "^11.11.4",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
