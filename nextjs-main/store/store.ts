@@ -39,9 +39,7 @@ type CustomNodeData = {
   label: string;
 };
 
-// --- THIS IS THE CRITICAL LINE ---
-// The 'export' keyword makes this type available to be imported by other files like Canvas.tsx.
-// Without 'export', the error in your screenshot will occur.
+
 export type CustomNode = Node<CustomNodeData>;
 
 export type RFState = {
