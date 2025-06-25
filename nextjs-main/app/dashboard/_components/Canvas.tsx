@@ -1,20 +1,26 @@
-// app/dashboard/canvas/[id]/Canvas.tsx
+// app/dashboard/_components/Canvas.tsx
 "use client";
-import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   Panel,
-  Node,
   ReactFlowInstance,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import useFlowStore, { RFState } from '@/store/store'; // Adjust path to your store
+
+// Import everything from your Zustand store
+import useFlowStore, { RFState, CustomNode} from '@/store/store';
 import { useShallow } from 'zustand/react/shallow';
 
-// Selector to get specific state and actions from the store
+// Import the CustomNode component we just created
+import AppNode from './CustomNode';
+
+// This selector optimizes performance by only re-rendering when the selected state changes.
 const selector = (state: RFState) => ({
   nodes: state.nodes,
   edges: state.edges,
@@ -27,72 +33,77 @@ const selector = (state: RFState) => ({
 });
 
 export default function Canvas() {
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // Get state and actions from the Zustand store
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, saveFlow, loadFlow } = useFlowStore(useShallow(selector));
-
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
+  // Register our custom node component with React Flow [2, 4].
+  // We use useMemo for performance, so this object isn't recreated on every render.
+  const nodeTypes = useMemo(() => ({ custom: AppNode }), []);
+
+  // Load the flow from Firebase when the component first mounts.
   useEffect(() => {
     const flowId = window.location.pathname.split('/').pop() || 'default';
-    loadFlow(flowId);
-  }, []);
+    if (flowId) {
+      loadFlow(flowId);
+    }
+  }, [loadFlow]);
 
+  // Handles dropping items from the sidebar onto the canvas.
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-      const type = event.dataTransfer.getData('application/reactflow');
-
-      if (!type || !reactFlowInstance || !reactFlowBounds) return;
-
+      const nodeInfoString = event.dataTransfer.getData('application/reactflow');
+      if (!nodeInfoString || !reactFlowInstance) return;
+      
+      const { type, label } = JSON.parse(nodeInfoString);
       const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
+        x: event.clientX,
+        y: event.clientY,
       });
 
-      const newNode: Node = {
+      // Create a new node object that matches our CustomNode type.
+      // IMPORTANT: The `type` property is set to 'custom' to match the key in our `nodeTypes` object.
+      const newNode: CustomNode = {
         id: `${type}_${Date.now()}`,
-        type: 'default',
+        type: 'custom',
         position,
-        data: { label: type.charAt(0).toUpperCase() + type.slice(1) },
+        data: { label },
       };
 
-      addNode(newNode); // Call the action from the store
+      addNode(newNode);
     },
     [reactFlowInstance, addNode]
   );
 
-
+  // Handles the save button click.
   const onSave = useCallback(() => {
     const flowId = window.location.pathname.split('/').pop() || 'default';
-    saveFlow(flowId); // Call the save action from the store
+    saveFlow(flowId);
   }, [saveFlow]);
 
   return (
-    <div ref={reactFlowWrapper} className="flex-1 h-[80vh] bg-gray-100 rounded-lg shadow-lg">
+    // This container gives the canvas its shadow, rounded corners, and white background.
+    <div className="w-full h-full rounded-xl shadow-lg overflow-hidden bg-white">
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes} // Pass our custom node types to React Flow [5]
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onInit={setReactFlowInstance}
         onDrop={onDrop}
         onDragOver={(e) => e.preventDefault()}
-        onNodeClick={(_, node) => setSelectedNode(node)}
-        onPaneClick={() => setSelectedNode(null)}
         fitView
+        proOptions={{ hideAttribution: true }} // Hides the "React Flow" attribution text
       >
-        <Background gap={16} size={1} color="#e0e7ef" />
-        <MiniMap />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
+        <MiniMap nodeStrokeWidth={3} zoomable pannable />
         <Controls />
-
         <Panel position="top-right">
           <button
             onClick={onSave}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200"
           >
             Save to Firebase
           </button>
