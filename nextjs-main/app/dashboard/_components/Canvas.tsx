@@ -1,11 +1,11 @@
 // app/dashboard/canvas/[id]/Canvas.tsx
 "use client";
-import { useCallback, useRef, useState } from 'react';
-import { 
-  ReactFlow, 
-  Background, 
-  Controls, 
-  MiniMap, 
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
   Panel,
   Node,
   ReactFlowInstance,
@@ -23,40 +23,47 @@ const selector = (state: RFState) => ({
   onConnect: state.onConnect,
   addNode: state.addNode,
   saveFlow: state.saveFlow,
+  loadFlow: state.loadFlow
 });
 
 export default function Canvas() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   // Get state and actions from the Zustand store
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, saveFlow } = useFlowStore(useShallow(selector));
-  
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, saveFlow, loadFlow } = useFlowStore(useShallow(selector));
+
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  useEffect(() => {
+    const flowId = window.location.pathname.split('/').pop() || 'default';
+    loadFlow(flowId);
+  }, []);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
       const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
       const type = event.dataTransfer.getData('application/reactflow');
-      
+
       if (!type || !reactFlowInstance || !reactFlowBounds) return;
-      
+
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
-      
+
       const newNode: Node = {
         id: `${type}_${Date.now()}`,
         type: 'default',
         position,
         data: { label: type.charAt(0).toUpperCase() + type.slice(1) },
       };
-      
+
       addNode(newNode); // Call the action from the store
     },
     [reactFlowInstance, addNode]
   );
+
 
   const onSave = useCallback(() => {
     const flowId = window.location.pathname.split('/').pop() || 'default';
@@ -81,9 +88,9 @@ export default function Canvas() {
         <Background gap={16} size={1} color="#e0e7ef" />
         <MiniMap />
         <Controls />
-        
+
         <Panel position="top-right">
-          <button 
+          <button
             onClick={onSave}
             className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
           >
