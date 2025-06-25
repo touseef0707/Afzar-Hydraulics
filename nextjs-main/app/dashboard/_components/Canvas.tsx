@@ -1,45 +1,37 @@
 // app/dashboard/canvas/[id]/Canvas.tsx
 "use client";
-import { useCallback, useRef , useEffect, useState } from 'react';
-import { ReactFlowInstance } from '@xyflow/react';
+import { useCallback, useRef, useState } from 'react';
 import { 
   ReactFlow, 
   Background, 
   Controls, 
   MiniMap, 
-  addEdge, 
-  Connection, 
-  Edge, 
-  Node, 
-  ReactFlowProvider,
   Panel,
-  MarkerType,
-  useNodesState,
-  useEdgesState
+  Node,
+  ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { useFlowContext } from '@/context/FlowContext';
+import useFlowStore, { RFState } from '@/store/store'; // Adjust path to your store
+import { useShallow } from 'zustand/react/shallow';
+
+// Selector to get specific state and actions from the store
+const selector = (state: RFState) => ({
+  nodes: state.nodes,
+  edges: state.edges,
+  onNodesChange: state.onNodesChange,
+  onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
+  addNode: state.addNode,
+  saveFlow: state.saveFlow,
+});
 
 export default function Canvas() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { nodes: contextNodes, edges: contextEdges, setNodes: setContextNodes, setEdges: setContextEdges, saveFlow } = useFlowContext();
-  const [nodes, setNodes, onNodesChange] = useNodesState(contextNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(contextEdges);
+  // Get state and actions from the Zustand store
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, saveFlow } = useFlowStore(useShallow(selector));
+  
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-
-  // Sync local state with context
-  useEffect(() => {
-    setNodes(contextNodes);
-    setEdges(contextEdges);
-  }, [contextNodes, contextEdges, setNodes, setEdges]);
-
-  // Sync context with local state
-
-  useEffect(() => {
-    setContextNodes(nodes);
-    setContextEdges(edges);
-  }, [nodes, edges, setContextNodes, setContextEdges]);
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
@@ -61,28 +53,15 @@ export default function Canvas() {
         data: { label: type.charAt(0).toUpperCase() + type.slice(1) },
       };
       
-      setNodes((nodes) => nodes.concat(newNode));
+      addNode(newNode); // Call the action from the store
     },
-    [reactFlowInstance, setNodes]
-  );
-
-  const onConnect = useCallback(
-    (params: Edge | Connection) => {
-      setEdges((eds) => addEdge({
-        ...params,
-        markerEnd: { type: MarkerType.ArrowClosed },
-        animated: true
-      }, eds));
-    }, 
-    [setEdges]
+    [reactFlowInstance, addNode]
   );
 
   const onSave = useCallback(() => {
-    if (reactFlowInstance) {
-      const flowId = window.location.pathname.split('/').pop() || 'default';
-      saveFlow(flowId);
-    }
-  }, [reactFlowInstance, saveFlow]);
+    const flowId = window.location.pathname.split('/').pop() || 'default';
+    saveFlow(flowId); // Call the save action from the store
+  }, [saveFlow]);
 
   return (
     <div ref={reactFlowWrapper} className="flex-1 h-[80vh] bg-gray-100 rounded-lg shadow-lg">
@@ -114,4 +93,4 @@ export default function Canvas() {
       </ReactFlow>
     </div>
   );
-} 
+}
