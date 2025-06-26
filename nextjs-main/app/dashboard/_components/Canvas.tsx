@@ -1,4 +1,3 @@
-// app/dashboard/_components/Canvas.tsx
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -82,8 +81,7 @@ export default function Canvas() {
   }, [saveFlow]);
 
   return (
-    // This container gives the canvas its shadow, rounded corners, and white background.
-    <div className="w-full h-full rounded-xl shadow-lg overflow-hidden bg-white">
+    <div className="w-full h-[calc(100%-0.5rem)] rounded-xl shadow-lg overflow-hidden bg-white">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -103,9 +101,9 @@ export default function Canvas() {
         <Panel position="top-right">
           <button
             onClick={onSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
           >
-            Save to Firebase
+            Save
           </button>
         </Panel>
       </ReactFlow>
