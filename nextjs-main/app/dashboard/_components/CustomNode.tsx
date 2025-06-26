@@ -10,13 +10,11 @@ type CustomNodeData = {
 };
 type AppNode = Node<CustomNodeData>;
 
-// The CustomNode component is a standard React component.
-// It receives props like `data` which contains the node's label.
+
 const CustomNode: FC<NodeProps<AppNode>> = ({ data }) => {
   return (
-    // This is the main container for the custom node.
-    // We use Tailwind CSS for styling to match your screenshot.
-    <div className="bg-white border-2 border-black rounded-lg shadow-md w-48 h-16 flex items-center justify-center">
+    
+    <div className="bg-white border-2 border-black rounded-lg shadow-md w-28 h-8 flex items-center justify-center">
       
       {/* Handle for incoming connections (target) */}
       <Handle
@@ -26,7 +24,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ data }) => {
       />
       
       {/* Display the node's label from the data prop */}
-      <div className="text-center font-medium text-gray-800">
+      <div className="text-center font-medium text-xs text-gray-800">
         {data.label}
       </div>
 
