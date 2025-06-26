@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Project, useProjects } from '@/context/ProjectContext';
 import { ref, remove } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
+import { Trash } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 // Format date to a more readable format
 const formatDate = (dateString: string) => {
@@ -25,6 +27,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { fetchProjects } = useProjects();
+  const { user } = useAuth();
 
   // Determine status badge color
   const getStatusColor = (status: string) => {
@@ -47,6 +50,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     try {
       const projectRef = ref(database, `projects/${project.id}`);
       await remove(projectRef);
+
+      const flowId = project.id.replace(/^-/, '')
+      const flowRef = ref(database, `flows/fid_${flowId}`);
+      await remove(flowRef);
+      
+      // Remove the project reference from the user's projects list
+      if (user) {
+        const userProjectRef = ref(database, `users/${user.uid}/projects/${project.id}`);
+        await remove(userProjectRef);
+      }
+
       // Refresh projects list
       fetchProjects();
     } catch (error) {
@@ -57,6 +71,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       setShowDeleteModal(false);
     }
   };
+
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -116,9 +131,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             className="bg-red-500 hover:bg-red-600 hover:cursor-pointer text-white p-2 rounded-md transition-colors duration-200"
             aria-label="Delete project"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
+            <Trash />
           </button>
         </div>
         
@@ -132,14 +145,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 font-medium"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200 font-medium hover:cursor-pointer"
                   disabled={isDeleting}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 font-medium flex items-center gap-2"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-200 font-medium flex items-center gap-2 hover:cursor-pointer"
                   disabled={isDeleting}
                 >
                   {isDeleting ? (
