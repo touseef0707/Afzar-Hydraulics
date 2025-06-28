@@ -55,6 +55,7 @@ export type RFState = {
   loadFlow: (flowId: string) => void;
   // Added: Function signature for deleting a node
   deleteNode: (nodeId: string) => void;
+  updateNodeParams: (nodeId: string, params: object) => void;
 };
 
 // --- Store Definition ---
@@ -101,6 +102,16 @@ const useFlowStore = create<RFState>((set, get) => ({
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+    });
+  },
+
+  updateNodeParams: (nodeId: string, params: object) => {
+    set({
+      nodes: get().nodes.map(node =>
+        node.id === nodeId
+          ? { ...node, data: { ...node.data, params } }
+          : node
+      ),
     });
   },
 }));
