@@ -1,3 +1,5 @@
+// file: src/store/store.ts
+
 "use client";
 
 import { create } from 'zustand';
@@ -34,17 +36,19 @@ const sanitizeForFirebase = (data: any): any => {
 };
 
 // --- Types ---
+// IMPORTANT: The node's data can now hold an optional 'params' object.
 type CustomNodeData = {
   label: string;
   nodeType: string;
+  params?: Record<string, any>;
 };
-
 
 export type CustomNode = Node<CustomNodeData>;
 
 export type RFState = {
   nodes: CustomNode[];
   edges: Edge[];
+  editingNodeId: string | null; // Tracks which node's modal is open
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
@@ -53,21 +57,23 @@ export type RFState = {
   setEdges: (edges: Edge[]) => void;
   saveFlow: (flowId: string) => void;
   loadFlow: (flowId: string) => void;
-  // Added: Function signature for deleting a node
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
+  setEditingNodeId: (nodeId: string | null) => void; // Action to open/close the modal
 };
 
 // --- Store Definition ---
 const useFlowStore = create<RFState>((set, get) => ({
   nodes: [],
   edges: [],
+  editingNodeId: null,
   onNodesChange: (changes: NodeChange[]) => set({ nodes: applyNodeChanges(changes, get().nodes) as CustomNode[] }),
   onEdgesChange: (changes: EdgeChange[]) => set({ edges: applyEdgeChanges(changes, get().edges) }),
   onConnect: (connection: Connection) => set({ edges: addEdge({ ...connection, markerEnd: { type: MarkerType.ArrowClosed }, animated: true }, get().edges) }),
   addNode: (node: CustomNode) => set({ nodes: [...get().nodes, node] }),
   setNodes: (nodes: CustomNode[]) => set({ nodes }),
   setEdges: (edges: Edge[]) => set({ edges }),
+  setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
 
   saveFlow: (flowId: string) => {
     const { nodes, edges } = get();
@@ -109,7 +115,7 @@ const useFlowStore = create<RFState>((set, get) => ({
     set({
       nodes: get().nodes.map(node =>
         node.id === nodeId
-          ? { ...node, data: { ...node.data, params } }
+          ? { ...node, data: { ...node.data, params: { ...node.data.params, ...params } } }
           : node
       ),
     });
