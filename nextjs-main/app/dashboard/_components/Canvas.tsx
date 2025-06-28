@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -11,12 +11,10 @@ import {
   BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-// Import everything from your Zustand store
-import useFlowStore, { RFState, CustomNode} from '@/store/store';
+import useFlowStore, { RFState, CustomNode } from '@/store/store';
 import { useShallow } from 'zustand/react/shallow';
 
-// Import the CustomNode component we just created
+// Import the CustomNode component
 import AppNode from './CustomNode';
 
 // This selector optimizes performance by only re-rendering when the selected state changes.
@@ -28,20 +26,20 @@ const selector = (state: RFState) => ({
   onConnect: state.onConnect,
   addNode: state.addNode,
   saveFlow: state.saveFlow,
-  loadFlow: state.loadFlow
+  loadFlow: state.loadFlow,
 });
 
 export default function Canvas() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, saveFlow, loadFlow } = useFlowStore(useShallow(selector));
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
-  // Register our custom node component with React Flow [2, 4].
+  // Register our custom node component with React Flow.
   // We use useMemo for performance, so this object isn't recreated on every render.
   const nodeTypes = useMemo(() => ({ custom: AppNode }), []);
 
   // Load the flow from Firebase when the component first mounts.
   useEffect(() => {
-    const flowId = window.location.pathname.split('/').pop() || 'default';
+    const flowId = window.location.pathname.split('/').pop();
     if (flowId) {
       loadFlow(flowId);
     }
@@ -53,7 +51,8 @@ export default function Canvas() {
       event.preventDefault();
       const nodeInfoString = event.dataTransfer.getData('application/reactflow');
       if (!nodeInfoString || !reactFlowInstance) return;
-      
+
+      // The 'type' here is the original type from the sidebar (e.g., 'feed', 'product')
       const { type, label } = JSON.parse(nodeInfoString);
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
@@ -62,11 +61,15 @@ export default function Canvas() {
 
       // Create a new node object that matches our CustomNode type.
       // IMPORTANT: The `type` property is set to 'custom' to match the key in our `nodeTypes` object.
+      // The original type is passed in the data payload as `nodeType`.
       const newNode: CustomNode = {
         id: `${type}_${Date.now()}`,
         type: 'custom',
         position,
-        data: { label },
+        data: {
+          label,
+          nodeType: type, 
+        },
       };
 
       addNode(newNode);
@@ -76,8 +79,10 @@ export default function Canvas() {
 
   // Handles the save button click.
   const onSave = useCallback(() => {
-    const flowId = window.location.pathname.split('/').pop() || 'default';
-    saveFlow(flowId);
+    const flowId = window.location.pathname.split('/').pop();
+    if (flowId) {
+        saveFlow(flowId);
+    }
   }, [saveFlow]);
 
   return (
@@ -85,7 +90,7 @@ export default function Canvas() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes} // Pass our custom node types to React Flow [5]
+        nodeTypes={nodeTypes} // Pass our custom node types to React Flow
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -94,6 +99,8 @@ export default function Canvas() {
         onDragOver={(e) => e.preventDefault()}
         fitView
         proOptions={{ hideAttribution: true }} // Hides the "React Flow" attribution text
+        // Enables keyboard shortcuts for deletion (Backspace/Delete key)
+        deleteKeyCode={['Backspace', 'Delete']}
       >
         <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
         <MiniMap nodeStrokeWidth={3} zoomable pannable />
