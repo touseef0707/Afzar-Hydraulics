@@ -20,7 +20,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ data }) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-3 !h-3 !bg-gray-500"
+        className="!w-2 !h-2 !bg-gray-500"
       />
       
       {/* Display the node's label from the data prop */}
@@ -32,7 +32,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ data }) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-3 !h-3 !bg-gray-500"
+        className="!w-2 !h-2 !bg-gray-500"
       />
     </div>
   );
