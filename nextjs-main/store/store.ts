@@ -1,4 +1,3 @@
-// store/store.ts
 "use client";
 
 import { create } from 'zustand';
@@ -37,6 +36,7 @@ const sanitizeForFirebase = (data: any): any => {
 // --- Types ---
 type CustomNodeData = {
   label: string;
+  nodeType: string;
 };
 
 
@@ -53,6 +53,8 @@ export type RFState = {
   setEdges: (edges: Edge[]) => void;
   saveFlow: (flowId: string) => void;
   loadFlow: (flowId: string) => void;
+  // Added: Function signature for deleting a node
+  deleteNode: (nodeId: string) => void;
 };
 
 // --- Store Definition ---
@@ -93,6 +95,13 @@ const useFlowStore = create<RFState>((set, get) => ({
     } catch (error) {
       console.error("Failed to load flow:", error);
     }
+  },
+
+  deleteNode: (nodeId: string) => {
+    set({
+      nodes: get().nodes.filter((node) => node.id !== nodeId),
+      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+    });
   },
 }));
 
