@@ -19,8 +19,7 @@ export const NODES: NodeTypeInfo[] = [
   { type: 'product', label: 'Product', icon: <Package size={20} />, color: 'green' },
   { type: 'pipe', label: 'Pipe', icon: <Cable size={20} />, color: 'orange' },
   { type: 'pump', label: 'Pump', icon: <CircuitBoard size={20} />, color: 'teal' },
-  { type: 'valve', label: 'Valve', icon: <CircuitBoard size={20} />, color: 'teal' },
-  { type: 'control-valve', label: 'Control Valve', icon: <ToyBrick size={20} />, color: 'indigo' },
+  { type: 'valve', label: 'Valve', icon: <ToyBrick size={20} />, color: 'indigo' },
   { type: 'splitter', label: 'Splitter/Mixer', icon: <CircuitBoard size={20} />, color: 'purple' },
   { type: 'misc', label: 'Misc', icon: <File size={20} />, color: 'gray' },
 ];
