@@ -27,12 +27,6 @@ export const NODE_CONFIG: Record<string, NodeConfig> = {
   misc: { label: 'Misc', icon: File, color: 'gray' },
 };
 
-// --- THIS IS THE FIX ---
-// We explicitly define the type for COLOR_CLASSES.
-// We state that it is an object where each key (like 'border' or 'bgHover')
-// maps to another object. That inner object is a `Record` where every key
-// is of type `Color` and every value is a string.
-// This resolves all the indexing errors.
 export const COLOR_CLASSES: Record<
   'border' | 'bgHover' | 'borderHover' | 'text' | 'gripHover',
   Record<Color, string>

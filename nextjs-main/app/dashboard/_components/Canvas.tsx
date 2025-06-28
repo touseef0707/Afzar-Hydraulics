@@ -15,12 +15,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import useFlowStore, { RFState, CustomNode } from '@/store/store'; // Ensure path is correct
 import { useShallow } from 'zustand/react/shallow';
-
-// --- THIS IS THE FIX ---
-// Import the named export 'CustomNode' and rename it to 'AppNode'
-// This matches how it's used later in the component.
 import AppNode from './CustomNode';
-import Modal from './Modal'; // Assuming Modal uses a default export
+import Modal from './Modal'; 
 
 const selector = (state: RFState) => ({
   nodes: state.nodes,
@@ -44,7 +40,7 @@ export default function Canvas({ flowId }: { flowId: string }) {
   
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
 
-  // The 'AppNode' variable now correctly refers to your CustomNode component
+  
   const nodeTypes = useMemo(() => ({ custom: AppNode }), [AppNode]);
 
   const editingNode = useMemo(() => {
