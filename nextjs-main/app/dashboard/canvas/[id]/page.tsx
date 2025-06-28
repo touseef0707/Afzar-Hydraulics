@@ -1,13 +1,33 @@
-import CanvasSidebar from '@/app/dashboard/_components/CanvasSidebar';
-import Canvas from '@/app/dashboard/_components/Canvas';
+// file: app/dashboard/canvas/[id]/page.tsx
 
-export default async function CanvasPage() {
+// This remains a Server Component
+import FlowCanvas from '@/app/dashboard/_components/FlowCanvas';
+// --- 1. IMPORT THE NEW SIDEBAR COMPONENT ---
+import CanvasSidebar from '@/app/dashboard/_components/CanvasSidebar';
+
+export default async function CanvasPage({ params }: { params: { id: string } }) {
+  const { id: flowId } = await params;
+
   return (
-    <div className="flex flex-col h-screen p-2">
-        <div className="flex flex-1 w-full max-w-7xl mx-auto gap-4">
-          <CanvasSidebar />
-          <Canvas />
-        </div>
-    </div>
+    // --- 2. CREATE A FLEXBOX CONTAINER FOR THE LAYOUT ---
+    // `flex` creates the two-column layout.
+    // `h-screen` ensures it takes the full viewport height.
+    // `bg-gray-100` provides a nice background for the page.
+    <main className="flex flex-row h-screen bg-gray-100">
+      
+      {/* The sidebar is the first item in the flex container */}
+      <CanvasSidebar />
+
+      {/* 
+        This div will hold the canvas and grow to fill the remaining space.
+        `flex-1` is shorthand for `flex-grow: 1`.
+        `p-4` adds some padding around the canvas area.
+      */}
+      <div className="flex-1 p-4">
+        {/* The FlowCanvas component (which contains the Provider and Canvas) goes here */}
+        <FlowCanvas flowId={flowId} />
+      </div>
+
+    </main>
   );
-};
+}
