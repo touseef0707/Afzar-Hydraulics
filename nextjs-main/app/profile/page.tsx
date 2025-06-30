@@ -7,22 +7,26 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  // NEW: Import updateProfile for username changes
   updateProfile,
-  AuthError // Ensure AuthError is imported
+  AuthError
 } from 'firebase/auth';
-import { auth } from '@/firebase/clientApp'; 
+import { auth } from '@/firebase/clientApp';
 import { useAuth } from '@/context/AuthContext';
+import { useProjects } from '@/context/ProjectContext'; 
 import ProtectedRoute from '@/components/ProtectedRoute'; 
 import ProfileInfo from '@/app/profile/_components/ProfileInfo';  
 import SettingsPanel from '@/app/profile/_components/SettingsPanel'; 
-
+import ProjectsPanel from '@/app/profile/_components/ProjectsPanel';
 
 export default function ProfilePage() {
-  // Use the global authentication context instead of local state and listener
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { 
+    projects: contextProjects, 
+    loading: projectsLoading, 
+    error: projectsError 
+  } = useProjects(); // Use the project context
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'projects'>('profile');
 
   // Password-related states
   const [currentPassword, setCurrentPassword] = useState('');
@@ -32,34 +36,31 @@ export default function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  // Username-related states (initialized based on user from context)
+  // Username-related states
   const [username, setUsername] = useState(user?.displayName || '');
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuccess, setUsernameSuccess] = useState('');
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
-  // Effect to update username state when the user object from context changes
   useEffect(() => {
     if (user) {
       setUsername(user.displayName || '');
     }
   }, [user]);
 
-  // Redirect to login if not authenticated after loading is complete
+  // Redirect to login if not authenticated
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push('/login');
     }
-  }, [loading, user, router]);
+  }, [authLoading, user, router]);
 
-  // Handler for username input changes
   const handleUsernameInputChange = (value: string) => {
     setUsername(value);
-    setUsernameError(''); // Clear error when input changes
-    setUsernameSuccess(''); // Clear success when input changes
+    setUsernameError('');
+    setUsernameSuccess('');
   };
 
-  // Handler for username update submission
   const handleUsernameChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -71,20 +72,17 @@ export default function ProfilePage() {
       setUsernameError("Username cannot be empty.");
       return;
     }
-    // Add more validation if needed (e.g., length, characters)
 
     setIsUpdatingUsername(true);
     setUsernameError('');
     setUsernameSuccess('');
 
     try {
-      // Use Firebase's updateProfile to change displayName
       await updateProfile(user, { displayName: username.trim() });
       setUsernameSuccess("Username updated successfully!");
     } catch (err) {
       const error = err as AuthError;
       console.error("Error updating username:", error);
-      // More specific error handling could be added here
       setUsernameError(`Failed to update username: ${error.message || 'An unknown error occurred.'}`);
     } finally {
       setIsUpdatingUsername(false);
@@ -108,7 +106,7 @@ export default function ProfilePage() {
       return;
     }
 
-    if (!user || !user.email) { // Ensure user and email are present for reauthentication
+    if (!user || !user.email) {
       setPasswordError("User not authenticated or email missing.");
       return;
     }
@@ -140,7 +138,7 @@ export default function ProfilePage() {
           errorMessage = 'Password is too weak. Please choose a stronger password.';
           break;
         default:
-          errorMessage = error.message || errorMessage; // Catch other Firebase errors
+          errorMessage = error.message || errorMessage;
       }
       setPasswordError(errorMessage);
     } finally {
@@ -157,8 +155,18 @@ export default function ProfilePage() {
     }
   };
 
-  // Display a loading indicator while auth context is determining user status
-  if (loading) {
+  // Format context projects to match the ProjectsPanel expectations
+  const formattedProjects = contextProjects.map(project => ({
+    id: project.id,
+    title: project.name,
+    description: project.description,
+    lastModified: project.lastModified,
+    status: project.status,
+    type: project.type,
+    createdAt: new Date(project.lastModified).getTime()
+  }));
+
+  if (authLoading || projectsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -166,8 +174,6 @@ export default function ProfilePage() {
     );
   }
 
-  // If not loading and no user, ProtectedRoute will handle the redirect, or
-  // the useEffect above will redirect. This ensures nothing renders if not authenticated.
   if (!user) {
     return null;
   }
@@ -183,7 +189,6 @@ export default function ProfilePage() {
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  {/* Display user's displayName (username) if available, otherwise email */}
                   <h1 className="text-2xl font-bold">{user.displayName || user.email}</h1>
                   {user.displayName && <p className="text-blue-100 text-sm">Email: {user.email}</p>}
                   <p className="text-blue-100 mt-2">
@@ -216,6 +221,17 @@ export default function ProfilePage() {
                 >
                   Settings
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('projects')}
+                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                    activeTab === 'projects'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  My Projects
+                </button>
               </nav>
             </div>
 
@@ -224,14 +240,12 @@ export default function ProfilePage() {
               {activeTab === 'settings' && (
                 <SettingsPanel
                   user={user}
-                  // Username update props
                   username={username}
                   usernameError={usernameError}
                   usernameSuccess={usernameSuccess}
                   isUpdatingUsername={isUpdatingUsername}
                   onUsernameChange={handleUsernameChange}
                   onUsernameInputChange={handleUsernameInputChange}
-                  // Password update props
                   currentPassword={currentPassword}
                   newPassword={newPassword}
                   confirmPassword={confirmPassword}
@@ -242,8 +256,14 @@ export default function ProfilePage() {
                   onCurrentPasswordChange={setCurrentPassword}
                   onNewPasswordChange={setNewPassword}
                   onConfirmPasswordChange={setConfirmPassword}
-                  // Other actions
                   onLogout={handleLogout}
+                />
+              )}
+              {activeTab === 'projects' && (
+                <ProjectsPanel 
+                  projects={formattedProjects}
+                  loading={projectsLoading}
+                  error={projectsError || ''}
                 />
               )}
             </div>
