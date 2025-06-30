@@ -1,5 +1,3 @@
-// file: src/store/store.ts
-
 "use client";
 
 import { create } from 'zustand';
@@ -35,8 +33,6 @@ const sanitizeForFirebase = (data: any): any => {
   return data;
 };
 
-// --- Types ---
-// IMPORTANT: The node's data can now hold an optional 'params' object.
 type CustomNodeData = {
   label: string;
   nodeType: string;
@@ -59,7 +55,7 @@ export type RFState = {
   loadFlow: (flowId: string) => void;
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
-  setEditingNodeId: (nodeId: string | null) => void; // Action to open/close the modal
+  setEditingNodeId: (nodeId: string | null) => void;
 };
 
 // --- Store Definition ---

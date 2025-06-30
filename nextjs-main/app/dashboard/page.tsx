@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { useProjects } from '@/context/ProjectContext';
-import ProjectGrid from '@/app/dashboard/_components/ProjectGrid';
-import ProjectFilter, { FilterState } from '@/app/dashboard/_components/ProjectFilter';
-import CreateProjectButton from '@/app/dashboard/_components/CreateProjectButton';
+import ProjectGrid from './_components/projects/ProjectGrid';
+import ProjectFilter, { FilterState } from './_components/projects/ProjectFilter';
+import CreateProjectButton from './_components/projects//CreateProjectButton';
 
 const DashboardPage = () => {
   const { projects, loading, error } = useProjects();

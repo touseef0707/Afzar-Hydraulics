@@ -1,22 +1,17 @@
-// file: src/components/flow_config.tsx
-
 import React from "react";
 import {
   Cable, CircuitBoard, Fuel, Package, ToyBrick, File,
 } from 'lucide-react';
 
-// Define allowed color types (This part is perfect)
 const COLORS = ['green', 'red', 'orange', 'teal', 'indigo', 'purple', 'gray'] as const;
 export type Color = typeof COLORS[number];
 
-// Type-safe node definition (This part is also perfect)
 export type NodeConfig = {
   label: string;
   icon: React.ComponentType<{ className?: string, size?: number }>;
   color: Color;
 };
 
-// Use an object map for efficient lookups
 export const NODE_CONFIG: Record<string, NodeConfig> = {
   feed: { label: 'Feed', icon: Fuel, color: 'red' },
   product: { label: 'Product', icon: Package, color: 'green' },

@@ -1,16 +1,13 @@
-// file: src/components/Modal.tsx
-
 "use client";
 
-import React, { FormEvent, ChangeEvent, useRef, useState, JSX } from 'react';
-import useFlowStore, { RFState } from '@/store/store';
+import React, { FormEvent, ChangeEvent, useRef, useState, JSX, useEffect } from 'react';
+import useFlowStore, { RFState } from '@/store/FlowStore';
 import { useShallow } from 'zustand/react/shallow';
-import { useClickOutside } from './useClickOutside';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 interface ModalProps {
   nodeId: string;
   onClose: () => void;
-  position: { x: number; y: number };
 }
 
 const selector = (state: RFState) => ({
@@ -18,15 +15,17 @@ const selector = (state: RFState) => ({
   updateNodeParams: state.updateNodeParams,
 });
 
-const Modal: React.FC<ModalProps> = ({ nodeId, onClose, position }) => {
+const Modal: React.FC<ModalProps> = ({ nodeId, onClose }) => {
   const { node, updateNodeParams } = useFlowStore(useShallow(selector));
   const [params, setParams] = useState<Record<string, any>>(node?.data.params || {});
   
   const modalContentRef = useRef<HTMLDivElement>(null); 
+
   useClickOutside(modalContentRef, onClose);
 
   if (!node) return null;
   const { nodeType } = node.data;
+
 
   const inputClass = 'border border-gray-300 rounded px-2 py-1.5 text-sm text-black w-full focus:outline-none focus:ring-1 focus:ring-blue-500';
   const labelClass = 'text-xs font-medium text-gray-600 mb-1';
@@ -85,23 +84,24 @@ const Modal: React.FC<ModalProps> = ({ nodeId, onClose, position }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm flex items-center justify-center">
       <div
         ref={modalContentRef}
-        className="absolute bg-white rounded-md shadow-lg p-4 w-[250px]"
-        style={{ top: `${position.y + 20}px`, left: `${position.x}px` }}
+        className="bg-white rounded-md shadow-lg p-4 w-[250px] max-w-full"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-sm font-semibold text-gray-800">{nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Settings</h2>
+          <h2 className="text-sm font-semibold text-gray-800">
+            {nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Settings
+          </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* This call is now type-safe because renderFields() returns JSX.Element */}
           <div>{renderFields()}</div>
-          
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className={secondaryButtonClass}>Cancel</button>
             <button type="submit" className={primaryButtonClass}>Save</button>
@@ -111,5 +111,4 @@ const Modal: React.FC<ModalProps> = ({ nodeId, onClose, position }) => {
     </div>
   );
 };
-
 export default Modal;

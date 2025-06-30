@@ -1,5 +1,3 @@
-// file: src/components/CanvasSidebar.tsx
-
 "use client";
 
 import React from 'react';

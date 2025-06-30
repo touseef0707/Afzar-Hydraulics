@@ -1,5 +1,3 @@
-// file: src/components/Canvas.tsx
-
 "use client";
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -13,7 +11,7 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import useFlowStore, { RFState, CustomNode } from '@/store/store'; // Ensure path is correct
+import useFlowStore, { RFState, CustomNode } from '@/store/FlowStore'; 
 import { useShallow } from 'zustand/react/shallow';
 import AppNode from './CustomNode';
 import Modal from './Modal'; 
@@ -31,7 +29,7 @@ const selector = (state: RFState) => ({
   setEditingNodeId: state.setEditingNodeId,
 });
 
-export default function Canvas({ flowId }: { flowId: string }) {
+export default function CanvasFlow({ flowId }: { flowId: string }) {
   const { 
     nodes, edges, editingNodeId,
     onNodesChange, onEdgesChange, onConnect, 
@@ -39,7 +37,6 @@ export default function Canvas({ flowId }: { flowId: string }) {
   } = useFlowStore(useShallow(selector));
   
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
-
   
   const nodeTypes = useMemo(() => ({ custom: AppNode }), [AppNode]);
 
@@ -97,7 +94,7 @@ export default function Canvas({ flowId }: { flowId: string }) {
       </div>
 
       {editingNodeId && modalPosition && (
-        <Modal nodeId={editingNodeId} onClose={() => setEditingNodeId(null)} position={modalPosition} />
+        <Modal nodeId={editingNodeId} onClose={() => setEditingNodeId(null)}/>
       )}
     </>
   );
