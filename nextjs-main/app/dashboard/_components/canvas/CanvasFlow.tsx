@@ -15,6 +15,7 @@ import useFlowStore, { RFState, CustomNode } from '@/store/FlowStore';
 import { useShallow } from 'zustand/react/shallow';
 import AppNode from './CustomNode';
 import Modal from './Modal'; 
+import { useToast } from '@/components/Toast';
 
 const selector = (state: RFState) => ({
   nodes: state.nodes,
@@ -30,6 +31,7 @@ const selector = (state: RFState) => ({
 });
 
 export default function CanvasFlow({ flowId }: { flowId: string }) {
+  const { showToast } = useToast();
   const { 
     nodes, edges, editingNodeId,
     onNodesChange, onEdgesChange, onConnect, 
@@ -70,7 +72,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
   }, [screenToFlowPosition, addNode]);
 
   const onSave = useCallback(() => {
-    if (flowId) saveFlow(flowId);
+    if (flowId) saveFlow(flowId, showToast);
   }, [flowId, saveFlow]);
 
   return (
@@ -86,7 +88,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
           <MiniMap nodeStrokeWidth={3} zoomable pannable />
           <Controls />
           <Panel position="top-right">
-            <button onClick={onSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200">
+            <button onClick={onSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200">
               Save
             </button>
           </Panel>

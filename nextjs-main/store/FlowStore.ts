@@ -51,7 +51,7 @@ export type RFState = {
   addNode: (node: CustomNode) => void;
   setNodes: (nodes: CustomNode[]) => void;
   setEdges: (edges: Edge[]) => void;
-  saveFlow: (flowId: string) => void;
+  saveFlow: (flowId: string, showToast: (message: string, type: 'success' | 'error') => void) => void;
   loadFlow: (flowId: string) => void;
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
@@ -71,15 +71,19 @@ const useFlowStore = create<RFState>((set, get) => ({
   setEdges: (edges: Edge[]) => set({ edges }),
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
 
-  saveFlow: (flowId: string) => {
-    const { nodes, edges } = get();
-    const formattedFlowId = "fid_" + flowId.replace(/^-/, '');
-    const flowData = { nodes: sanitizeForFirebase(nodes), edges: sanitizeForFirebase(edges) };
-    const projectFlowRef = ref(database, `projects/${flowId}/flow`);
-    fbSet(projectFlowRef, formattedFlowId);
-    const flowDataRef = ref(database, `flows/${formattedFlowId}`);
-    fbSet(flowDataRef, flowData);
-    console.log(`Flow ${formattedFlowId} saved to project ${flowId}.`);
+  saveFlow: (flowId: string, showToast?) => {
+    try {
+      const { nodes, edges } = get();
+      const formattedFlowId = "fid_" + flowId.replace(/^-/, '');
+      const flowData = { nodes: sanitizeForFirebase(nodes), edges: sanitizeForFirebase(edges) };
+      const projectFlowRef = ref(database, `projects/${flowId}/flow`);
+      fbSet(projectFlowRef, formattedFlowId);
+      const flowDataRef = ref(database, `flows/${formattedFlowId}`);
+      fbSet(flowDataRef, flowData);
+      showToast?.('Flow saved successfully!', 'success');
+    } catch (error) {
+      showToast?.('Failed to save flow', 'error');
+    }
   },
 
   loadFlow: async (flowId: string) => {

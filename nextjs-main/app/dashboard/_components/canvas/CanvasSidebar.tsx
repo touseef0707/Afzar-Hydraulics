@@ -47,7 +47,6 @@ export default function CanvasSidebar() {
                 <span className="font-medium text-gray-700">{nodeInfo.label}</span>
               </div>
               <GripVertical 
-                // The error here is also resolved
                 className={`text-gray-300 transition-colors ${COLOR_CLASSES.gripHover[nodeInfo.color]}`} 
               />
             </div>

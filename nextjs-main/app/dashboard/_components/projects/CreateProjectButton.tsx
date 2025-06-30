@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ref, push, serverTimestamp, set } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/Toast';
 
 interface CreateProjectButtonProps {
   className?: string;
@@ -21,6 +22,7 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
   
   const router = useRouter();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const openModal = () => {
     if (!user) {
@@ -69,8 +71,8 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
           edgeCount: 0,
           lastSimulationRun: null
         },
-        flowId: null, // Initialize flowId as null
-        thumbnail: `https://picsum.photos/seed/${Date.now()}/200/300` // Random placeholder image
+        flowId: null, 
+        thumbnail: `https://picsum.photos/seed/${Date.now()}/200/300` 
       };
       
       // Push the new project to Firebase
@@ -84,12 +86,15 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ className = '
         console.log(`[Database] Project ${projectId} added to user ${user.uid}`);
       }
       
-      // Close the modal and redirect to the new project
       closeModal();
       router.push(`/dashboard/canvas/${projectId}`);
+
+      showToast("Project created successfully", "success");
+
     } catch (err) {
       console.error('Error creating project:', err);
-      setError('Failed to create project. Please check Firebase security rules and try again.');
+      showToast("Error creating project. Please try again", "error");
+      
     } finally {
       setIsSubmitting(false);
     }

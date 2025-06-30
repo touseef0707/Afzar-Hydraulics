@@ -7,6 +7,7 @@ import { ref, remove } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
 import { Trash } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/components/Toast';
 
 // Format date to a more readable format
 const formatDate = (dateString: string) => {
@@ -28,6 +29,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const { fetchProjects } = useProjects();
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   // Determine status badge color
   const getStatusColor = (status: string) => {
@@ -54,18 +56,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       const flowId = project.id.replace(/^-/, '')
       const flowRef = ref(database, `flows/fid_${flowId}`);
       await remove(flowRef);
-      
+
       // Remove the project reference from the user's projects list
       if (user) {
         const userProjectRef = ref(database, `users/${user.uid}/projects/${project.id}`);
         await remove(userProjectRef);
       }
 
-      // Refresh projects list
+      showToast("Project deleted successfully", "success");
       fetchProjects();
+
     } catch (error) {
-      console.error('Error deleting project:', error);
-      alert('Failed to delete project. Please try again.');
+      console.log(error);
+      showToast("Error deleting project. Please try again", "error");
+
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);

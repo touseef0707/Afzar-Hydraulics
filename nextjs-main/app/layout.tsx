@@ -4,6 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ProjectProvider } from '@/context/ProjectContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { ToastProvider } from '@/components/Toast';
 
 export const metadata: Metadata = {
   title: 'Afzar Hydraulics',
@@ -22,7 +23,11 @@ export default function RootLayout({
           <ProjectProvider>
             <div className="flex flex-col min-h-screen">
               <Navbar />
-              <main className="flex-grow">{children}</main>
+              <main className="flex-grow">
+                <ToastProvider>
+                  {children}
+                </ToastProvider>
+              </main>
               <Footer companyName="Afzar Hydraulics" />
             </div>
           </ProjectProvider>
