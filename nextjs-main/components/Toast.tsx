@@ -116,7 +116,7 @@ function ToastItem({
       </div>
       <button
         onClick={onClose}
-        className="text-white hover:text-gray-200 ml-2 text-xl"
+        className="text-white hover:text-gray-200 hover:cursor-pointer ml-2 text-xl"
         aria-label="Close toast"
       >
         &times;

@@ -27,7 +27,6 @@ interface ProjectCardProps {
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { fetchProjects } = useProjects();
   const { user } = useAuth();
   const { showToast } = useToast();
 
@@ -64,7 +63,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       }
 
       showToast("Project deleted successfully", "success");
-      fetchProjects();
 
     } catch (error) {
       console.log(error);

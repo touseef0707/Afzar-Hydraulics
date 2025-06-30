@@ -132,7 +132,7 @@ const Navbar = () => {
               <div className="relative ml-3">
                 <button
                   onClick={toggleProfileMenu}
-                  className="flex items-center max-w-xs rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-800"
+                  className="flex items-center max-w-xs rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:bg-gray-800 hover:cursor-pointer"
                   id="user-menu"
                   aria-haspopup="true"
                   aria-expanded={isProfileMenuOpen}
@@ -158,14 +158,14 @@ const Navbar = () => {
                   <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-gray-800 ring-1 ring-gray-700 ring-opacity-5 focus:outline-none z-10">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 hover:cursor-pointer"
                       onClick={() => setIsProfileMenuOpen(false)}
                     >
                       Your Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 hover:cursor-pointer"
                     >
                       Sign out
                     </button>
@@ -176,13 +176,13 @@ const Navbar = () => {
               <>
                 <Link 
                   href="/login" 
-                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200 border border-gray-700 hover:border-blue-400"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200 border border-gray-700 hover:border-blue-400 hover:cursor-pointer"
                 >
                   Login
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 border border-blue-600 hover:border-blue-700"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 border border-blue-600 hover:border-blue-700 hover:cursor-pointer"
                 >
                   Sign Up
                 </Link>

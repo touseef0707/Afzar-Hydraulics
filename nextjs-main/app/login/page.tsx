@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/clientApp';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +28,11 @@ const LoginPage = () => {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/');
+      showToast("Successfully Signed In!", "success");
     } catch (err) {
       const error = err as AuthError;
       console.error(error);
+      showToast("Sign In Failed", "error");
       setError(getAuthErrorMessage(error.code));
     } finally {
       setLoading(false);
@@ -44,11 +48,13 @@ const LoginPage = () => {
       setError('');
       setGoogleLoading(true);
       await signInWithPopup(auth, googleProvider);
+      showToast("Successfully Signed In!", "success");
       router.push('/');
     } catch (err) {
       const error = err as AuthError;
       console.error('Google sign-in error:', error);
       setError(error.message || 'Failed to sign in with Google');
+      showToast("Sign In Failed", "error");
     } finally {
       setGoogleLoading(false);
     }
@@ -104,7 +110,7 @@ const LoginPage = () => {
             <button
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {googleLoading ? (
                 <svg className="animate-spin h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -174,7 +180,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {loading ? (
                     <>
