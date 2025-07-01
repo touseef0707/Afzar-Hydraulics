@@ -3,18 +3,16 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/firebase/clientApp';
+import { useLogout } from '@/hooks/useLogout';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, loading } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
+  const { handleLogout, isLoading, error } = useLogout();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,15 +22,10 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/login');
-      setIsProfileMenuOpen(false);
-      setIsMobileMenuOpen(false);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  const onLogoutClick = async () => {
+    await handleLogout();
+    setIsProfileMenuOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
   const toggleMobileMenu = () => {
@@ -164,10 +157,10 @@ const Navbar = () => {
                       Your Profile
                     </Link>
                     <button
-                      onClick={handleLogout}
+                      onClick={onLogoutClick}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 hover:cursor-pointer"
                     >
-                      Sign out
+                      {isLoading?'Logging out...':'Log Out'}
                     </button>
                   </div>
                 )}
@@ -282,10 +275,10 @@ const Navbar = () => {
                   Your Profile
                 </Link>
                 <button
-                  onClick={handleLogout}
+                  onClick={onLogoutClick}
                   className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700"
                 >
-                  Sign out
+                  {isLoading ? 'Logging out...' : 'Log Out'}
                 </button>
               </div>
             </div>

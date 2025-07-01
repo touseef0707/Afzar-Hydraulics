@@ -3,23 +3,23 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
-  signOut,
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updateProfile,
   AuthError
 } from 'firebase/auth';
-import { auth } from '@/firebase/clientApp';
 import { useAuth } from '@/context/AuthContext';
-import { useProjects } from '@/context/ProjectContext'; 
+import { useProjects } from '@/context/ProjectContext';
 import ProtectedRoute from '@/components/ProtectedRoute'; 
 import ProfileInfo from '@/app/profile/_components/ProfileInfo';  
 import SettingsPanel from '@/app/profile/_components/SettingsPanel'; 
 import ProjectsPanel from '@/app/profile/_components/ProjectsPanel';
+import { useLogout } from '@/hooks/useLogout';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
+  const { handleLogout, isLoading, error } = useLogout();
   const { 
     projects: contextProjects, 
     loading: projectsLoading, 
@@ -143,15 +143,6 @@ export default function ProfilePage() {
       setPasswordError(errorMessage);
     } finally {
       setIsUpdatingPassword(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/login');
-    } catch (error) {
-      console.error('Error signing out:', error);
     }
   };
 

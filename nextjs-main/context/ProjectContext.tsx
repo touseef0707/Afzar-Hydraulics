@@ -45,30 +45,30 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       // Reference to the user's projects list
       const userProjectsRef = ref(database, `users/${user.uid}/projects`);
-      
+
       // Get the user's project IDs
       const userProjectsSnapshot = await get(userProjectsRef);
-      
+
       if (userProjectsSnapshot.exists()) {
         const userProjectIds = Object.keys(userProjectsSnapshot.val());
-        
+
         if (userProjectIds.length === 0) {
           setProjects([]);
           return;
         }
-        
+
         // Fetch each project's details
         const projectPromises = userProjectIds.map(async (projectId) => {
           const projectRef = ref(database, `projects/${projectId}`);
           const projectSnapshot = await get(projectRef);
-          
+
           if (projectSnapshot.exists()) {
             return {
               id: projectId,
@@ -77,10 +77,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
           }
           return null;
         });
-        
+
         const projectsData = await Promise.all(projectPromises);
         const validProjects = projectsData.filter(project => project !== null) as Project[];
-        
+
         setProjects(validProjects);
       } else {
         // If no projects exist yet, set empty array
@@ -96,61 +96,75 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   // Set up listener for real-time updates when user is authenticated
   useEffect(() => {
-    if (user) {
-      // Reference to the user's projects list for real-time updates
-      const userProjectsRef = ref(database, `users/${user.uid}/projects`);
-      
-      const listener = onValue(userProjectsRef, async (snapshot) => {
-        if (snapshot.exists()) {
-          const userProjectIds = Object.keys(snapshot.val());
-          
-          if (userProjectIds.length === 0) {
-            setProjects([]);
-            setLoading(false);
-            return;
-          }
-          
-          try {
-            // Fetch each project's details
-            const projectPromises = userProjectIds.map(async (projectId) => {
-              const projectRef = ref(database, `projects/${projectId}`);
-              const projectSnapshot = await get(projectRef);
-              
-              if (projectSnapshot.exists()) {
-                return {
-                  id: projectId,
-                  ...projectSnapshot.val()
-                };
-              }
-              return null;
-            });
-            
-            const projectsData = await Promise.all(projectPromises);
-            const validProjects = projectsData.filter(project => project !== null) as Project[];
-            
-            setProjects(validProjects);
-          } catch (error) {
-            console.error('Error fetching project details:', error);
-            setError('Failed to fetch project details.');
-          }
-        } else {
-          setProjects([]);
-        }
-        
-        setLoading(false);
-      }, (error) => {
-        console.error('Error in projects listener:', error);
-        setError('Failed to sync with projects data.');
-        setLoading(false);
-      });
-
-      // Clean up listener on unmount
-      return () => off(userProjectsRef, 'value', listener);
-    } else {
-      // If user is not authenticated, clear projects
+    
+    if (!user) {
       setProjects([]);
       setLoading(false);
+      return;
     }
+
+    // Reference to the user's projects list for real-time updates
+    const userProjectsRef = ref(database, `users/${user.uid}/projects`);
+
+    let isMounted = true;
+
+    const listener = onValue(userProjectsRef, async (snapshot) => {
+
+      if (!user) {
+        off(userProjectsRef, 'value', listener);
+        return;
+      }
+
+      if (!isMounted || !user) return; // Double check user exists
+
+      if (snapshot.exists()) {
+        const userProjectIds = Object.keys(snapshot.val());
+
+        if (userProjectIds.length === 0) {
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+
+        try {
+          // Fetch each project's details
+          const projectPromises = userProjectIds.map(async (projectId) => {
+            const projectRef = ref(database, `projects/${projectId}`);
+            const projectSnapshot = await get(projectRef);
+
+            if (projectSnapshot.exists()) {
+              return {
+                id: projectId,
+                ...projectSnapshot.val()
+              };
+            }
+            return null;
+          });
+
+          const projectsData = await Promise.all(projectPromises);
+          const validProjects = projectsData.filter(project => project !== null) as Project[];
+
+          setProjects(validProjects);
+        } catch (error) {
+          console.error('Error fetching project details:', error);
+          setError('Failed to fetch project details.');
+        }
+      } else {
+        setProjects([]);
+      }
+
+      setLoading(false);
+    }, (error) => {
+      if (!isMounted) return;
+      console.error('Error in projects listener:', error);
+      setError('Failed to sync with projects data.');
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      off(userProjectsRef, 'value', listener);
+    };
   }, [user]);
 
   const getProjectById = (id: string) => {

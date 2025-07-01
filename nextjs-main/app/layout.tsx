@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import { ProjectProvider } from '@/context/ProjectContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { ToastProvider } from '@/components/Toast';
+import { ProjectProvider } from '@/context/ProjectContext';
 
 export const metadata: Metadata = {
   title: 'Afzar Hydraulics',
