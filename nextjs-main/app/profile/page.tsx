@@ -193,7 +193,7 @@ export default function ProfilePage() {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
                     activeTab === 'profile'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -204,7 +204,7 @@ export default function ProfilePage() {
 
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
                     activeTab === 'settings'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -215,7 +215,7 @@ export default function ProfilePage() {
 
                 <button
                   onClick={() => setActiveTab('projects')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
                     activeTab === 'projects'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

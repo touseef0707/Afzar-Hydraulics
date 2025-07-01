@@ -19,7 +19,7 @@ export default function CanvasSidebar() {
       <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
         <button
           onClick={() => router.push('/dashboard')}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-full hover:bg-gray-100 hover:cursor-pointer transition-colors"
           title="Back to Dashboard"
         >
           <ArrowLeft size={20} className="text-gray-600" />

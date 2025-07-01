@@ -30,8 +30,8 @@ const Modal: React.FC<ModalProps> = ({ nodeId, onClose }) => {
   const inputClass = 'border border-gray-300 rounded px-2 py-1.5 text-sm text-black w-full focus:outline-none focus:ring-1 focus:ring-blue-500';
   const labelClass = 'text-xs font-medium text-gray-600 mb-1';
   const buttonClass = 'px-3 py-1.5 rounded text-sm font-medium transition-colors';
-  const secondaryButtonClass = `${buttonClass} border border-gray-300 text-gray-700 hover:bg-gray-50`;
-  const primaryButtonClass = `${buttonClass} bg-blue-600 text-white hover:bg-blue-700`;
+  const secondaryButtonClass = `${buttonClass} hover:cursor-pointer border border-gray-300 text-gray-700 hover:bg-gray-50`;
+  const primaryButtonClass = `${buttonClass} hover:cursor-pointer bg-blue-600 text-white hover:bg-blue-700`;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -93,7 +93,7 @@ const Modal: React.FC<ModalProps> = ({ nodeId, onClose }) => {
           <h2 className="text-sm font-semibold text-gray-800">
             {nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Settings
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 hover:cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
