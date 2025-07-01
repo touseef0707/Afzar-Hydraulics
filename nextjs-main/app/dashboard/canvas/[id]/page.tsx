@@ -9,10 +9,6 @@ export default async function CanvasPage({ params }: { params: { id: string } })
   const { id: flowId } = await params;
 
   return (
-    // --- 2. CREATE A FLEXBOX CONTAINER FOR THE LAYOUT ---
-    // `flex` creates the two-column layout.
-    // `h-screen` ensures it takes the full viewport height.
-    // `bg-gray-100` provides a nice background for the page.
     <main className="flex flex-row h-screen bg-gray-100">
       
       {/* The sidebar is the first item in the flex container */}
