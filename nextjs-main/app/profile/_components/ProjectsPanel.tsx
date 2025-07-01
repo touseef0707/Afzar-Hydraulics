@@ -112,7 +112,7 @@ export default function ProjectsPanel({ projects, loading, error }: ProjectsPane
               
               <div className="mt-4">
                 <Link href={`/dashboard/canvas/${project.id}`}>
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors duration-200">
+                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition-colors duration-200 hover:cursor-pointer">
                     Open Project
                   </button>
                 </Link>
