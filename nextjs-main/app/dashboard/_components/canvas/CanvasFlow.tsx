@@ -37,6 +37,20 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     onNodesChange, onEdgesChange, onConnect, 
     addNode, saveFlow, loadFlow, setEditingNodeId 
   } = useFlowStore(useShallow(selector));
+  const isDirty = useFlowStore((state) => state.isDirty);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isDirty]);
   
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
   

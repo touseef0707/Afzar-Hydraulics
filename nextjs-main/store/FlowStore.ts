@@ -44,7 +44,9 @@ export type CustomNode = Node<CustomNodeData>;
 export type RFState = {
   nodes: CustomNode[];
   edges: Edge[];
-  editingNodeId: string | null; // Tracks which node's modal is open
+  editingNodeId: string | null;
+  isDirty: boolean;
+  setDirty: (dirty: boolean) => void;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
@@ -58,17 +60,31 @@ export type RFState = {
   setEditingNodeId: (nodeId: string | null) => void;
 };
 
-// --- Store Definition ---
 const useFlowStore = create<RFState>((set, get) => ({
   nodes: [],
   edges: [],
   editingNodeId: null,
-  onNodesChange: (changes: NodeChange[]) => set({ nodes: applyNodeChanges(changes, get().nodes) as CustomNode[] }),
-  onEdgesChange: (changes: EdgeChange[]) => set({ edges: applyEdgeChanges(changes, get().edges) }),
-  onConnect: (connection: Connection) => set({ edges: addEdge({ ...connection, markerEnd: { type: MarkerType.ArrowClosed }, animated: true }, get().edges) }),
-  addNode: (node: CustomNode) => set({ nodes: [...get().nodes, node] }),
-  setNodes: (nodes: CustomNode[]) => set({ nodes }),
-  setEdges: (edges: Edge[]) => set({ edges }),
+  isDirty: false,
+  setDirty: (dirty) => set({ isDirty: dirty }),
+
+  onNodesChange: (changes: NodeChange[]) => {
+    set({ nodes: applyNodeChanges(changes, get().nodes) as CustomNode[], isDirty: true });
+  },
+  onEdgesChange: (changes: EdgeChange[]) => {
+    set({ edges: applyEdgeChanges(changes, get().edges), isDirty: true });
+  },
+  onConnect: (connection: Connection) => {
+    set({
+      edges: addEdge(
+        { ...connection, markerEnd: { type: MarkerType.ArrowClosed }, animated: true },
+        get().edges
+      ),
+      isDirty: true,
+    });
+  },
+  addNode: (node: CustomNode) => set({ nodes: [...get().nodes, node], isDirty: true }),
+  setNodes: (nodes: CustomNode[]) => set({ nodes, isDirty: true }),
+  setEdges: (edges: Edge[]) => set({ edges, isDirty: true }),
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
 
   saveFlow: (flowId: string, showToast?) => {
@@ -80,6 +96,7 @@ const useFlowStore = create<RFState>((set, get) => ({
       fbSet(projectFlowRef, formattedFlowId);
       const flowDataRef = ref(database, `flows/${formattedFlowId}`);
       fbSet(flowDataRef, flowData);
+      set({ isDirty: false });
       showToast?.('Flow saved successfully!', 'success');
     } catch (error) {
       showToast?.('Failed to save flow', 'error');
@@ -93,11 +110,11 @@ const useFlowStore = create<RFState>((set, get) => ({
       const snapshot = await fbGet(flowDataRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        set({ nodes: data.nodes || [], edges: data.edges || [] });
+        set({ nodes: data.nodes || [], edges: data.edges || [], isDirty: false });
         console.log("Flow loaded successfully");
       } else {
+        set({ nodes: [], edges: [], isDirty: false });
         console.log("No flow data found for this ID.");
-        set({ nodes: [], edges: [] });
       }
     } catch (error) {
       console.error("Failed to load flow:", error);
@@ -108,6 +125,7 @@ const useFlowStore = create<RFState>((set, get) => ({
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
       edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      isDirty: true,
     });
   },
 
@@ -118,6 +136,7 @@ const useFlowStore = create<RFState>((set, get) => ({
           ? { ...node, data: { ...node.data, params: { ...node.data.params, ...params } } }
           : node
       ),
+      isDirty: true,
     });
   },
 }));
