@@ -36,13 +36,32 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
     setEditingNodeId(id);
   };
 
+  // Determine which handles to show based on node type
+  const showSourceHandle = data.nodeType !== 'product';
+  const showTargetHandle = data.nodeType !== 'feed';
+
   return (
     <div 
       onContextMenu={handleRightClick} 
       className={`group relative bg-white border-2 rounded-lg shadow-md w-36 h-12 px-4 transition-colors duration-200 ${borderColorClass} ${bgHoverClass}`}
     >
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-gray-500" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-gray-500" />
+      {/* Target handle on the left */}
+      {showTargetHandle && (
+        <Handle 
+          type="target" 
+          position={Position.Left} 
+          className="!w-2 !h-2 !bg-gray-500" 
+        />
+      )}
+      
+      {/* Source handle on the right */}
+      {showSourceHandle && (
+        <Handle 
+          type="source" 
+          position={Position.Right} 
+          className="!w-2 !h-2 !bg-gray-500" 
+        />
+      )}
       
       <button onClick={() => deleteNode(id)} className="absolute top-0 right-0 w-5 h-5 -mt-2 -mr-2 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-gray-400 opacity-0 hover:cursor-pointer group-hover:opacity-100 hover:!text-red-500 hover:!border-red-500 transition-opacity duration-200">
         <X size={14} />
