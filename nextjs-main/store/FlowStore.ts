@@ -1,6 +1,6 @@
 "use client";
 
-import { create } from 'zustand';
+import { create } from "zustand";
 import {
   Connection,
   Edge,
@@ -13,18 +13,21 @@ import {
   OnConnect,
   applyNodeChanges,
   applyEdgeChanges,
-  MarkerType
-} from '@xyflow/react';
-import { ref, set as fbSet, get as fbGet } from 'firebase/database';
-import { database } from '@/firebase/clientApp';
+  MarkerType,
+} from "@xyflow/react";
+import { ref, set as fbSet, get as fbGet } from "firebase/database";
+import { database } from "@/firebase/clientApp";
 
 // --- Utility Function ---
 const sanitizeForFirebase = (data: any): any => {
   if (Array.isArray(data)) return data.map(item => sanitizeForFirebase(item));
-  if (data !== null && typeof data === 'object') {
+  if (data !== null && typeof data === "object") {
     const sanitizedObject: { [key: string]: any } = {};
     for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key) && data[key] !== undefined) {
+      if (
+        Object.prototype.hasOwnProperty.call(data, key) &&
+        data[key] !== undefined
+      ) {
         sanitizedObject[key] = sanitizeForFirebase(data[key]);
       }
     }
@@ -53,8 +56,11 @@ export type RFState = {
   addNode: (node: CustomNode) => void;
   setNodes: (nodes: CustomNode[]) => void;
   setEdges: (edges: Edge[]) => void;
-  saveFlow: (flowId: string, showToast: (message: string, type: 'success' | 'error') => void) => void;
-  loadFlow: (flowId: string) => void;
+  saveFlow: (
+    flowId: string,
+    showToast?: (message: string, type: "success" | "error") => void
+  ) => void;
+  loadFlow: (flowId: string) => Promise<void>;
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
   setEditingNodeId: (nodeId: string | null) => void;
@@ -68,7 +74,10 @@ const useFlowStore = create<RFState>((set, get) => ({
   setDirty: (dirty) => set({ isDirty: dirty }),
 
   onNodesChange: (changes: NodeChange[]) => {
-    set({ nodes: applyNodeChanges(changes, get().nodes) as CustomNode[], isDirty: true });
+    set({
+      nodes: applyNodeChanges(changes, get().nodes) as CustomNode[],
+      isDirty: true,
+    });
   },
   onEdgesChange: (changes: EdgeChange[]) => {
     set({ edges: applyEdgeChanges(changes, get().edges), isDirty: true });
@@ -76,13 +85,18 @@ const useFlowStore = create<RFState>((set, get) => ({
   onConnect: (connection: Connection) => {
     set({
       edges: addEdge(
-        { ...connection, markerEnd: { type: MarkerType.ArrowClosed }, animated: true },
+        {
+          ...connection,
+          markerEnd: { type: MarkerType.ArrowClosed },
+          animated: true,
+        },
         get().edges
       ),
       isDirty: true,
     });
   },
-  addNode: (node: CustomNode) => set({ nodes: [...get().nodes, node], isDirty: true }),
+  addNode: (node: CustomNode) =>
+    set({ nodes: [...get().nodes, node], isDirty: true }),
   setNodes: (nodes: CustomNode[]) => set({ nodes, isDirty: true }),
   setEdges: (edges: Edge[]) => set({ edges, isDirty: true }),
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
@@ -90,33 +104,41 @@ const useFlowStore = create<RFState>((set, get) => ({
   saveFlow: (flowId: string, showToast?) => {
     try {
       const { nodes, edges } = get();
-      const formattedFlowId = "fid_" + flowId.replace(/^-/, '');
-      const flowData = { nodes: sanitizeForFirebase(nodes), edges: sanitizeForFirebase(edges) };
+      const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
+      const flowData = {
+        nodes: Array.isArray(nodes) ? sanitizeForFirebase(nodes) : [],
+        edges: Array.isArray(edges) ? sanitizeForFirebase(edges) : [],
+      };
       const projectFlowRef = ref(database, `projects/${flowId}/flow`);
       fbSet(projectFlowRef, formattedFlowId);
       const flowDataRef = ref(database, `flows/${formattedFlowId}`);
       fbSet(flowDataRef, flowData);
       set({ isDirty: false });
-      showToast?.('Flow saved successfully!', 'success');
+      showToast?.("Flow saved successfully!", "success");
     } catch (error) {
-      showToast?.('Failed to save flow', 'error');
+      showToast?.("Failed to save flow", "error");
     }
   },
 
   loadFlow: async (flowId: string) => {
-    const formattedFlowId = "fid_" + flowId.replace(/^-/, '');
+    const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
     const flowDataRef = ref(database, `flows/${formattedFlowId}`);
     try {
       const snapshot = await fbGet(flowDataRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
-        set({ nodes: data.nodes || [], edges: data.edges || [], isDirty: false });
+        set({
+          nodes: Array.isArray(data.nodes) ? data.nodes : [],
+          edges: Array.isArray(data.edges) ? data.edges : [],
+          isDirty: false,
+        });
         console.log("Flow loaded successfully");
       } else {
         set({ nodes: [], edges: [], isDirty: false });
         console.log("No flow data found for this ID.");
       }
     } catch (error) {
+      set({ nodes: [], edges: [], isDirty: false });
       console.error("Failed to load flow:", error);
     }
   },
@@ -124,16 +146,21 @@ const useFlowStore = create<RFState>((set, get) => ({
   deleteNode: (nodeId: string) => {
     set({
       nodes: get().nodes.filter((node) => node.id !== nodeId),
-      edges: get().edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      edges: get().edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId
+      ),
       isDirty: true,
     });
   },
 
   updateNodeParams: (nodeId: string, params: object) => {
     set({
-      nodes: get().nodes.map(node =>
+      nodes: get().nodes.map((node) =>
         node.id === nodeId
-          ? { ...node, data: { ...node.data, params: { ...node.data.params, ...params } } }
+          ? {
+              ...node,
+              data: { ...node.data, params: { ...node.data.params, ...params } },
+            }
           : node
       ),
       isDirty: true,

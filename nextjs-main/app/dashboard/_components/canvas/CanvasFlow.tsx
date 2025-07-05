@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ReactFlow,
   Background,
@@ -9,13 +9,13 @@ import {
   Panel,
   BackgroundVariant,
   useReactFlow,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import useFlowStore, { RFState, CustomNode } from '@/store/FlowStore'; 
-import { useShallow } from 'zustand/react/shallow';
-import AppNode from './CustomNode';
-import Modal from './Modal'; 
-import { useToast } from '@/components/Toast';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import useFlowStore, { RFState, CustomNode } from "@/store/FlowStore";
+import { useShallow } from "zustand/react/shallow";
+import AppNode from "./CustomNode";
+import Modal from "./Modal"; // This should be your ComponentModal
+import { useToast } from "@/components/Toast";
 
 const selector = (state: RFState) => ({
   nodes: state.nodes,
@@ -32,10 +32,17 @@ const selector = (state: RFState) => ({
 
 export default function CanvasFlow({ flowId }: { flowId: string }) {
   const { showToast } = useToast();
-  const { 
-    nodes, edges, editingNodeId,
-    onNodesChange, onEdgesChange, onConnect, 
-    addNode, saveFlow, loadFlow, setEditingNodeId 
+  const {
+    nodes,
+    edges,
+    editingNodeId,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addNode,
+    saveFlow,
+    loadFlow,
+    setEditingNodeId,
   } = useFlowStore(useShallow(selector));
   const isDirty = useFlowStore((state) => state.isDirty);
 
@@ -43,27 +50,37 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isDirty]);
-  
+
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
-  
+
   const nodeTypes = useMemo(() => ({ custom: AppNode }), [AppNode]);
 
   const editingNode = useMemo(() => {
     if (!editingNodeId) return null;
-    return nodes.find(node => node.id === editingNodeId);
+    return nodes.find((node) => node.id === editingNodeId);
   }, [editingNodeId, nodes]);
+
+  // Get componentType from the node's data
+  const componentType = useMemo(() => {
+    if (!editingNode?.data?.nodeType) return undefined;
+    // Ensure it's lowercase and matches your modal switcher
+    return editingNode.data.nodeType as "feed" | "product" | "pipe" | undefined;
+  }, [editingNode]);
 
   const modalPosition = useMemo(() => {
     if (!editingNode) return null;
-    return flowToScreenPosition({ x: editingNode.position.x, y: editingNode.position.y });
+    return flowToScreenPosition({
+      x: editingNode.position.x,
+      y: editingNode.position.y,
+    });
   }, [editingNode, flowToScreenPosition]);
 
   useEffect(() => {
@@ -72,45 +89,69 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     }
   }, [flowId, loadFlow]);
 
-  const onDrop = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    const nodeInfoString = event.dataTransfer.getData('application/reactflow');
-    if (!nodeInfoString) return;
-    const { type, label } = JSON.parse(nodeInfoString);
-    const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-    const newNode: CustomNode = {
-      id: `${type}_${Date.now()}`, type: 'custom', position,
-      data: { label, nodeType: type },
-    };
-    addNode(newNode);
-  }, [screenToFlowPosition, addNode]);
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      const nodeInfoString = event.dataTransfer.getData("application/reactflow");
+      if (!nodeInfoString) return;
+      const { type, label } = JSON.parse(nodeInfoString);
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const newNode: CustomNode = {
+        id: `${type}_${Date.now()}`,
+        type: "custom",
+        position,
+        data: { label, nodeType: type }, // nodeType is important!
+      };
+      addNode(newNode);
+    },
+    [screenToFlowPosition, addNode]
+  );
 
   const onSave = useCallback(() => {
     if (flowId) saveFlow(flowId, showToast);
-  }, [flowId, saveFlow]);
+  }, [flowId, saveFlow, showToast]);
 
   return (
     <>
       <div className="w-full h-full rounded-xl shadow-lg overflow-hidden bg-white">
         <ReactFlow
-          nodes={nodes} edges={edges} nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect}
-          onDrop={onDrop} onDragOver={(e) => e.preventDefault()}
-          fitView proOptions={{ hideAttribution: true }} deleteKeyCode={['Backspace', 'Delete']}
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDrop={onDrop}
+          onDragOver={(e) => e.preventDefault()}
+          fitView
+          proOptions={{ hideAttribution: true }}
+          deleteKeyCode={["Backspace", "Delete"]}
         >
           <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
           <MiniMap nodeStrokeWidth={3} zoomable pannable />
           <Controls />
           <Panel position="top-right">
-            <button onClick={onSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200">
+            <button
+              onClick={onSave}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
+            >
               Save
             </button>
           </Panel>
         </ReactFlow>
       </div>
 
-      {editingNodeId && modalPosition && (
-        <Modal nodeId={editingNodeId} onClose={() => setEditingNodeId(null)}/>
+      {/* Modal: Only show if editingNodeId, modalPosition, and componentType are all valid */}
+      {editingNodeId && modalPosition && componentType && (
+        <Modal
+          componentType={componentType}
+          flowId={flowId}
+          nodeId={editingNodeId}
+          onClose={() => setEditingNodeId(null)}
+        />
       )}
     </>
   );
