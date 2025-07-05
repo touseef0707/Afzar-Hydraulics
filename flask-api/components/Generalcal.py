@@ -105,8 +105,11 @@ def friction_factor_swamee_jain(re, roughness, diameter):
     Returns:
         float: Friction factor
     """
-    term = roughness / (3.7 * diameter) + 5.74 / (re ** 0.9)
-    return 0.25 / (math.log10(term) ** 2)
+    term = roughness / (3.7 * diameter) 
+    term1 = 5.74 / (re ** 0.9)
+    return 0.25 / (math.log10(term+term1) ** 2)
+
+
 
 def friction_factor_churchill(re, roughness, diameter):
     """
@@ -123,7 +126,7 @@ def friction_factor_churchill(re, roughness, diameter):
     term1 = (7 / re) ** 0.9 + 0.27 * (roughness / diameter)
     A = (2.457 * math.log(term1)) ** 16
     B = (37530 / re) ** 16
-    bracket_term = (8 / re) ** 12 + 1 / (A + B) ** 1.5
+    bracket_term = (8 / re) ** 12 + 1 / (A + B) ** -1.5
     return 8 * bracket_term ** (1 / 12)
 
 def calculate_friction_factor(re, roughness=None, diameter=None, method='auto'):
@@ -199,7 +202,7 @@ def calculate_pressure_drop(friction_factor, density, length, diameter, velocity
     Returns:
         float: Pressure drop (Pa)
     """
-    return friction_factor * (length / diameter) * (density * velocity ** 2) / 2
+    return friction_factor * (length / diameter) * (density * velocity ** 2) / (2 * gravity)
 
 # Example usage:
 if __name__ == "__main__":
@@ -209,7 +212,8 @@ if __name__ == "__main__":
     diameter = 0.05      # m
     viscosity_cp = 1.0   # cP (water)
     roughness = 0.0001   # m (PVC pipe)
-    length = 10.0        # m
+    length = 10.0         # m
+    gravity = 9.81        # m/s²
     
     # Calculate Reynolds number
     re = calculate_reynolds_number(density, velocity, diameter, viscosity_cp)
