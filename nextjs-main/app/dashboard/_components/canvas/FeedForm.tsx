@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { saveNodeParams, loadNodeParams } from '@/firebase/clientApp'
+import useFlowStore from '@/store/FlowStore'
 
 type FeedFormProps = {
   flowId: string
@@ -8,22 +8,33 @@ type FeedFormProps = {
   onClose: () => void
 }
 
-export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
-  const [fields, setFields] = useState({ pressure: '', viscosity: '', density: '' })
+export default function FeedForm({nodeId, onClose }: FeedFormProps) {
+  const [fields, setFields] = useState({ 
+    pressure: '', 
+    viscosity: '', 
+    density: '' 
+  })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
+  
+  // Get the node data from the store
+  const nodes = useFlowStore(state => state.nodes)
+  const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
   useEffect(() => {
-    setLoading(true)
-    loadNodeParams(flowId, nodeId).then(data => {
-      if (data) setFields({
-        pressure: data.pressure || '',
-        viscosity: data.viscosity || '',
-        density: data.density || '',
+    // Find the current node in the store
+    const currentNode = nodes.find(node => node.id === nodeId)
+    
+    if (currentNode?.data?.params) {
+      setFields({
+        pressure: currentNode.data.params.pressure || '',
+        viscosity: currentNode.data.params.viscosity || '',
+        density: currentNode.data.params.density || '',
       })
-      setLoading(false)
-    })
-  }, [flowId, nodeId])
+    }
+    
+    setLoading(false)
+  }, [nodeId, nodes])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFields({ ...fields, [e.target.name]: e.target.value })
@@ -45,7 +56,9 @@ export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
       setErrors(err)
       return
     }
-    await saveNodeParams(flowId, nodeId, fields)
+    
+    // Update params in the store instead of Firebase
+    updateNodeParams(nodeId, fields)
     onClose()
   }
 
@@ -64,7 +77,7 @@ export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
               value={fields.pressure}
               onChange={handleChange}
               placeholder="e.g. 100"
-              className={errors.pressure ? 'input-error' : ''}
+              className={errors.pressure ? 'input-error' : 'text-black'}
               autoFocus />
             {errors.pressure && <span className="error-text">{errors.pressure}</span>}
           </div>
@@ -77,7 +90,7 @@ export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
               value={fields.viscosity}
               onChange={handleChange}
               placeholder="e.g. 1.2"
-              className={errors.viscosity ? 'input-error' : ''} />
+              className={errors.viscosity ? 'input-error' : 'text-black'} />
             {errors.viscosity && <span className="error-text">{errors.viscosity}</span>}
           </div>
           <div className="form-field form-field-full">
@@ -89,7 +102,7 @@ export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
               value={fields.density}
               onChange={handleChange}
               placeholder="e.g. 998"
-              className={errors.density ? 'input-error' : ''} />
+              className={errors.density ? 'input-error' : 'text-black'} />
             {errors.density && <span className="error-text">{errors.density}</span>}
           </div>
         </div><div className="form-actions">
@@ -148,6 +161,7 @@ export default function FeedForm({ flowId, nodeId, onClose }: FeedFormProps) {
       min-width: 0;
       width: 100%;
       box-sizing: border-box;
+      color: #1e293b;
     }
     input:focus {
       border-color: #2563eb;

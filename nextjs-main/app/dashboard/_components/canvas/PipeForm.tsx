@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { saveNodeParams, loadNodeParams } from '@/firebase/clientApp'
+import useFlowStore from '@/store/FlowStore'
 
 type PipeFormProps = {
   flowId: string
@@ -8,26 +8,37 @@ type PipeFormProps = {
   onClose: () => void
 }
 
-export default function PipeForm({ flowId, nodeId, onClose }: PipeFormProps) {
+export default function PipeForm({nodeId, onClose }: PipeFormProps) {
   const [fields, setFields] = useState({
-    length: '', diameter: '', roughness: '', volumetricFlowrate: '', massFlowRate: ''
+    length: '',
+    diameter: '',
+    roughness: '',
+    volumetricFlowrate: '',
+    massFlowRate: ''
   })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
+  
+  // Get the node data from the store
+  const nodes = useFlowStore(state => state.nodes)
+  const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
   useEffect(() => {
-    setLoading(true)
-    loadNodeParams(flowId, nodeId).then(data => {
-      if (data) setFields({
-        length: data.length || '',
-        diameter: data.diameter || '',
-        roughness: data.roughness || '',
-        volumetricFlowrate: data.volumetricFlowrate || '',
-        massFlowRate: data.massFlowRate || '',
+    // Find the current node in the store
+    const currentNode = nodes.find(node => node.id === nodeId)
+    
+    if (currentNode?.data?.params) {
+      setFields({
+        length: currentNode.data.params.length || '',
+        diameter: currentNode.data.params.diameter || '',
+        roughness: currentNode.data.params.roughness || '',
+        volumetricFlowrate: currentNode.data.params.volumetricFlowrate || '',
+        massFlowRate: currentNode.data.params.massFlowRate || '',
       })
-      setLoading(false)
-    })
-  }, [flowId, nodeId])
+    }
+    
+    setLoading(false)
+  }, [nodeId, nodes])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFields({ ...fields, [e.target.name]: e.target.value })
@@ -44,16 +55,18 @@ export default function PipeForm({ flowId, nodeId, onClose }: PipeFormProps) {
     return err
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    console.log('Form submitted!', fields);
+    console.log('Form submitted!', fields)
     const err = validate()
     if (Object.keys(err).length > 0) {
       setErrors(err)
       return
     }
-    await saveNodeParams(flowId, nodeId, fields)
-    console.log('Saving fields:', fields);
+    
+    // Update params in the store
+    updateNodeParams(nodeId, fields)
+    console.log('Saving fields to store:', fields)
     onClose()
   }
 
@@ -181,6 +194,7 @@ export default function PipeForm({ flowId, nodeId, onClose }: PipeFormProps) {
           min-width: 0;
           width: 100%;
           box-sizing: border-box;
+          color: #1e293b;
         }
         input:focus {
           border-color: #2563eb;

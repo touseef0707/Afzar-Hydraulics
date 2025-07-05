@@ -1,6 +1,6 @@
 'use client'
+import useFlowStore from '@/store/FlowStore'
 import { useState, useEffect } from 'react'
-import { saveNodeParams, loadNodeParams } from '@/firebase/clientApp'
 
 type ProductFormProps = {
   flowId: string
@@ -8,22 +8,33 @@ type ProductFormProps = {
   onClose: () => void
 }
 
-export default function ProductForm({ flowId, nodeId, onClose }: ProductFormProps) {
-  const [fields, setFields] = useState({ pressure: '', composition: '', temperature: '' })
+export default function ProductForm({nodeId, onClose }: ProductFormProps) {
+  const [fields, setFields] = useState({ 
+    pressure: '', 
+    composition: '', 
+    temperature: '' 
+  })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
+  
+  // Get store methods and state
+  const nodes = useFlowStore(state => state.nodes)
+  const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
   useEffect(() => {
     setLoading(true)
-    loadNodeParams(flowId, nodeId).then(data => {
-      if (data) setFields({
-        pressure: data.pressure || '',
-        composition: data.composition || '',
-        temperature: data.temperature || '',
+    // Find the current node in the store
+    const currentNode = nodes.find(node => node.id === nodeId)
+    
+    if (currentNode?.data?.params) {
+      setFields({
+        pressure: currentNode.data.params.pressure || '',
+        composition: currentNode.data.params.composition || '',
+        temperature: currentNode.data.params.temperature || '',
       })
-      setLoading(false)
-    })
-  }, [flowId, nodeId])
+    }
+    setLoading(false)
+  }, [nodeId, nodes])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFields({ ...fields, [e.target.name]: e.target.value })
@@ -38,14 +49,16 @@ export default function ProductForm({ flowId, nodeId, onClose }: ProductFormProp
     return err
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const err = validate()
     if (Object.keys(err).length > 0) {
       setErrors(err)
       return
     }
-    await saveNodeParams(flowId, nodeId, fields)
+    
+    // Update params in the store
+    updateNodeParams(nodeId, fields)
     onClose()
   }
 
@@ -148,6 +161,7 @@ export default function ProductForm({ flowId, nodeId, onClose }: ProductFormProp
           min-width: 0;
           width: 100%;
           box-sizing: border-box;
+          color: #1e293b;
         }
         input:focus {
           border-color: #2563eb;
