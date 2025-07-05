@@ -16,6 +16,8 @@ import { useShallow } from "zustand/react/shallow";
 import AppNode from "./CustomNode";
 import Modal from "./Modal"; // This should be your ComponentModal
 import { useToast } from "@/components/Toast";
+import { useRun } from "@/hooks/onRun";
+
 
 const selector = (state: RFState) => ({
   nodes: state.nodes,
@@ -45,6 +47,26 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     setEditingNodeId,
   } = useFlowStore(useShallow(selector));
   const isDirty = useFlowStore((state) => state.isDirty);
+
+  // Call useRun at the top level
+  const { run, loading, error } = useRun();
+
+  // Create a handler for the run button
+  const handleRun = useCallback(() => {
+    // You'll need to prepare the flow data to send to your API
+    const flowData = {
+      nodes,
+      edges,
+      flowId
+      // include any other data your API expects
+    };
+    run(flowData).then(() => {
+      // Handle successful run if needed
+    }).catch((err) => {
+      // Error is already handled in useRun, but you could add additional handling here
+      console.error("Run failed:", err);
+    });
+  }, [run, nodes, edges, flowId]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -134,12 +156,21 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
           <MiniMap nodeStrokeWidth={3} zoomable pannable />
           <Controls />
           <Panel position="top-right">
+            <div className="flex gap-x-2">
+            <button 
+              onClick={handleRun}
+              disabled={loading}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 hover:cursor-pointer transition-all duration-200"
+            >
+              Run
+            </button>
             <button
               onClick={onSave}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
             >
               Save
             </button>
+            </div>
           </Panel>
         </ReactFlow>
       </div>
