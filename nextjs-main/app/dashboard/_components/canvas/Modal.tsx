@@ -1,114 +1,75 @@
-"use client";
+'use client'
 
-import React, { FormEvent, ChangeEvent, useRef, useState, JSX, useEffect } from 'react';
-import useFlowStore, { RFState } from '@/store/FlowStore';
-import { useShallow } from 'zustand/react/shallow';
-import { useClickOutside } from '@/hooks/useClickOutside';
+import FeedForm from './FeedForm'
+import ProductForm from './ProductForm'
+import PipeForm from './PipeForm'
 
-interface ModalProps {
-  nodeId: string;
-  onClose: () => void;
+type ComponentModalProps = {
+  componentType: 'feed' | 'product' | 'pipe'
+  flowId: string
+  nodeId: string
+  onClose: () => void
 }
 
-const selector = (state: RFState) => ({
-  node: state.nodes.find((n) => n.id === state.editingNodeId),
-  updateNodeParams: state.updateNodeParams,
-});
-
-const Modal: React.FC<ModalProps> = ({ nodeId, onClose }) => {
-  const { node, updateNodeParams } = useFlowStore(useShallow(selector));
-  const [params, setParams] = useState<Record<string, any>>(node?.data.params || {});
-  
-  const modalContentRef = useRef<HTMLDivElement>(null); 
-
-  useClickOutside(modalContentRef, onClose);
-
-  if (!node) return null;
-  const { nodeType } = node.data;
-
-
-  const inputClass = 'border border-gray-300 rounded px-2 py-1.5 text-sm text-black w-full focus:outline-none focus:ring-1 focus:ring-blue-500';
-  const labelClass = 'text-xs font-medium text-gray-600 mb-1';
-  const buttonClass = 'px-3 py-1.5 rounded text-sm font-medium transition-colors';
-  const secondaryButtonClass = `${buttonClass} hover:cursor-pointer border border-gray-300 text-gray-700 hover:bg-gray-50`;
-  const primaryButtonClass = `${buttonClass} hover:cursor-pointer bg-blue-600 text-white hover:bg-blue-700`;
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    updateNodeParams(nodeId, params);
-    onClose();
-  };
-  
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setParams({ ...params, [e.target.name]: e.target.value });
-  };
-  
-  // --- THIS IS THE FIX ---
-  // We explicitly state that this function returns a JSX.Element.
-  const renderFields = (): JSX.Element => {
-    switch (nodeType) {
+export default function ComponentModal({
+  componentType,
+  flowId,
+  nodeId,
+  onClose,
+}: ComponentModalProps) {
+  function renderForm() {
+    switch (componentType) {
       case 'feed':
-        return (
-          <div>
-            <label className={labelClass}>Pressure (bar)</label>
-            <input type="number" name="pressure" value={params.pressure || ''} onChange={handleChange} className={inputClass} placeholder="Enter value" />
-          </div>
-        );
-      case 'pipe':
-        return (
-          <div className="space-y-3">
-            <div><label className={labelClass}>Diameter (mm)</label><input type="number" name="diameter" value={params.diameter || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-            <div><label className={labelClass}>Length (m)</label><input type="number" name="length" value={params.length || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-            <div><label className={labelClass}>Flow (m³/s)</label><input type="number" name="flow" value={params.flow || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-            <div><label className={labelClass}>Density (kg/m³)</label><input type="number" name="density" value={params.density || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-            <div><label className={labelClass}>Pressure Drop (bar)</label><input type="number" name="pressureDrop" value={params.pressureDrop || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-          </div>
-        );
-      case 'valve':
-        return (
-          <div className="space-y-3">
-            <div><label className={labelClass}>Flow (m³/s)</label><input type="number" name="flow" value={params.flow || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-            <div><label className={labelClass}>Pressure Drop (bar)</label><input type="number" name="pressureDrop" value={params.pressureDrop || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/></div>
-          </div>
-        );
+        return <FeedForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
       case 'product':
-        return (
-          <div>
-            <label className={labelClass}>Pressure Drop (bar)</label>
-            <input type="number" name="pressureDrop" value={params.pressureDrop || ''} onChange={handleChange} className={inputClass} placeholder="Enter value"/>
-          </div>
-        );
+        return <ProductForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
+      case 'pipe':
+        return <PipeForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
       default:
-        return <div className="text-xs text-gray-500 italic">No parameters required</div>;
+        return <div>Please select a valid component type.</div>
     }
-  };
+  }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm flex items-center justify-center">
-      <div
-        ref={modalContentRef}
-        className="bg-white rounded-md shadow-lg p-4 w-[250px] max-w-full"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-sm font-semibold text-gray-800">
-            {nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Settings
-          </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 hover:cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>{renderFields()}</div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className={secondaryButtonClass}>Cancel</button>
-            <button type="submit" className={primaryButtonClass}>Save</button>
-          </div>
-        </form>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button
+          aria-label="Close modal"
+          onClick={onClose}
+          className="modal-close-button"
+        >
+          ×
+        </button>
+        {renderForm()}
       </div>
+      <style jsx>{`
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .modal-content {
+          background: white;
+          padding: 1.5rem;
+          border-radius: 8px;
+          width: 90%;
+          max-width: 500px;
+          position: relative;
+        }
+        .modal-close-button {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          background: transparent;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+        }
+      `}</style>
     </div>
-  );
-};
-export default Modal;
+  )
+}

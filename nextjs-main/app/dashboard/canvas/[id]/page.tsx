@@ -4,6 +4,8 @@ import CanvasSidebar from '@/app/dashboard/_components/canvas/CanvasSidebar';
 export default async function CanvasPage({ params }: { params: { id: string } }) {
   const { id: flowId } = await params;
 
+  
+
   return (
     <main className="flex flex-row h-screen bg-gray-100">
       
