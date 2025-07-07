@@ -1,44 +1,35 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS 
-from components import Feed, Pipe
-from components.base import Component
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-@app.route('/sum', methods=['POST'])
-def sum_numbers():
-    data = request.get_json()
-    if not data or 'numbers' not in data:
-        return jsonify({'error': 'Please provide numbers array'}), 400
+# Configure CORS with explicit settings
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "http://localhost:3000",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
+
+@app.after_request
+def after_request(response):
+    # Additional headers that might help
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+@app.route('/api/run', methods=['POST', 'OPTIONS'])
+def run_code():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     
-    try:
-        numbers = data['numbers']
-        if not isinstance(numbers, list):
-            return jsonify({'error': 'Numbers should be an array'}), 400
-            
-        result = sum(numbers)
-        return jsonify({'result': result})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-def index():
-    # This is an example of how to run the components.
-    # In a real application, you might trigger this from a specific API endpoint.
-
-    # 1. Create a data feed
-    text_feed = Feed(name="Text Feed", data_source="hello world, this is a test.")
-
-    # 2. Create a destination component to receive the final data
-    output_component = Component(name="Output Handler")
-
-    # 3. Create a pipe to connect the feed to the output
-    processing_pipe = Pipe(name="Main Pipe", source=text_feed, destination=output_component)
-
-    # 4. Start the data flow
-    processing_pipe.flow()
-
-    return "Component flow executed! Check your console for output."
+    data = request.json
+    # Your processing logic here
+    return jsonify({"result": "Success", "data": data})
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=8000, debug=True)

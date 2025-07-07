@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getDatabase } from "firebase/database";
+import { getDatabase, set, ref } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,8 +17,6 @@ let app: FirebaseApp;
 let auth: ReturnType<typeof getAuth>;
 let googleProvider: GoogleAuthProvider;
 let database: ReturnType<typeof getDatabase>;
-let ref: ReturnType<typeof getDatabase>;
-let set: ReturnType<typeof getDatabase>;
 let onValue: ReturnType<typeof getDatabase>;
 let off: ReturnType<typeof getDatabase>;
 
@@ -32,5 +30,4 @@ if (typeof window !== "undefined") {
   googleProvider = new GoogleAuthProvider();
   database = getDatabase(app);
 }
-
-export { auth, googleProvider , database, ref, set, onValue, off};
+export { auth, googleProvider, database, ref, set, onValue, off };

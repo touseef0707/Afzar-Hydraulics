@@ -8,7 +8,7 @@ interface FlowProps {
 }
 
 export default function Canvas({ flowId }: FlowProps) {
-  return (
+ return (
     // ReactFlowProvider provides the context that the useReactFlow hook needs
     <ReactFlowProvider>
       <CanvasFlow flowId={flowId} />
