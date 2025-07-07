@@ -10,9 +10,7 @@ type ProductFormProps = {
 
 export default function ProductForm({nodeId, onClose }: ProductFormProps) {
   const [fields, setFields] = useState({ 
-    pressure: '', 
-    composition: '', 
-    temperature: '' 
+    pressure: ''
   })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
@@ -28,9 +26,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
     
     if (currentNode?.data?.params) {
       setFields({
-        pressure: currentNode.data.params.pressure || '',
-        composition: currentNode.data.params.composition || '',
-        temperature: currentNode.data.params.temperature || '',
+        pressure: currentNode.data.params.pressure || ''
       })
     }
     setLoading(false)
@@ -44,8 +40,6 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
   function validate() {
     const err: { [key: string]: string } = {}
     if (!fields.pressure) err.pressure = 'Pressure is required'
-    if (!fields.composition) err.composition = 'Composition is required'
-    if (!fields.temperature) err.temperature = 'Temperature is required'
     return err
   }
 
@@ -66,49 +60,27 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="feed-form-flat">
-      {
-      <><h2 className="form-title">Product Parameters</h2><div className="form-grid">
-          <div className="form-field">
-            <label htmlFor="pressure">Operating Pressure (kPag)</label>
-            <input
-              id="pressure"
-              name="pressure"
-              type="number"
-              value={fields.pressure}
-              onChange={handleChange}
-              placeholder="e.g. 100"
-              className={errors.pressure ? 'input-error' : ''}
-              autoFocus />
-            {errors.pressure && <span className="error-text">{errors.pressure}</span>}
-          </div>
-          <div className="form-field">
-            <label htmlFor="composition">Outlet Composition</label>
-            <input
-              id="composition"
-              name="composition"
-              type="text"
-              value={fields.composition}
-              onChange={handleChange}
-              placeholder="e.g. H2O"
-              className={errors.composition ? 'input-error' : ''} />
-            {errors.composition && <span className="error-text">{errors.composition}</span>}
-          </div>
-          <div className="form-field form-field-full">
-            <label htmlFor="temperature">Temperature (°C)</label>
-            <input
-              id="temperature"
-              name="temperature"
-              type="number"
-              value={fields.temperature}
-              onChange={handleChange}
-              placeholder="e.g. 25"
-              className={errors.temperature ? 'input-error' : ''} />
-            {errors.temperature && <span className="error-text">{errors.temperature}</span>}
-          </div>
-        </div><div className="form-actions">
-            <button type="button" onClick={onClose} className="btn-cancel">Cancel</button>
-            <button type="submit" className="btn-save">Save</button>
-          </div><style jsx>{`
+      <h2 className="form-title">Product Parameters</h2>
+      <div className="form-grid">
+        <div className="form-field form-field-full">
+          <label htmlFor="pressure">Operating Pressure (kPag)</label>
+          <input
+            id="pressure"
+            name="pressure"
+            type="number"
+            value={fields.pressure}
+            onChange={handleChange}
+            placeholder="e.g. 100"
+            className={errors.pressure ? 'input-error' : ''}
+            autoFocus />
+          {errors.pressure && <span className="error-text">{errors.pressure}</span>}
+        </div>
+      </div>
+      <div className="form-actions">
+        <button type="button" onClick={onClose} className="btn-cancel">Cancel</button>
+        <button type="submit" className="btn-save">Save</button>
+      </div>
+      <style jsx>{`
         .feed-form-flat {
           padding: 0;
           margin: 0;
@@ -130,8 +102,8 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
         }
         .form-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 18px 18px;
+          grid-template-columns: 1fr;
+          gap: 18px;
           margin-bottom: 10px;
           width: 100%;
         }
@@ -142,7 +114,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
           min-width: 0;
         }
         .form-field-full {
-          grid-column: 1 / 3;
+          grid-column: 1 / 2;
         }
         label {
           font-weight: 600;
@@ -213,16 +185,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
           background: #e5e7eb;
           color: #1e293b;
         }
-        @media (max-width: 600px) {
-          .form-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-          .form-field-full {
-            grid-column: 1 / 2;
-          }
-        }
-      `}</style></>
-          }</form>
+      `}</style>
+    </form>
   )
 }
