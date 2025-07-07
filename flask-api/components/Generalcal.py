@@ -234,3 +234,44 @@ if __name__ == "__main__":
     # Calculate pressure drop
     p_drop = calculate_pressure_drop(f, density, length, diameter, velocity)
     print(f"Pressure drop: {p_drop:.2f} Pa")
+
+def extract_system_parameters(data):
+    """Extract system parameters from the fetched JSON data"""
+    system_params = {}
+    
+    for node in data['nodes']:
+        node_type = node['data']['nodeType']
+        params = node['data']['params']
+        system_params[node_type] = {'params': params}
+    
+    return system_params
+
+def perform_pipe_flow_calculations(system_params):
+    """Convert parameters and perform calculations"""
+    pipe_params = system_params['pipe']['params']
+    feed_params = system_params['feed']['params']
+    
+    # Convert string parameters to float
+    length = float(pipe_params['length'])
+    diameter = float(pipe_params['diameter'])
+    roughness = float(pipe_params['roughness']) / 1e6  # μm to m
+    volumetric_flow_rate = float(pipe_params['volumetricFlowrate'])
+    density = float(feed_params['density'])
+    viscosity = float(feed_params['viscosity'])
+    
+    # Perform your existing calculations
+    cross_sectional_area = calculate_cross_sectional_area(diameter)
+    velocity = calculate_velocity(volumetric_flow_rate, cross_sectional_area)
+    reynolds_number = calculate_reynolds_number(density, velocity, diameter, viscosity)
+    friction_factor = calculate_friction_factor(reynolds_number, roughness, diameter)
+    pressure_drop = calculate_pressure_drop(friction_factor, density, length, diameter, velocity)
+    
+    return {
+        'status': 'success',
+        'calculated_results': {
+            'velocity': round(velocity, 3),
+            'reynolds_number': round(reynolds_number, 1),
+            'friction_factor': round(friction_factor, 4),
+            'pressure_drop': round(pressure_drop, 2)
+        }
+    }
