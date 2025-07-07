@@ -28,6 +28,7 @@ def run_code():
         return jsonify({}), 200
     
     data = request.json
+    print(data)
     # Your processing logic here
     return jsonify({"result": "Success", "data": data})
 
