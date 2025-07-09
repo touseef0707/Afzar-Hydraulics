@@ -153,16 +153,25 @@ const useFlowStore = create<RFState>((set, get) => ({
     });
   },
 
-  updateNodeParams: (nodeId: string, params: object) => {
+  // In your flow store
+updateNodeParams: (nodeId: string, params: object) => {
+    console.log('Updating params for node:', nodeId, 'with:', params);
     set({
-      nodes: get().nodes.map((node) =>
-        node.id === nodeId
-          ? {
-              ...node,
-              data: { ...node.data, params: { ...node.data.params, ...params } },
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          console.log('Previous params:', node.data.params);
+          const updatedNode = {
+            ...node,
+            data: { 
+              ...node.data, 
+              params: { ...node.data.params, ...params } 
             }
-          : node
-      ),
+          };
+          console.log('Updated node:', updatedNode);
+          return updatedNode;
+        }
+        return node;
+      }),
       isDirty: true,
     });
   },

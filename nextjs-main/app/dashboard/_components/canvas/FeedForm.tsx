@@ -44,22 +44,30 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
   const nodes = useFlowStore(state => state.nodes)
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
-  useEffect(() => {
-    const currentNode = nodes.find(node => node.id === nodeId)
-    
-    if (currentNode?.data?.params) {
-      setFields({
-        pressure: currentNode.data.params.pressure || '',
-        viscosity: currentNode.data.params.viscosity || '',
-        density: currentNode.data.params.density || '',
-      })
-    } else if (fluidType !== 'custom') {
-      // Apply presets for new nodes if fluidType is specified
-      applyPreset(fluidType)
-    }
-    
-    setLoading(false)
-  }, [nodeId, nodes, fluidType])
+  // In FeedForm.tsx
+useEffect(() => {
+  const currentNode = nodes.find(node => node.id === nodeId);
+  
+  // Reset all form state when node changes
+  setFields({
+    pressure: currentNode?.data?.params?.pressure?.toString() || '',
+    viscosity: currentNode?.data?.params?.viscosity?.toString() || '',
+    density: currentNode?.data?.params?.density?.toString() || '',
+  });
+  
+  setCurrentFluidType(
+    currentNode?.data?.params?.fluidType || 
+    (currentNode?.data?.params ? 'custom' : fluidType)
+  );
+  
+  setErrors({});
+  setLoading(false);
+
+  // Add cleanup to prevent memory leaks
+  return () => {
+    setLoading(true); // Reset loading state when unmounting
+  };
+}, [nodeId, nodes]); // Remove fluidType from dependencies
 
   function applyPreset(type: 'water' | 'oil' | 'custom') {
     if (type !== 'custom') {
@@ -102,7 +110,9 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     }
   }
 
-  function validate() {
+  function validate(numericFields: {
+      pressure: number; viscosity: number; density: number; fluidType: "water" | "oil" | "custom" // Save the detected fluid type
+    }) {
     const err: { [key: string]: string } = {}
     const values = {
       pressure: parseFloat(fields.pressure),
@@ -158,18 +168,20 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const err = validate()
+  
+    
+    const numericFields = {
+      pressure: parseFloat(fields.pressure.toString()),
+      viscosity: parseFloat(fields.viscosity.toString()),
+      density: parseFloat(fields.density.toString()),
+      fluidType: currentFluidType // Save the detected fluid type
+    }
+    const err = validate(numericFields)
     if (Object.keys(err).length > 0) {
       setErrors(err)
       return
     }
-    
-    const numericFields = {
-      pressure: parseFloat(fields.pressure),
-      viscosity: parseFloat(fields.viscosity),
-      density: parseFloat(fields.density),
-      fluidType: currentFluidType // Save the detected fluid type
-    }
+
     
     updateNodeParams(nodeId, numericFields)
     onClose()
