@@ -8,14 +8,6 @@ type ProductFormProps = {
   onClose: () => void
 }
 
-// Engineering constants and limits
-const MIN_PRESSURE = 0; // Absolute vacuum (kPag)
-const MAX_PRESSURE = 100000; // 100,000 kPag (very high pressure)
-const MIN_TEMPERATURE = -273; // Absolute zero (°C)
-const MAX_TEMPERATURE = 1000; // 1000°C (very high temp)
-const MIN_LEVEL = 0; // 0% level
-const MAX_LEVEL = 100; // 100% level
-
 export default function ProductForm({nodeId, onClose }: ProductFormProps) {
   const [fields, setFields] = useState({ 
     pressure: '',
@@ -25,7 +17,6 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
     vaporFraction: ''
   })
   
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
   const [showAdvanced, setShowAdvanced] = useState(false)
   
@@ -53,77 +44,10 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setFields(prev => ({ ...prev, [name]: value }))
-    
-    // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev }
-        delete newErrors[name]
-        return newErrors
-      })
-    }
-  }
-
-  function validate() {
-    const err: { [key: string]: string } = {}
-    const values = {
-      pressure: parseFloat(fields.pressure),
-      temperature: parseFloat(fields.temperature),
-      level: parseFloat(fields.level),
-      vaporFraction: parseFloat(fields.vaporFraction)
-    }
-
-    // Basic presence check for required field
-    if (!fields.pressure) err.pressure = 'Pressure is required'
-
-    // Physical limits validation
-    if (fields.pressure) {
-      const pressure = parseFloat(fields.pressure)
-      if (isNaN(pressure)) {
-        err.pressure = 'Pressure must be a number'
-      } else if (pressure < MIN_PRESSURE || pressure > MAX_PRESSURE) {
-        err.pressure = `Pressure must be between ${MIN_PRESSURE} and ${MAX_PRESSURE} kPag`
-      }
-    }
-
-    if (fields.temperature) {
-      const temp = parseFloat(fields.temperature)
-      if (isNaN(temp)) {
-        err.temperature = 'Temperature must be a number'
-      } else if (temp < MIN_TEMPERATURE || temp > MAX_TEMPERATURE) {
-        err.temperature = `Temperature must be between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE} °C`
-      }
-    }
-
-    if (fields.level) {
-      const level = parseFloat(fields.level)
-      if (isNaN(level)) {
-        err.level = 'Level must be a number'
-      } else if (level < MIN_LEVEL || level > MAX_LEVEL) {
-        err.level = `Level must be between ${MIN_LEVEL} and ${MAX_LEVEL} %`
-      }
-    }
-
-    if (fields.vaporFraction) {
-      const vf = parseFloat(fields.vaporFraction)
-      if (isNaN(vf)) {
-        err.vaporFraction = 'Vapor fraction must be a number'
-      } else if (vf < 0 || vf > 1) {
-        err.vaporFraction = 'Vapor fraction must be between 0 and 1'
-      }
-    }
-
-    return err
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const err = validate()
-    if (Object.keys(err).length > 0) {
-      setErrors(err)
-      return
-    }
-    
     // Update params in the store
     updateNodeParams(nodeId, fields)
     onClose()
@@ -142,15 +66,11 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
             id="pressure"
             name="pressure"
             type="number"
-            min={MIN_PRESSURE}
-            max={MAX_PRESSURE}
             step="0.1"
             value={fields.pressure}
             onChange={handleChange}
-            placeholder={`${MIN_PRESSURE}-${MAX_PRESSURE} kPag`}
-            className={errors.pressure ? 'input-error' : ''}
+            placeholder="Enter pressure"
             autoFocus />
-          {errors.pressure && <span className="error-text">{errors.pressure}</span>}
         </div>
         
         <div className="form-field">
@@ -159,14 +79,10 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
             id="temperature"
             name="temperature"
             type="number"
-            min={MIN_TEMPERATURE}
-            max={MAX_TEMPERATURE}
             step="0.1"
             value={fields.temperature}
             onChange={handleChange}
-            placeholder={`${MIN_TEMPERATURE}-${MAX_TEMPERATURE} °C`}
-            className={errors.temperature ? 'input-error' : ''} />
-          {errors.temperature && <span className="error-text">{errors.temperature}</span>}
+            placeholder="Enter temperature" />
         </div>
       </div>
       
@@ -187,14 +103,10 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
                 id="level"
                 name="level"
                 type="number"
-                min={MIN_LEVEL}
-                max={MAX_LEVEL}
                 step="1"
                 value={fields.level}
                 onChange={handleChange}
-                placeholder={`${MIN_LEVEL}-${MAX_LEVEL} %`}
-                className={errors.level ? 'input-error' : ''} />
-              {errors.level && <span className="error-text">{errors.level}</span>}
+                placeholder="Enter level" />
             </div>
             
             <div className="form-field">
@@ -203,14 +115,10 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
                 id="vaporFraction"
                 name="vaporFraction"
                 type="number"
-                min="0"
-                max="1"
                 step="0.01"
                 value={fields.vaporFraction}
                 onChange={handleChange}
-                placeholder="0-1"
-                className={errors.vaporFraction ? 'input-error' : ''} />
-              {errors.vaporFraction && <span className="error-text">{errors.vaporFraction}</span>}
+                placeholder="Enter vapor fraction" />
             </div>
             
             <div className="form-field form-field-full">
@@ -221,9 +129,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
                 type="text"
                 value={fields.composition}
                 onChange={handleChange}
-                placeholder="e.g. Water 100%"
-                className={errors.composition ? 'input-error' : ''} />
-              {errors.composition && <span className="error-text">{errors.composition}</span>}
+                placeholder="e.g. Water 100%" />
             </div>
           </div>
         </div>
@@ -292,16 +198,6 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
         input:focus {
           border-color: #2563eb;
           background: #f0f7ff;
-        }
-        .input-error {
-          border-color: #dc2626;
-          background: #fef2f2;
-        }
-        .error-text {
-          color: #dc2626;
-          font-size: 0.95em;
-          margin-top: 1px;
-          font-weight: 500;
         }
         .form-actions {
           display: flex;
