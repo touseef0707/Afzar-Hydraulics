@@ -32,7 +32,7 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
     fluidDensity: '1000' // Default to water density (1000 kg/m³)
   })
   
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  // const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
   const [showAdvanced, setShowAdvanced] = useState(false)
   
@@ -61,13 +61,13 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
     setFields(prev => ({ ...prev, [name]: value }))
     
     // Clear error when user types
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev }
-        delete newErrors[name]
-        return newErrors
-      })
-    }
+    // if (errors[name]) {
+      // setErrors(prev => {
+      //   const newErrors = { ...prev }
+      //   delete newErrors[name]
+      //   return newErrors
+      // })
+    // }
     
     // Auto-calculate related fields
     if (name === 'volumetricFlowrate' || name === 'massFlowRate' || name === 'fluidDensity') {
@@ -101,78 +101,79 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
   }
 
   function validate() {
-    const err: { [key: string]: string } = {}
-    const values = {
-      length: parseFloat(fields.length),
-      diameter: parseFloat(fields.diameter),
-      roughness: parseFloat(fields.roughness),
-      volumetricFlowrate: parseFloat(fields.volumetricFlowrate),
-      massFlowRate: parseFloat(fields.massFlowRate),
-      fluidDensity: parseFloat(fields.fluidDensity)
-    }
+    // const err: { [key: string]: string } = {}
+    // const values = {
+    //   length: parseFloat(fields.length),
+    //   diameter: parseFloat(fields.diameter),
+    //   roughness: parseFloat(fields.roughness),
+    //   volumetricFlowrate: parseFloat(fields.volumetricFlowrate),
+    //   massFlowRate: parseFloat(fields.massFlowRate),
+    //   fluidDensity: parseFloat(fields.fluidDensity)
+    // }
 
-    // Basic presence checks
-    if (!fields.length) err.length = 'Length is required'
-    if (!fields.diameter) err.diameter = 'Diameter is required'
-    if (!fields.roughness) err.roughness = 'Roughness is required'
-    if (!fields.volumetricFlowrate && !fields.massFlowRate) {
-      err.volumetricFlowrate = 'Either volumetric or mass flow rate is required'
-    }
+    // // Basic presence checks
+    // if (!fields.length) err.length = 'Length is required'
+    // if (!fields.diameter) err.diameter = 'Diameter is required'
+    // if (!fields.roughness) err.roughness = 'Roughness is required'
+    // if (!fields.volumetricFlowrate && !fields.massFlowRate) {
+    //   err.volumetricFlowrate = 'Either volumetric or mass flow rate is required'
+    // }
 
-    // Physical limits validation
-    if (values.length && (values.length < MIN_LENGTH || values.length > MAX_LENGTH)) {
-      err.length = `Length must be between ${MIN_LENGTH}m and ${MAX_LENGTH}m`
-    }
+    // // Physical limits validation
+    // if (values.length && (values.length < MIN_LENGTH || values.length > MAX_LENGTH)) {
+    //   err.length = `Length must be between ${MIN_LENGTH}m and ${MAX_LENGTH}m`
+    // }
     
-    if (values.diameter && (values.diameter < MIN_DIAMETER || values.diameter > MAX_DIAMETER)) {
-      err.diameter = `Diameter must be between ${MIN_DIAMETER}m and ${MAX_DIAMETER}m`
-    }
+    // if (values.diameter && (values.diameter < MIN_DIAMETER || values.diameter > MAX_DIAMETER)) {
+    //   err.diameter = `Diameter must be between ${MIN_DIAMETER}m and ${MAX_DIAMETER}m`
+    // }
     
-    if (values.roughness && (values.roughness < MIN_ROUGHNESS || values.roughness > MAX_ROUGHNESS)) {
-      err.roughness = `Roughness must be between ${MIN_ROUGHNESS}mm and ${MAX_ROUGHNESS}mm`
-    }
+    // if (values.roughness && (values.roughness < MIN_ROUGHNESS || values.roughness > MAX_ROUGHNESS)) {
+    //   err.roughness = `Roughness must be between ${MIN_ROUGHNESS}mm and ${MAX_ROUGHNESS}mm`
+    // }
     
-    if (values.volumetricFlowrate && 
-        (values.volumetricFlowrate < MIN_FLOW_RATE || values.volumetricFlowrate > MAX_FLOW_RATE)) {
-      err.volumetricFlowrate = `Flow rate must be between ${MIN_FLOW_RATE} and ${MAX_FLOW_RATE} m³/h`
-    }
+    // if (values.volumetricFlowrate && 
+    //     (values.volumetricFlowrate < MIN_FLOW_RATE || values.volumetricFlowrate > MAX_FLOW_RATE)) {
+    //   err.volumetricFlowrate = `Flow rate must be between ${MIN_FLOW_RATE} and ${MAX_FLOW_RATE} m³/h`
+    // }
     
-    if (values.fluidDensity && (values.fluidDensity < MIN_DENSITY || values.fluidDensity > MAX_DENSITY)) {
-      err.fluidDensity = `Density must be between ${MIN_DENSITY} and ${MAX_DENSITY} kg/m³`
-    }
+    // if (values.fluidDensity && (values.fluidDensity < MIN_DENSITY || values.fluidDensity > MAX_DENSITY)) {
+    //   err.fluidDensity = `Density must be between ${MIN_DENSITY} and ${MAX_DENSITY} kg/m³`
+    // }
 
-    // Hydraulic consistency checks
-    if (values.diameter && values.volumetricFlowrate) {
-      const velocity = values.volumetricFlowrate / (3600 * Math.PI * Math.pow(values.diameter/2, 2))
+    // // Hydraulic consistency checks
+    // if (values.diameter && values.volumetricFlowrate) {
+    //   const velocity = values.volumetricFlowrate / (3600 * Math.PI * Math.pow(values.diameter/2, 2))
       
-      // Check for unrealistic velocities
-      if (velocity > 10) { // 10 m/s is very high for most liquid applications
-        err.volumetricFlowrate = 'Velocity too high (>10 m/s) for this diameter'
-        err.diameter = 'Diameter too small for this flow rate'
-      } else if (velocity < 0.1) { // 0.1 m/s is very low
-        err.volumetricFlowrate = 'Velocity very low (<0.1 m/s) for this diameter'
-      }
-    }
+    //   // Check for unrealistic velocities
+    //   if (velocity > 10) { // 10 m/s is very high for most liquid applications
+    //     err.volumetricFlowrate = 'Velocity too high (>10 m/s) for this diameter'
+    //     err.diameter = 'Diameter too small for this flow rate'
+    //   } else if (velocity < 0.1) { // 0.1 m/s is very low
+    //     err.volumetricFlowrate = 'Velocity very low (<0.1 m/s) for this diameter'
+    //   }
+    // }
 
-    // Check roughness ratio (ε/D)
-    if (values.diameter && values.roughness) {
-      const roughnessRatio = values.roughness / (values.diameter * 1000) // convert diameter to mm
-      if (roughnessRatio > 0.05) { // ε/D > 0.05 is extremely rough
-        err.roughness = 'Roughness is extremely high for this pipe diameter'
-      }
-    }
+    // // Check roughness ratio (ε/D)
+    // if (values.diameter && values.roughness) {
+    //   const roughnessRatio = values.roughness / (values.diameter * 1000) // convert diameter to mm
+    //   if (roughnessRatio > 0.05) { // ε/D > 0.05 is extremely rough
+    //     err.roughness = 'Roughness is extremely high for this pipe diameter'
+    //   }
+    // }
 
-    // Check mass flow consistency if both are provided
-    if (fields.volumetricFlowrate && fields.massFlowRate && fields.fluidDensity) {
-      const expectedMass = values.volumetricFlowrate * values.fluidDensity
-      const diff = Math.abs(expectedMass - values.massFlowRate) / expectedMass
+    // // Check mass flow consistency if both are provided
+    // if (fields.volumetricFlowrate && fields.massFlowRate && fields.fluidDensity) {
+    //   const expectedMass = values.volumetricFlowrate * values.fluidDensity
+    //   const diff = Math.abs(expectedMass - values.massFlowRate) / expectedMass
       
-      if (diff > 0.01) { // 1% tolerance
-        err.massFlowRate = 'Mass flow rate inconsistent with volumetric flow and density'
-      }
-    }
+    //   if (diff > 0.01) { // 1% tolerance
+    //     err.massFlowRate = 'Mass flow rate inconsistent with volumetric flow and density'
+    //   }
+    // }
 
-    return err
+    // return err
+    return {}
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -180,7 +181,7 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
     const err = validate()
     
     if (Object.keys(err).length > 0) {
-      setErrors(err)
+      // setErrors(err)
       return
     }
     
@@ -202,15 +203,15 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
             id="length"
             name="length"
             type="number"
-            min={MIN_LENGTH}
-            max={MAX_LENGTH}
+            // min={MIN_LENGTH}
+            // max={MAX_LENGTH}
             step="0.1"
             value={fields.length}
             onChange={handleChange}
             placeholder={`${MIN_LENGTH}-${MAX_LENGTH}m`}
-            className={errors.length ? 'input-error' : ''}
+            // className={errors.length ? 'input-error' : ''}
             autoFocus />
-          {errors.length && <span className="error-text">{errors.length}</span>}
+          {/* errors.length && <span className="error-text">{errors.length}</span> */}
         </div>
         
         <div className="form-field">
@@ -219,14 +220,15 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
             id="diameter"
             name="diameter"
             type="number"
-            min={MIN_DIAMETER}
-            max={MAX_DIAMETER}
+            // min={MIN_DIAMETER}
+            // max={MAX_DIAMETER}
             step="0.001"
             value={fields.diameter}
             onChange={handleChange}
             placeholder={`${MIN_DIAMETER}-${MAX_DIAMETER}m`}
-            className={errors.diameter ? 'input-error' : ''} />
-          {errors.diameter && <span className="error-text">{errors.diameter}</span>}
+            // className={errors.diameter ? 'input-error' : ''} 
+          />
+          {/* // errors.diameter && <span className="error-text">{errors.diameter}</span> */}
         </div>
         
         <div className="form-field">
@@ -235,14 +237,15 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
             id="roughness"
             name="roughness"
             type="number"
-            min={MIN_ROUGHNESS}
-            max={MAX_ROUGHNESS}
+            // min={MIN_ROUGHNESS}
+            // max={MAX_ROUGHNESS}
             step="0.001"
             value={fields.roughness}
             onChange={handleChange}
             placeholder={`${MIN_ROUGHNESS}-${MAX_ROUGHNESS}mm`}
-            className={errors.roughness ? 'input-error' : ''} />
-          {errors.roughness && <span className="error-text">{errors.roughness}</span>}
+            // className={errors.roughness ? 'input-error' : ''} 
+            />
+          {/* {errors.roughness && <span className="error-text">{errors.roughness}</span>} */}
         </div>
         
         <div className="form-field">
@@ -251,14 +254,15 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
             id="volumetricFlowrate"
             name="volumetricFlowrate"
             type="number"
-            min={MIN_FLOW_RATE}
-            max={MAX_FLOW_RATE}
+            // min={MIN_FLOW_RATE}
+            // max={MAX_FLOW_RATE}
             step="0.1"
             value={fields.volumetricFlowrate}
             onChange={handleChange}
             placeholder={`${MIN_FLOW_RATE}-${MAX_FLOW_RATE}m³/h`}
-            className={errors.volumetricFlowrate ? 'input-error' : ''} />
-          {errors.volumetricFlowrate && <span className="error-text">{errors.volumetricFlowrate}</span>}
+            // className={errors.volumetricFlowrate ? 'input-error' : ''} 
+            />
+          {/* {errors.volumetricFlowrate && <span className="error-text">{errors.volumetricFlowrate}</span>} */}
         </div>
         
         <div className="form-field">
@@ -270,8 +274,9 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
             value={fields.massFlowRate}
             onChange={handleChange}
             placeholder="Calculated automatically"
-            className={errors.massFlowRate ? 'input-error' : ''} />
-          {errors.massFlowRate && <span className="error-text">{errors.massFlowRate}</span>}
+            // className={errors.massFlowRate ? 'input-error' : ''} 
+            />
+          {/* {errors.massFlowRate && <span className="error-text">{errors.massFlowRate}</span>} */}
         </div>
       </div>
       
@@ -291,14 +296,15 @@ export default function PipeForm({nodeId, onClose }: PipeFormProps) {
               id="fluidDensity"
               name="fluidDensity"
               type="number"
-              min={MIN_DENSITY}
-              max={MAX_DENSITY}
+              // min={MIN_DENSITY}
+              // max={MAX_DENSITY}
               step="1"
               value={fields.fluidDensity}
               onChange={handleChange}
               placeholder={`${MIN_DENSITY}-${MAX_DENSITY}kg/m³`}
-              className={errors.fluidDensity ? 'input-error' : ''} />
-            {errors.fluidDensity && <span className="error-text">{errors.fluidDensity}</span>}
+              // className={errors.fluidDensity ? 'input-error' : ''} 
+              />
+            {/* {errors.fluidDensity && <span className="error-text">{errors.fluidDensity}</span>} */}
           </div>
         </div>
       )}
