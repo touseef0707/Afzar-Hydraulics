@@ -1,0 +1,64 @@
+{
+  "nodes": [
+    {
+      "data": {
+        "label": "Feed",
+        "nodeType": "feed",
+        "params": {
+          "density": 998,
+          "pressure": 100,
+          "viscosity": 100,
+          "fluidType": "custom"
+        }
+      },
+      "id": "feed_1751713095112"
+    },
+    {
+      "data": {
+        "label": "Pipe",
+        "nodeType": "pipe",
+        "params": {
+          "diameter": "0.5",
+          "length": "10",
+          "massFlowRate": "99001.0000",
+          "roughness": "0.001",
+          "volumetricFlowrate": "99.001",
+          "fluidDensity": "1000"
+        }
+      },
+      "id": "pipe_1751868201985"
+    },
+    {
+      "data": {
+        "label": "Product",
+        "nodeType": "product",
+        "params": {
+          "composition": "H2O",
+          "pressure": "100",
+          "temperature": "25"
+        }
+      },
+      "id": "product_1751868466292"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__feed_1751713095112-pipe_1751868201985",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "source": "feed_1751713095112",
+      "target": "pipe_1751868201985"
+    },
+    {
+      "id": "xy-edge__pipe_1751868201985-product_1751868466292",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "source": "pipe_1751868201985",
+      "target": "product_1751868466292"
+    }
+  ],
+  "flowId": "-OUPE3Zdq4GXjZvNoqOG"
+}
+
