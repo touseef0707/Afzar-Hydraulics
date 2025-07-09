@@ -103,57 +103,57 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
   }
 
   function validate() {
-    const err: { [key: string]: string } = {}
-    const values = {
-      pressure: parseFloat(fields.pressure),
-      viscosity: parseFloat(fields.viscosity),
-      density: parseFloat(fields.density)
-    }
+    // const err: { [key: string]: string } = {}
+    // const values = {
+    //   pressure: parseFloat(fields.pressure),
+    //   viscosity: parseFloat(fields.viscosity),
+    //   density: parseFloat(fields.density)
+    // }
     
-    // Validate pressure
-    if (!fields.pressure.trim()) {
-      err.pressure = 'Pressure is required'
-    } else if (isNaN(values.pressure)) {
-      err.pressure = 'Must be a valid number'
-    } else if (values.pressure < HYDRAULIC_LIMITS.pressure.min) {
-      err.pressure = `Pressure must be ≥ ${HYDRAULIC_LIMITS.pressure.min} kPa`
-    } else if (values.pressure > HYDRAULIC_LIMITS.pressure.max) {
-      err.pressure = `Pressure must be ≤ ${HYDRAULIC_LIMITS.pressure.max} kPa`
-    }
+    // // Validate pressure
+    // if (!fields.pressure.trim()) {
+    //   err.pressure = 'Pressure is required'
+    // } else if (isNaN(values.pressure)) {
+    //   err.pressure = 'Must be a valid number'
+    // } else if (values.pressure < HYDRAULIC_LIMITS.pressure.min) {
+    //   err.pressure = `Pressure must be ≥ ${HYDRAULIC_LIMITS.pressure.min} kPa`
+    // } else if (values.pressure > HYDRAULIC_LIMITS.pressure.max) {
+    //   err.pressure = `Pressure must be ≤ ${HYDRAULIC_LIMITS.pressure.max} kPa`
+    // }
     
-    // Validate viscosity
-    if (!fields.viscosity.trim()) {
-      err.viscosity = 'Viscosity is required'
-    } else if (isNaN(values.viscosity)) {
-      err.viscosity = 'Must be a valid number'
-    } else if (values.viscosity < HYDRAULIC_LIMITS.viscosity.min) {
-      err.viscosity = `Viscosity must be ≥ ${HYDRAULIC_LIMITS.viscosity.min} cP`
-    } else if (values.viscosity > HYDRAULIC_LIMITS.viscosity.max) {
-      err.viscosity = `Viscosity must be ≤ ${HYDRAULIC_LIMITS.viscosity.max} cP`
-    }
+    // // Validate viscosity
+    // if (!fields.viscosity.trim()) {
+    //   err.viscosity = 'Viscosity is required'
+    // } else if (isNaN(values.viscosity)) {
+    //   err.viscosity = 'Must be a valid number'
+    // } else if (values.viscosity < HYDRAULIC_LIMITS.viscosity.min) {
+    //   err.viscosity = `Viscosity must be ≥ ${HYDRAULIC_LIMITS.viscosity.min} cP`
+    // } else if (values.viscosity > HYDRAULIC_LIMITS.viscosity.max) {
+    //   err.viscosity = `Viscosity must be ≤ ${HYDRAULIC_LIMITS.viscosity.max} cP`
+    // }
     
-    // Validate density
-    if (!fields.density.trim()) {
-      err.density = 'Density is required'
-    } else if (isNaN(values.density)) {
-      err.density = 'Must be a valid number'
-    } else if (values.density < HYDRAULIC_LIMITS.density.min) {
-      err.density = `Density must be ≥ ${HYDRAULIC_LIMITS.density.min} kg/m³`
-    } else if (values.density > HYDRAULIC_LIMITS.density.max) {
-      err.density = `Density must be ≤ ${HYDRAULIC_LIMITS.density.max} kg/m³`
-    }
+    // // Validate density
+    // if (!fields.density.trim()) {
+    //   err.density = 'Density is required'
+    // } else if (isNaN(values.density)) {
+    //   err.density = 'Must be a valid number'
+    // } else if (values.density < HYDRAULIC_LIMITS.density.min) {
+    //   err.density = `Density must be ≥ ${HYDRAULIC_LIMITS.density.min} kg/m³`
+    // } else if (values.density > HYDRAULIC_LIMITS.density.max) {
+    //   err.density = `Density must be ≤ ${HYDRAULIC_LIMITS.density.max} kg/m³`
+    // }
     
-    // Cross-validate physical relationships
-    if (!err.viscosity && !err.density) {
-      const kinematicViscosity = values.viscosity / values.density
-      if (kinematicViscosity < 0.01) {
-        err.viscosity = 'Viscosity too low for this density (check units)'
-      } else if (kinematicViscosity > 100) {
-        err.viscosity = 'Viscosity unusually high for this density'
-      }
-    }
+    // // Cross-validate physical relationships
+    // if (!err.viscosity && !err.density) {
+    //   const kinematicViscosity = values.viscosity / values.density
+    //   if (kinematicViscosity < 0.01) {
+    //     err.viscosity = 'Viscosity too low for this density (check units)'
+    //   } else if (kinematicViscosity > 100) {
+    //     err.viscosity = 'Viscosity unusually high for this density'
+    //   }
+    // }
     
-    return err
+    return {}
   }
 
   async function handleSubmit(e: React.FormEvent) {

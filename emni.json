@@ -1,1 +1,64 @@
-{'nodes': [{'data': {'label': 'Feed', 'nodeType': 'feed', 'params': {'density': '3', 'pressure': '1', 'viscosity': '2'}}, 'dragging': False, 'id': 'feed_1751438270519', 'measured': {'height': 48, 'width': 144}, 'position': {'x': -21.438976322472364, 'y': -67.51260292132814}, 'selected': False, 'type': 'custom'}, {'data': {'label': 'Pipe', 'nodeType': 'pipe', 'params': {'diameter': '2', 'length': '1', 'massFlowRate': '5', 'roughness': '3', 'volumetricFlowrate': '4'}}, 'dragging': False, 'id': 'pipe_1751696703710', 'measured': {'height': 48, 'width': 144}, 'position': {'x': 164.11196927569833, 'y': -67.77597817430836}, 'selected': True, 'type': 'custom'}, {'data': {'label': 'Product', 'nodeType': 'product', 'params': {'composition': '2', 'pressure': '1', 'temperature': '3'}}, 'dragging': False, 'id': 'product_1751696707746', 'measured': {'height': 48, 'width': 144}, 'position': {'x': 343.83672507670656, 'y': -69.04338745880173}, 'selected': False, 'type': 'custom'}], 'edges': [{'animated': True, 'id': 'xy-edge__feed_1751438270519-pipe_1751696703710', 'markerEnd': {'type': 'arrowclosed'}, 'source': 'feed_1751438270519', 'target': 'pipe_1751696703710'}, {'animated': True, 'id': 'xy-edge__pipe_1751696703710-product_1751696707746', 'markerEnd': {'type': 'arrowclosed'}, 'source': 'pipe_1751696703710', 'target': 'product_1751696707746'}], 'flowId': '-OU4f3gRq8m6sfywyZka'}
+{
+  "nodes": [
+    {
+      "data": {
+        "label": "Feed",
+        "nodeType": "feed",
+        "params": {
+          "density": 998,
+          "pressure": 100,
+          "viscosity": 100,
+          "fluidType": "custom"
+        }
+      },
+      "id": "feed_1751713095112"
+    },
+    {
+      "data": {
+        "label": "Pipe",
+        "nodeType": "pipe",
+        "params": {
+          "diameter": "0.5",
+          "length": "10",
+          "massFlowRate": "99001.0000",
+          "roughness": "0.001",
+          "volumetricFlowrate": "99.001",
+          "fluidDensity": "1000"
+        }
+      },
+      "id": "pipe_1751868201985"
+    },
+    {
+      "data": {
+        "label": "Product",
+        "nodeType": "product",
+        "params": {
+          "composition": "H2O",
+          "pressure": "100",
+          "temperature": "25"
+        }
+      },
+      "id": "product_1751868466292"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__feed_1751713095112-pipe_1751868201985",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "source": "feed_1751713095112",
+      "target": "pipe_1751868201985"
+    },
+    {
+      "id": "xy-edge__pipe_1751868201985-product_1751868466292",
+      "markerEnd": {
+        "type": "arrowclosed"
+      },
+      "source": "pipe_1751868201985",
+      "target": "product_1751868466292"
+    }
+  ],
+  "flowId": "-OUPE3Zdq4GXjZvNoqOG"
+}
+
