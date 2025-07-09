@@ -77,7 +77,7 @@ class Pipe:
     # ──────────────────────────────
     def _cross_sectional_area(self) -> float:
         r = self.D / 2
-        return math.pi * r**2
+        return math.pi * (r**2)
 
     def _flow_velocity(self) -> float:
         q_m3_s = self.Q / 3600          # convert h-1 → s-1
@@ -96,29 +96,46 @@ class Pipe:
 
     # Darcy friction factor selection
     def _darcy_friction_factor(self) -> float:
-        method = self._method
-        Re     = self.reynolds
+        Re = self.reynolds
 
-        if method == "auto":
-            if self.regime == "laminar":
-                return 64 / Re
-            # fall through to Swamee-Jain for transitional / turbulent
-            method = "churchill"
+        if Re < 2000:
+            return self._laminar_friction(Re)
 
-        if method == "swamee_jain":
-            rr  = self.epsilon / (3.7 * self.D)
-            term= 5.74 / (Re ** 0.9)
-            return 0.25 / (math.log10(rr + term) ** 2)
+        elif 2000 <= Re < 4000:
+            return self._swamee_jain_friction(Re)
 
-        if method == "churchill":
-            A = (2.457 * math.log((7 / Re) ** 0.9 + 0.27 * self.epsilon / self.D)) ** 16
-            B = (37530 / Re) ** 16
-            return 8 * ((8 / Re) ** 12 + 1 / (A + B) ** 1.5) ** (1 / 12)
+        else:
+            return self._churchill_friction(Re)
 
-        raise ValueError("Unknown friction factor method")
+    def _laminar_friction(self, Re: float) -> float:
+        return 64 / Re
+
+    def _swamee_jain_friction(self, Re: float) -> float:
+        rr = self._relative_roughness()
+        term = 5.74 / (Re ** 0.9)
+        return 0.25 / ((math.log10(rr + term)) ** 2)
+
+    def _churchill_friction(self, Re: float) -> float:
+        A = self._churchill_A(Re)
+        B = self._churchill_B(Re)
+        term1 = math.pow(8 / Re, 12)
+        term2 = math.pow(A + B, -1.5)
+        sum_terms = term1 + term2
+        outer_root = math.pow(sum_terms, 1 / 12)
+        return 8 * outer_root
+
+    def _relative_roughness(self) -> float:
+        return self.epsilon / (3.7 * self.D)
+
+    def _churchill_A(self, Re: float) -> float:
+        return (2.457 * math.log((7 / Re) ** 0.9 + 0.27 * self.epsilon / self.D)) ** 16
+
+    
+    def _churchill_B(self, Re: float) -> float:
+        return (37530 / Re) ** 16
 
     def _darcy_head_loss(self) -> float:
-        return self.friction_factor * (self.L / self.D) * self.velocity**2 / (2 * Pipe.g)
+        return ((self.friction_factor) * (self.L / self.D) * ((self.velocity)**2) / (2 * Pipe.g))
 
     def _darcy_pressure_drop(self) -> float:
-        return self.friction_factor * (self.L / self.D) * self.rho * self.velocity**2 / 2
+        return self.head_loss * self.rho * Pipe.g
