@@ -14,7 +14,6 @@ import math
 from collections import defaultdict, deque
 from typing import Dict, List, Any
 
-# Local import:  components/__init__.py exposes Pipe
 from components.Pipe import Pipe
 
 
@@ -128,3 +127,25 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
 
     return {"order": order, "results": results}
 
+def print_hydraulic_report(report: dict):
+    print("\n🔍 Hydraulic Simulation Report")
+    print("=" * 35)
+
+    order = report.get("order", [])
+    results = report.get("results", {})
+
+    for element_id in order:
+        element_data = results.get(element_id, {})
+        element_type = element_id.split("_")[0].capitalize()
+        print(f"\n📌 {element_type} ({element_id}):")
+        print("-" * 35)
+        
+        for key, value in element_data.items():
+            # Format the key to be more readable
+            readable_key = key.replace("_", " ").capitalize()
+            # Format floats with 4 decimal places
+            if isinstance(value, float):
+                print(f"{readable_key:30}: {value:.4f}")
+            else:
+                print(f"{readable_key:30}: {value}")
+    print("=" * 35 + "\n✅ Report generation complete.\n")
