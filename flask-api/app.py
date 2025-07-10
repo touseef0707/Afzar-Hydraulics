@@ -9,7 +9,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # Local helper functions
-from helpers import execute_flowsheet
+from helpers import execute_flowsheet, print_hydraulic_report
 
 app = Flask(__name__)
 
@@ -56,7 +56,7 @@ def run_flowsheet():                      # noqa: D401
     # 2 ─ Execute hydraulic calculations
     try:
         report = execute_flowsheet(flowsheet)
-        print(report)
+        print_hydraulic_report(report)
     except ValueError as exc:
         return jsonify(error=str(exc)), 400
     except Exception:

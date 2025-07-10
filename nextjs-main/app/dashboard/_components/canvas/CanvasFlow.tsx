@@ -60,8 +60,10 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
       flowId
       // include any other data your API expects
     };
-    run(flowData).then(() => {
-      // Handle successful run if needed
+    run(flowData).then((response) => {
+      // on Success
+      console.log(response)
+      
     }).catch((err) => {
       // Error is already handled in useRun, but you could add additional handling here
       console.error("Run failed:", err);

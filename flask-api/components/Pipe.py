@@ -20,7 +20,7 @@ class Pipe:
         self,
         inner_diameter: float,      # m
         length: float,              # m
-        roughness: float,           # m
+        roughness: float,           # mm
         volumetric_flowrate: float, # m³ h-1
         density: float,             # kg m-3
         viscosity_cp: float,        # cP
@@ -30,7 +30,7 @@ class Pipe:
 
         self.D          = inner_diameter
         self.L          = length
-        self.epsilon    = roughness
+        self.epsilon    = roughness / 1000 # m
         self.Q          = volumetric_flowrate
         self.rho        = density
         self.mu_cp      = viscosity_cp
