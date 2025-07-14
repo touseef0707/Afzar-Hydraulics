@@ -205,7 +205,11 @@ const useFlowStore = create<RFState>((set, get) => ({
     try {
       const filteredData = get()._filterFlowData(flowdata);
 
-      const response = await fetch("http://localhost:5000/api/run", {
+      const apiUrl = process.env.NEXT_PUBLIC_FLASK_API_URL;
+      if (!apiUrl) {
+        throw new Error("FLASK_API_URL is not defined in environment variables");
+      }
+      const response = await fetch(`${apiUrl}/api/run`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

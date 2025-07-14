@@ -18,6 +18,7 @@ export default function CanvasSidebar() {
   const isDirty = useFlowStore((state) => state.isDirty);
   const setDirty = useFlowStore((state) => state.setDirty);
   const saveFlow = useFlowStore((state) => state.saveFlow);
+  const clearRunResults = useFlowStore((state) => state.clearRunResults);
 
   // Controls visibility of the unsaved changes warning modal
   const [showWarning, setShowWarning] = useState(false);
@@ -27,6 +28,7 @@ export default function CanvasSidebar() {
     if (isDirty) {
       setShowWarning(true);
     } else {
+      clearRunResults();
       router.push('/dashboard');
     }
   };
