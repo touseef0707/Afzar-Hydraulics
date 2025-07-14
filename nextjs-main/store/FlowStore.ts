@@ -49,6 +49,11 @@ export type RFState = {
   edges: Edge[];
   editingNodeId: string | null;
   isDirty: boolean;
+  runResponse: any | null;
+  runError: string | null;
+  isRunning: boolean;
+  
+  // Flow management actions
   setDirty: (dirty: boolean) => void;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
@@ -64,6 +69,13 @@ export type RFState = {
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
   setEditingNodeId: (nodeId: string | null) => void;
+  
+  // Run functionality
+  run: (flowdata: any) => Promise<any>;
+  clearRunResults: () => void;
+  
+  // Private/internal methods (not exposed outside)
+  _filterFlowData: (flowdata: any) => any;
 };
 
 const useFlowStore = create<RFState>((set, get) => ({
@@ -71,6 +83,11 @@ const useFlowStore = create<RFState>((set, get) => ({
   edges: [],
   editingNodeId: null,
   isDirty: false,
+  runResponse: null,
+  runError: null,
+  isRunning: false,
+
+  // Flow management actions
   setDirty: (dirty) => set({ isDirty: dirty }),
 
   onNodesChange: (changes: NodeChange[]) => {
@@ -79,9 +96,11 @@ const useFlowStore = create<RFState>((set, get) => ({
       isDirty: true,
     });
   },
+
   onEdgesChange: (changes: EdgeChange[]) => {
     set({ edges: applyEdgeChanges(changes, get().edges), isDirty: true });
   },
+
   onConnect: (connection: Connection) => {
     set({
       edges: addEdge(
@@ -95,10 +114,14 @@ const useFlowStore = create<RFState>((set, get) => ({
       isDirty: true,
     });
   },
+
   addNode: (node: CustomNode) =>
     set({ nodes: [...get().nodes, node], isDirty: true }),
+
   setNodes: (nodes: CustomNode[]) => set({ nodes, isDirty: true }),
+
   setEdges: (edges: Edge[]) => set({ edges, isDirty: true }),
+
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
 
   saveFlow: (flowId: string, showToast?) => {
@@ -153,28 +176,78 @@ const useFlowStore = create<RFState>((set, get) => ({
     });
   },
 
-  // In your flow store
-updateNodeParams: (nodeId: string, params: object) => {
-    console.log('Updating params for node:', nodeId, 'with:', params);
+  updateNodeParams: (nodeId: string, params: object) => {
     set({
       nodes: get().nodes.map((node) => {
         if (node.id === nodeId) {
-          console.log('Previous params:', node.data.params);
-          const updatedNode = {
+          return {
             ...node,
             data: { 
               ...node.data, 
               params: { ...node.data.params, ...params } 
             }
           };
-          console.log('Updated node:', updatedNode);
-          return updatedNode;
         }
         return node;
       }),
       isDirty: true,
     });
   },
+
+  // Run functionality implementation
+  run: async (flowdata: any) => {
+    set({ isRunning: true, runError: null });
+    try {
+      const filteredData = get()._filterFlowData(flowdata);
+      
+      const response = await fetch("http://localhost:5000/api/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filteredData),
+        mode: 'cors',
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      set({ runResponse: result });
+      return result;
+    } catch (err: any) {
+      set({ runError: err.message || "Unknown error" });
+      throw err;
+    } finally {
+      set({ isRunning: false });
+    }
+  },
+
+  clearRunResults: () => set({ runResponse: null, runError: null }),
+
+  // Internal method for filtering flow data
+  _filterFlowData: (flowdata: any): any => {
+    if (!flowdata) return flowdata;
+      
+    // Filter nodes
+    const filteredNodes = flowdata.nodes?.map((node: any) => {
+      const { measured, position, type, selected, dragging, ...filteredNode } = node;
+      return filteredNode;
+    }) || [];
+    
+    // Filter edges
+    const filteredEdges = flowdata.edges?.map((edge: any) => {
+      const { animated, ...filteredEdge } = edge;
+      return filteredEdge;
+    }) || [];
+    
+    return {
+      ...flowdata,
+      nodes: filteredNodes,
+      edges: filteredEdges
+    };
+  }
 }));
 
 export default useFlowStore;
