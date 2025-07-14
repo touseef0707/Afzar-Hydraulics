@@ -230,7 +230,7 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
-  clearRunResults: () => set({ runResponse: null, runError: null }),
+  clearRunResults: () => set({ runResponse: null, runError: null, runOnce: false }),
 
   setDisplayResults: (show) => set({ displayResults: show }),
 
