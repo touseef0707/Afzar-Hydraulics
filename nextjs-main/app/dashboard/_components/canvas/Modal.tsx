@@ -1,8 +1,8 @@
 'use client'
 
-import FeedForm from './FeedForm'
-import ProductForm from './ProductForm'
-import PipeForm from './PipeForm'
+import FeedForm from './forms/FeedForm'
+import ProductForm from './forms/ProductForm'
+import PipeForm from './forms/PipeForm'
 
 // Defines the props for the ComponentModal
 // componentType: Determines which form to render (feed, product, or pipe)
