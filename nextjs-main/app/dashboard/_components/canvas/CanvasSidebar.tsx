@@ -12,13 +12,18 @@ export default function CanvasSidebar() {
   const router = useRouter();
   const params = useParams();
   const flowId = params?.id as string;
-  const isDirty = useFlowStore((state) => state.isDirty);
-  const saveFlow = useFlowStore((state) => state.saveFlow);
-  const setDirty = useFlowStore((state) => state.setDirty);
-  const [showWarning, setShowWarning] = useState(false);
   const { showToast } = useToast();
 
+  // Zustand selector to check if there are unsaved changes in the flow
+  const isDirty = useFlowStore((state) => state.isDirty);
+  const setDirty = useFlowStore((state) => state.setDirty);
+  const saveFlow = useFlowStore((state) => state.saveFlow);
+
+  // Controls visibility of the unsaved changes warning modal
+  const [showWarning, setShowWarning] = useState(false);
+
   const handleBack = () => {
+    // If there are unsaved changes, show warning modal
     if (isDirty) {
       setShowWarning(true);
     } else {
@@ -27,20 +32,27 @@ export default function CanvasSidebar() {
   };
 
   const handleSaveAndLeave = () => {
+    // Save the flow and then navigate back to dashboard
     saveFlow(flowId, showToast);
     setDirty(false);
     setShowWarning(false);
     router.push('/dashboard');
   };
+
+
   const handleCancelAndLeave = () => {
+    // Reset dirty state and close warning modal
+    setDirty(false);
     setShowWarning(false);
     router.push('/dashboard');
   };
 
   return (
     <>
+    {/* Sidebar container with node components */}
       <aside className="w-64 h-full bg-white border-r border-gray-200 p-4 flex flex-col shadow-lg">
         <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
+          
           <button
             onClick={handleBack}
             className="p-2 rounded-full hover:bg-gray-100 hover:cursor-pointer transition-colors"
@@ -48,15 +60,19 @@ export default function CanvasSidebar() {
           >
             <ArrowLeft size={20} className="text-gray-600" />
           </button>
+
           <h2 className="text-xl font-bold text-gray-800">Components</h2>
           <div className="w-8" />
         </div>
+
         <div className="flex flex-col gap-3 overflow-y-auto">
+          {/* Loop through all defined node types and render draggable blocks */}
           {Object.entries(NODE_CONFIG).map(([nodeType, nodeInfo]) => {
             const IconComponent = nodeInfo.icon;
             return (
               <div
                 key={nodeType}
+                // On drag start, set node type and label into dataTransfer for React Flow
                 onDragStart={(e) => {
                   const nodeInfoObj = { type: nodeType, label: nodeInfo.label };
                   e.dataTransfer.setData('application/reactflow', JSON.stringify(nodeInfoObj));
@@ -79,6 +95,8 @@ export default function CanvasSidebar() {
           })}
         </div>
       </aside>
+
+      {/* Show modal warning user about unsaved changes before leaving */}
       {showWarning && (
         <SaveWarningModal
           onSave={handleSaveAndLeave}

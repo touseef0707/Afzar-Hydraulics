@@ -2,11 +2,13 @@
 
 import { FC } from "react";
 
+// Props definition for the NodeResult component
 interface NodeResultProps {
     result: any;
     nodeType?: string;
 }
 
+// Reusable UI row component to display a label, value, and optional unit
 const LineItem = ({
     label,
     value,
@@ -24,6 +26,7 @@ const LineItem = ({
     </div>
 );
 
+// Format result data specific to 'feed' node type
 const formatFeedResult = (result: any) => {
     const { fluidType, density, viscosity, pressure } = result;
 
@@ -43,6 +46,7 @@ const formatFeedResult = (result: any) => {
     );
 };
 
+// Format result data specific to 'pipe' node type
 const formatPipeResult = (result: any) => {
     const {
         head_loss_m,
@@ -89,6 +93,7 @@ const formatPipeResult = (result: any) => {
     );
 };
 
+// Format result data specific to 'product' node type
 const formatProductResult = (result: any) => {
     const pressureDrop = result?.pressure_drop_Pa;
     return (
@@ -105,8 +110,10 @@ const formatProductResult = (result: any) => {
 };
 
 const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
+    // Don't render anything if result is undefined or null
     if (!result) return null;
 
+    // Choose the correct formatter based on node type
     const renderContent = () => {
         switch (nodeType) {
             case "feed":
@@ -115,6 +122,8 @@ const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
                 return formatPipeResult(result);
             case "product":
                 return formatProductResult(result);
+
+            // Fallback: render raw JSON for unsupported node types
             default:
                 return (
                     <pre className="text-[11px] text-gray-300 whitespace-pre-wrap break-words">
@@ -126,6 +135,7 @@ const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
         }
     };
 
+    // Wrapper around the rendered node result with styling
     return (
         <div className="mt-2 bg-gray-600 rounded-md p-2 border border-gray-700 shadow-inner inline-block">
             {renderContent()}
