@@ -4,6 +4,11 @@ import FeedForm from './FeedForm'
 import ProductForm from './ProductForm'
 import PipeForm from './PipeForm'
 
+// Defines the props for the ComponentModal
+// componentType: Determines which form to render (feed, product, or pipe)
+// flowId: Identifier for the current flow
+// nodeId: Identifier for the node being edited
+// onClose: Callback to close the modal
 type ComponentModalProps = {
   componentType: 'feed' | 'product' | 'pipe'
   flowId: string
@@ -11,12 +16,18 @@ type ComponentModalProps = {
   onClose: () => void
 }
 
+// A modal component that renders different forms based on componentType
+// Acts as a container for various node configuration forms
 export default function ComponentModal({
   componentType,
   flowId,
   nodeId,
   onClose,
 }: ComponentModalProps) {
+
+  // Determines which form component to render based on componentType
+  // Returns the appropriate form with required props
+  // Shows fallback message for invalid component types
   function renderForm() {
     switch (componentType) {
       case 'feed':
@@ -29,7 +40,12 @@ export default function ComponentModal({
         return <div>Please select a valid component type.</div>
     }
   }
-
+  
+  // Renders a modal overlay with:
+  // - Semi-transparent background
+  // - Centered content container
+  // - Close button in top-right corner
+  // - Dynamic form content based on componentType
   return (
     <div className="modal-overlay">
       <div className="modal-content">
