@@ -28,10 +28,13 @@ const selector = (state: RFState) => ({
   saveFlow: state.saveFlow,
   loadFlow: state.loadFlow,
   setEditingNodeId: state.setEditingNodeId,
+  setDisplayResults: state.setDisplayResults,
   run: state.run,
   isRunning: state.isRunning,
   runResponse: state.runResponse,
   runError: state.runError,
+  displayResults: state.displayResults,
+  runOnce: state.runOnce
 });
 
 export default function CanvasFlow({ flowId }: { flowId: string }) {
@@ -48,8 +51,10 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     loadFlow,
     setEditingNodeId,
     run,
+    setDisplayResults,
+    displayResults,
+    runOnce,
     isRunning,
-    runResponse,
     runError,
   } = useFlowStore(useShallow(selector));
   const isDirty = useFlowStore((state) => state.isDirty);
@@ -159,14 +164,23 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
           <Controls />
           <Panel position="top-right">
             <div className="flex gap-x-2">
-              <button 
+
+              {runOnce ? <button
+                onClick={() => setDisplayResults(!displayResults)}
+                className={`px-4 py-2 rounded-lg shadow-md transition-all duration-200 hover:cursor-pointer
+                ${displayResults ? "bg-gray-600" : "bg-green-600 hover:bg-green-700"}
+                text-white`}
+              >
+                {displayResults ? "Hide results" : "Show results"}
+              </button> : null}
+
+              <button
                 onClick={handleRun}
                 disabled={isRunning}
-                className={`px-4 py-2 text-white rounded-lg shadow-md transition-all duration-200 ${
-                  isRunning 
-                    ? 'bg-gray-500 cursor-not-allowed' 
-                    : 'bg-red-600 hover:bg-red-700 cursor-pointer'
-                }`}
+                className={`px-4 py-2 text-white rounded-lg shadow-md transition-all duration-200 ${isRunning
+                  ? 'bg-gray-500 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                  }`}
               >
                 {isRunning ? 'Running...' : 'Run'}
               </button>
