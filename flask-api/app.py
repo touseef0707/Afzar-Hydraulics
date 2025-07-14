@@ -80,4 +80,4 @@ def health():                             # noqa: D401
 # ──────────────────────────────────────────────────────────
 if __name__ == "__main__":
     # In production use gunicorn / uwsgi; keep debug=True for dev
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

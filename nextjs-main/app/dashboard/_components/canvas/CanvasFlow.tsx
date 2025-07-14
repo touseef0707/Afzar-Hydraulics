@@ -14,10 +14,8 @@ import "@xyflow/react/dist/style.css";
 import useFlowStore, { RFState, CustomNode } from "@/store/FlowStore";
 import { useShallow } from "zustand/react/shallow";
 import AppNode from "./CustomNode";
-import Modal from "./Modal"; // This should be your ComponentModal
+import Modal from "./Modal";
 import { useToast } from "@/components/Toast";
-import { useRun } from "@/hooks/onRun";
-
 
 const selector = (state: RFState) => ({
   nodes: state.nodes,
@@ -30,6 +28,10 @@ const selector = (state: RFState) => ({
   saveFlow: state.saveFlow,
   loadFlow: state.loadFlow,
   setEditingNodeId: state.setEditingNodeId,
+  run: state.run,
+  isRunning: state.isRunning,
+  runResponse: state.runResponse,
+  runError: state.runError,
 });
 
 export default function CanvasFlow({ flowId }: { flowId: string }) {
@@ -45,30 +47,30 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     saveFlow,
     loadFlow,
     setEditingNodeId,
+    run,
+    isRunning,
+    runResponse,
+    runError,
   } = useFlowStore(useShallow(selector));
   const isDirty = useFlowStore((state) => state.isDirty);
 
-  // Call useRun at the top level
-  const { run, loading, error } = useRun();
-
   // Create a handler for the run button
-  const handleRun = useCallback(() => {
-    // You'll need to prepare the flow data to send to your API
+  const handleRun = useCallback(async () => {
     const flowData = {
       nodes,
       edges,
       flowId
-      // include any other data your API expects
     };
-    run(flowData).then((response) => {
-      // on Success
-      console.log(response)
-      
-    }).catch((err) => {
-      // Error is already handled in useRun, but you could add additional handling here
-      console.error("Run failed:", err);
-    });
-  }, [run, nodes, edges, flowId]);
+
+    try {
+      const response = await run(flowData);
+      console.log("Run successful:", response);
+      showToast("Flow executed successfully!", "success");
+    } catch (error) {
+      console.error("Run failed:", error);
+      showToast(runError || "Failed to execute flow", "error");
+    }
+  }, [run, nodes, edges, flowId, runError, showToast]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -92,10 +94,8 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     return nodes.find((node) => node.id === editingNodeId);
   }, [editingNodeId, nodes]);
 
-  // Get componentType from the node's data
   const componentType = useMemo(() => {
     if (!editingNode?.data?.nodeType) return undefined;
-    // Ensure it's lowercase and matches your modal switcher
     return editingNode.data.nodeType as "feed" | "product" | "pipe" | undefined;
   }, [editingNode]);
 
@@ -127,7 +127,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
         id: `${type}_${Date.now()}`,
         type: "custom",
         position,
-        data: { label, nodeType: type }, // nodeType is important!
+        data: { label, nodeType: type },
       };
       addNode(newNode);
     },
@@ -159,19 +159,23 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
           <Controls />
           <Panel position="top-right">
             <div className="flex gap-x-2">
-            <button 
-              onClick={handleRun}
-              disabled={loading}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 hover:cursor-pointer transition-all duration-200"
-            >
-              Run
-            </button>
-            <button
-              onClick={onSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
-            >
-              Save
-            </button>
+              <button 
+                onClick={handleRun}
+                disabled={isRunning}
+                className={`px-4 py-2 text-white rounded-lg shadow-md transition-all duration-200 ${
+                  isRunning 
+                    ? 'bg-gray-500 cursor-not-allowed' 
+                    : 'bg-red-600 hover:bg-red-700 cursor-pointer'
+                }`}
+              >
+                {isRunning ? 'Running...' : 'Run'}
+              </button>
+              <button
+                onClick={onSave}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
+              >
+                Save
+              </button>
             </div>
           </Panel>
         </ReactFlow>
