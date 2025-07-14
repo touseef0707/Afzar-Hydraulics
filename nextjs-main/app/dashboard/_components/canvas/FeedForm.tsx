@@ -2,6 +2,12 @@
 import { useState, useEffect } from 'react'
 import useFlowStore from '@/store/FlowStore'
 
+
+// Defines the props expected by the FeedForm component
+// flowId: Unique identifier for the flow
+// nodeId: Unique identifier for the node being edited
+// onClose: Callback function to close the form
+// fluidType: Optional preset fluid type (water, oil, or custom)
 type FeedFormProps = {
   flowId: string
   nodeId: string
@@ -10,7 +16,8 @@ type FeedFormProps = {
 
 }
 
-// Enhanced hydraulic parameter limits with typical values
+// Defines minimum, maximum and typical values for hydraulic parameters
+// Used for validation and displaying typical values in the form
 const HYDRAULIC_LIMITS = {
   pressure: { min: 0, max: 10000, typical: { water: 100, oil: 500, custom: Number.NaN } },
   viscosity: { min: 0.1, max: 10000, typical: { water: 1.0, oil: 50, custom: Number.NaN } },
@@ -32,18 +39,24 @@ const FLUID_PRESETS = {
 }
 
 export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: FeedFormProps) {
+  // State for form fields (pressure, viscosity, density)
   const [fields, setFields] = useState({ 
     pressure: '', 
     viscosity: '', 
     density: '' 
   })
+  // State for validation errors
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
+  // Loading state while fetching node data
   const [loading, setLoading] = useState(true)
+  // Current fluid type (water, oil, or custom)
   const [currentFluidType, setCurrentFluidType] = useState(fluidType)
   
   const nodes = useFlowStore(state => state.nodes)
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
+  // Load node data when component mounts or nodeId changes
+  // Applies preset values if fluidType is specified and no existing params
   useEffect(() => {
     const currentNode = nodes.find(node => node.id === nodeId)
     
@@ -54,7 +67,8 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
         density: currentNode.data.params.density || '',
       })
     } else if (fluidType !== 'custom') {
-      // Apply presets for new nodes if fluidType is specified
+      // Applies predefined fluid property values based on fluid type
+      // Resets errors when preset is applied
       applyPreset(fluidType)
     }
     
@@ -72,7 +86,8 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       setErrors({})
     }
   }
-
+  // Handles input changes and updates form state
+  // Auto-detects if current values match any preset configuration
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newFields = { ...fields, [e.target.name]: e.target.value }
     setFields(newFields)
@@ -101,7 +116,10 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       else setCurrentFluidType('custom')
     }
   }
-
+  
+  // Validates form inputs against hydraulic limits
+  // Checks for required fields, valid numbers, and physical constraints
+  // Returns error messages for invalid inputs
   function validate() {
     // const err: { [key: string]: string } = {}
     // const values = {
@@ -156,6 +174,9 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     return {}
   }
 
+  // Handles form submission
+  // Validates inputs, converts to numeric values, and updates node params
+  // Closes the form on successful submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const err = validate()
@@ -177,6 +198,10 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
 
   if (loading) return <div className="form-loading">Loading...</div>
 
+  // Renders the feed parameter form with:
+  // - Fluid type selector (preset buttons)
+  // - Input fields for pressure, viscosity, and density
+  // - Form actions (cancel/save buttons)
   return (
     <form onSubmit={handleSubmit} className="feed-form-flat">
       <h2 className="form-title">Feed Parameters</h2>
