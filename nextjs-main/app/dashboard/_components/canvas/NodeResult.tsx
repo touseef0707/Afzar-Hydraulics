@@ -1,0 +1,136 @@
+"use client";
+
+import { FC } from "react";
+
+interface NodeResultProps {
+    result: any;
+    nodeType?: string;
+}
+
+const LineItem = ({
+    label,
+    value,
+    unit,
+}: {
+    label: string;
+    value: string | number;
+    unit?: string;
+}) => (
+    <div className="flex justify-between text-white/90 text-[11px] leading-tight gap-2">
+        <span className="text-gray-300 whitespace-nowrap">{label}:</span>
+        <span className="text-right whitespace-nowrap">
+            {value} {unit}
+        </span>
+    </div>
+);
+
+const formatFeedResult = (result: any) => {
+    const { fluidType, density, viscosity, pressure } = result;
+
+    return (
+        <div className="space-y-1">
+            {fluidType && <LineItem label="Fluid Type" value={fluidType} />}
+            {density !== undefined && (
+                <LineItem label="Density" value={density} unit="kg/m³" />
+            )}
+            {viscosity !== undefined && (
+                <LineItem label="Viscosity" value={viscosity} unit="cP" />
+            )}
+            {pressure !== undefined && (
+                <LineItem label="Pressure" value={pressure} unit="kPa" />
+            )}
+        </div>
+    );
+};
+
+const formatPipeResult = (result: any) => {
+    const {
+        head_loss_m,
+        friction_factor,
+        pressure_drop_Pa,
+        flow_velocity_m_s,
+        flow_regime,
+        reynolds_number,
+    } = result;
+
+    return (
+        <div className="space-y-1">
+            {head_loss_m !== undefined && (
+                <LineItem label="Head Loss" value={head_loss_m.toFixed(4)} unit="m" />
+            )}
+            {friction_factor !== undefined && (
+                <LineItem
+                    label="Friction Factor"
+                    value={friction_factor.toFixed(6)}
+                />
+            )}
+            {pressure_drop_Pa !== undefined && (
+                <LineItem
+                    label="Pressure Drop"
+                    value={pressure_drop_Pa.toFixed(2)}
+                    unit="Pa"
+                />
+            )}
+            {flow_velocity_m_s !== undefined && (
+                <LineItem
+                    label="Flow Velocity"
+                    value={flow_velocity_m_s.toFixed(3)}
+                    unit="m/s"
+                />
+            )}
+            {flow_regime && <LineItem label="Flow Regime" value={flow_regime} />}
+            {reynolds_number !== undefined && (
+                <LineItem
+                    label="Reynolds #"
+                    value={Math.round(reynolds_number)}
+                />
+            )}
+        </div>
+    );
+};
+
+const formatProductResult = (result: any) => {
+    const pressureDrop = result?.pressure_drop_Pa;
+    return (
+        <div className="space-y-1">
+            {pressureDrop !== undefined && (
+                <LineItem
+                    label="Pressure Drop"
+                    value={pressureDrop.toFixed(2)}
+                    unit="Pa"
+                />
+            )}
+        </div>
+    );
+};
+
+const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
+    if (!result) return null;
+
+    const renderContent = () => {
+        switch (nodeType) {
+            case "feed":
+                return formatFeedResult(result);
+            case "pipe":
+                return formatPipeResult(result);
+            case "product":
+                return formatProductResult(result);
+            default:
+                return (
+                    <pre className="text-[11px] text-gray-300 whitespace-pre-wrap break-words">
+                        {typeof result === "object"
+                            ? JSON.stringify(result, null, 2)
+                            : String(result)}
+                    </pre>
+                );
+        }
+    };
+
+    return (
+        <div className="mt-2 bg-gray-600 rounded-md p-2 border border-gray-700 shadow-inner inline-block">
+            {renderContent()}
+        </div>
+    );
+};
+
+export default NodeResult;

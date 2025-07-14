@@ -52,7 +52,9 @@ export type RFState = {
   runResponse: any | null;
   runError: string | null;
   isRunning: boolean;
-  
+  displayResults: boolean;
+  runOnce: boolean;
+
   // Flow management actions
   setDirty: (dirty: boolean) => void;
   onNodesChange: OnNodesChange;
@@ -69,11 +71,12 @@ export type RFState = {
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
   setEditingNodeId: (nodeId: string | null) => void;
-  
+
   // Run functionality
   run: (flowdata: any) => Promise<any>;
   clearRunResults: () => void;
-  
+  setDisplayResults: (show: boolean) => void;
+
   // Private/internal methods (not exposed outside)
   _filterFlowData: (flowdata: any) => any;
 };
@@ -86,6 +89,8 @@ const useFlowStore = create<RFState>((set, get) => ({
   runResponse: null,
   runError: null,
   isRunning: false,
+  displayResults: true,
+  runOnce: false,
 
   // Flow management actions
   setDirty: (dirty) => set({ isDirty: dirty }),
@@ -182,9 +187,9 @@ const useFlowStore = create<RFState>((set, get) => ({
         if (node.id === nodeId) {
           return {
             ...node,
-            data: { 
-              ...node.data, 
-              params: { ...node.data.params, ...params } 
+            data: {
+              ...node.data,
+              params: { ...node.data.params, ...params }
             }
           };
         }
@@ -199,7 +204,7 @@ const useFlowStore = create<RFState>((set, get) => ({
     set({ isRunning: true, runError: null });
     try {
       const filteredData = get()._filterFlowData(flowdata);
-      
+
       const response = await fetch("http://localhost:5000/api/run", {
         method: "POST",
         headers: {
@@ -209,12 +214,13 @@ const useFlowStore = create<RFState>((set, get) => ({
         mode: 'cors',
         credentials: 'include'
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const result = await response.json();
       set({ runResponse: result });
+      set({ runOnce: true});
       return result;
     } catch (err: any) {
       set({ runError: err.message || "Unknown error" });
@@ -224,24 +230,26 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
-  clearRunResults: () => set({ runResponse: null, runError: null }),
+  clearRunResults: () => set({ runResponse: null, runError: null, runOnce: false }),
+
+  setDisplayResults: (show) => set({ displayResults: show }),
 
   // Internal method for filtering flow data
   _filterFlowData: (flowdata: any): any => {
     if (!flowdata) return flowdata;
-      
+
     // Filter nodes
     const filteredNodes = flowdata.nodes?.map((node: any) => {
       const { measured, position, type, selected, dragging, ...filteredNode } = node;
       return filteredNode;
     }) || [];
-    
+
     // Filter edges
     const filteredEdges = flowdata.edges?.map((edge: any) => {
       const { animated, ...filteredEdge } = edge;
       return filteredEdge;
     }) || [];
-    
+
     return {
       ...flowdata,
       nodes: filteredNodes,
