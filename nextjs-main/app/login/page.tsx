@@ -1,28 +1,32 @@
-'use client';
+'use client'; // Enables client-side interactivity in Next.js
 
+// Import necessary React and Next.js hooks and components
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   signInWithEmailAndPassword,
   signInWithPopup,
   AuthError
 } from 'firebase/auth';
-import { auth, googleProvider } from '@/firebase/clientApp';
+
+import { auth, googleProvider } from '@/firebase/clientApp'; // Firebase configuration
 import Link from 'next/link';
-import { useToast } from '@/components/Toast';
+import { useToast } from '@/components/Toast'; // Custom toast notification hook
 
 const LoginPage = () => {
+  // State management for form inputs and loading
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const router = useRouter();
-  const { showToast } = useToast();
 
+  const router = useRouter(); // For navigation
+  const { showToast } = useToast(); // For showing toast messages
+
+  // Handle email/password sign-in
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       setError('');
       setLoading(true);
@@ -33,18 +37,18 @@ const LoginPage = () => {
       const error = err as AuthError;
       console.error(error);
       showToast("Sign In Failed", "error");
-      setError(getAuthErrorMessage(error.code));
+      setError(getAuthErrorMessage(error.code)); // Get user-friendly error
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle Google sign-in
   const handleGoogleSignIn = async () => {
     try {
       if (!auth || !googleProvider) {
         throw new Error('Authentication service not available');
       }
-      
       setError('');
       setGoogleLoading(true);
       await signInWithPopup(auth, googleProvider);
@@ -60,6 +64,7 @@ const LoginPage = () => {
     }
   };
 
+  // Converts Firebase error codes to user-friendly messages
   const getAuthErrorMessage = (code: string): string => {
     switch (code) {
       case 'auth/invalid-email':
@@ -82,6 +87,8 @@ const LoginPage = () => {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-8">
+
+            {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
               <p className="mt-2 text-gray-600">
@@ -92,6 +99,7 @@ const LoginPage = () => {
               </p>
             </div>
 
+            {/* Error message */}
             {error && (
               <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
                 <div className="flex items-center">
@@ -107,10 +115,11 @@ const LoginPage = () => {
               </div>
             )}
 
+            {/* Google Sign-In Button */}
             <button
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
               {googleLoading ? (
                 <svg className="animate-spin h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -120,13 +129,14 @@ const LoginPage = () => {
               ) : (
                 <>
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.153-2.675-6.735-2.675-5.522 0-10 4.479-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.67-0.069-1.325-0.189-1.955h-9.811z"/>
+                    <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.784-1.664-4.153-2.675-6.735-2.675-5.522 0-10 4.479-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.67-0.069-1.325-0.189-1.955h-9.811z" />
                   </svg>
                   <span>Continue with Google</span>
                 </>
               )}
             </button>
 
+            {/* Divider */}
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -136,6 +146,7 @@ const LoginPage = () => {
               </div>
             </div>
 
+            {/* Email/Password Form */}
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -145,9 +156,8 @@ const LoginPage = () => {
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -162,9 +172,8 @@ const LoginPage = () => {
                   id="password"
                   name="password"
                   type="password"
-                  autoComplete="current-password"
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -180,7 +189,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full flex justify-center items-center py-3 px-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 disabled:opacity-50"
                 >
                   {loading ? (
                     <>
@@ -195,16 +204,14 @@ const LoginPage = () => {
               </div>
             </form>
           </div>
+
+          {/* Footer note */}
           <div className="bg-gray-50 px-8 py-6 text-center">
             <p className="text-xs text-gray-600">
               By signing in, you agree to our{' '}
-              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Terms of Service
-              </a>{' '}
+              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">Terms of Service</a>{' '}
               and{' '}
-              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Privacy Policy
-              </a>
+              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">Privacy Policy</a>
             </p>
           </div>
         </div>
@@ -213,4 +220,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage; // Exporting the login component
