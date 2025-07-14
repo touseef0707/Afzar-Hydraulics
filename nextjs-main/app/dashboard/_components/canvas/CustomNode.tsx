@@ -21,7 +21,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
     deleteNode,
     setEditingNodeId,
     runResponse,
-    displayResults        // <- the new flag you added
+    displayResults        
   } = useFlowStore(
     useShallow(state => ({
       deleteNode: state.deleteNode,
@@ -31,6 +31,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
     }))
   );
 
+  // get the node cofigurations from NODE_CONFIG in flow_config.tsx
   const nodeConfig = NODE_CONFIG[data.nodeType];
 
   if (!nodeConfig) {
@@ -45,6 +46,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
   const textColorClass = COLOR_CLASSES.text[color];
   const bgHoverClass = COLOR_CLASSES.bgHover[color];
 
+  // Handle right-click to edit node
   const handleRightClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setEditingNodeId(id);
@@ -54,6 +56,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
   const showSourceHandle = data.nodeType !== 'product';
   const showTargetHandle = data.nodeType !== 'feed';
 
+  // Get the results for this node
   const nodeResult = runResponse?.results?.[id];
 
   return (
@@ -79,10 +82,12 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
         />
       )}
 
+      {/* Delete node button */}
       <button onClick={() => deleteNode(id)} className="absolute top-0 right-0 w-5 h-5 -mt-2 -mr-2 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center text-gray-400 opacity-0 hover:cursor-pointer group-hover:opacity-100 hover:!text-red-500 hover:!border-red-500 transition-opacity duration-200">
         <X size={14} />
       </button>
 
+      {/* Node label and Icon*/}
       <div className="w-full h-full flex items-center justify-center gap-2">
         <IconComponent size={20} className={textColorClass} />
         <div className="text-center font-medium text-sm text-gray-800">
@@ -90,6 +95,7 @@ const CustomNode: FC<NodeProps<AppNode>> = ({ id, data }) => {
         </div>
       </div>
 
+      {/* Display results only if execution response exists and user has toggled the display on */}
       {displayResults && nodeResult && (
         <div className="absolute top-full left-1/2 mt-1 -translate-x-1/2">
           <NodeResult result={nodeResult} nodeType={data.nodeType} />

@@ -9,6 +9,7 @@ type ProductFormProps = {
 }
 
 export default function ProductForm({nodeId, onClose }: ProductFormProps) {
+  // Form fields representing product parameters (initially empty)
   const [fields, setFields] = useState({ 
     pressure: '',
     temperature: '',
@@ -16,17 +17,21 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
     composition: '',
     vaporFraction: ''
   })
-  
   const [loading, setLoading] = useState(true)
+
+  // Controls visibility of advanced fields section
   const [showAdvanced, setShowAdvanced] = useState(false)
   
-  // Get store methods and state
+  // Get the current list of nodes from the global flow store
   const nodes = useFlowStore(state => state.nodes)
+
+  // Function to update node parameters in the store
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
+  // On mount or when nodeId/nodes change, load existing parameters into form
   useEffect(() => {
     setLoading(true)
-    // Find the current node in the store
+     // Find the node in store matching the given nodeId
     const currentNode = nodes.find(node => node.id === nodeId)
     
     if (currentNode?.data?.params) {
@@ -41,24 +46,28 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
     setLoading(false)
   }, [nodeId, nodes])
 
+  // Handle changes in input fields and update local form state
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setFields(prev => ({ ...prev, [name]: value }))
   }
 
+  // On form submit, update node parameters in the store and close the form
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // Update params in the store
     updateNodeParams(nodeId, fields)
     onClose()
   }
 
+  // Show loading message while form is being prepared
   if (loading) return <div className="form-loading">Loading...</div>
 
   return (
+    // Main form container for product parameter inputs
     <form onSubmit={handleSubmit} className="feed-form-flat">
       <h2 className="form-title">Product Parameters</h2>
       
+      {/* Basic input section with pressure and temperature fields */}
       <div className="form-grid">
         <div className="form-field">
           <label htmlFor="pressure">Operating Pressure (kPag)</label>
@@ -86,6 +95,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
         </div>
       </div>
       
+      {/* Toggle button to show/hide advanced input fields */}
       <button 
         type="button" 
         onClick={() => setShowAdvanced(!showAdvanced)}
@@ -94,6 +104,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
         {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
       </button>
       
+      {/* Advanced input fields for level, vapor fraction, and composition */}
       {showAdvanced && (
         <div className="advanced-fields">
           <div className="form-grid">
@@ -135,6 +146,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
         </div>
       )}
       
+      {/* Submit and cancel buttons at the bottom of the form */}
       <div className="form-actions">
         <button type="button" onClick={onClose} className="btn-cancel">Cancel</button>
         <button type="submit" className="btn-save">Save</button>

@@ -17,7 +17,9 @@ import AppNode from "./CustomNode";
 import Modal from "./Modal";
 import { useToast } from "@/components/Toast";
 
+
 const selector = (state: RFState) => ({
+  // Select only necessary state and actions from the Zustand store
   nodes: state.nodes,
   edges: state.edges,
   editingNodeId: state.editingNodeId,
@@ -38,7 +40,9 @@ const selector = (state: RFState) => ({
 });
 
 export default function CanvasFlow({ flowId }: { flowId: string }) {
+  // Initialize toast notification handler
   const { showToast } = useToast();
+
   const {
     nodes,
     edges,
@@ -59,14 +63,9 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
   } = useFlowStore(useShallow(selector));
   const isDirty = useFlowStore((state) => state.isDirty);
 
-  // Create a handler for the run button
+  // Handles flow execution when "Run" button is clicked
   const handleRun = useCallback(async () => {
-    const flowData = {
-      nodes,
-      edges,
-      flowId
-    };
-
+    const flowData = { nodes, edges, flowId };
     try {
       const response = await run(flowData);
       console.log("Run successful:", response);
@@ -75,8 +74,9 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
       console.error("Run failed:", error);
       showToast(runError || "Failed to execute flow", "error");
     }
-  }, [run, nodes, edges, flowId, runError, showToast]);
+  }, [run, nodes, edges, flowId, runError, showToast, runOnce]);
 
+  // Warn user before page reload if there are unsaved change
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
@@ -90,20 +90,25 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     };
   }, [isDirty]);
 
+  // Utilities to convert between screen and flow coordinates
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
 
+  // Define custom node types for React Flow
   const nodeTypes = useMemo(() => ({ custom: AppNode }), [AppNode]);
 
+  // Find the node currently being edited (if any)
   const editingNode = useMemo(() => {
     if (!editingNodeId) return null;
     return nodes.find((node) => node.id === editingNodeId);
   }, [editingNodeId, nodes]);
 
+  // Extract component type from node data to determine modal content
   const componentType = useMemo(() => {
     if (!editingNode?.data?.nodeType) return undefined;
     return editingNode.data.nodeType as "feed" | "product" | "pipe" | undefined;
   }, [editingNode]);
 
+  // Compute modal screen position based on node position
   const modalPosition = useMemo(() => {
     if (!editingNode) return null;
     return flowToScreenPosition({
@@ -112,12 +117,14 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     });
   }, [editingNode, flowToScreenPosition]);
 
+  // Load flow data when component mounts or flowId changes
   useEffect(() => {
     if (flowId) {
       loadFlow(flowId);
     }
   }, [flowId, loadFlow]);
 
+  // Handle drag-and-drop of new nodes into the canvas
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
@@ -139,6 +146,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     [screenToFlowPosition, addNode]
   );
 
+  // Save flow state to backend or storage
   const onSave = useCallback(() => {
     if (flowId) saveFlow(flowId, showToast);
   }, [flowId, saveFlow, showToast]);
@@ -146,6 +154,8 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
   return (
     <>
       <div className="w-full h-full rounded-xl shadow-lg overflow-hidden bg-white">
+
+        {/* Main canvas area for rendering nodes and edges */}
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -165,6 +175,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
           <Panel position="top-right">
             <div className="flex gap-x-2">
 
+              {/* Toggle button to show/hide execution results (only if runOnce enabled)  */}
               {runOnce ? <button
                 onClick={() => setDisplayResults(!displayResults)}
                 className={`px-4 py-2 rounded-lg shadow-md transition-all duration-200 hover:cursor-pointer
@@ -174,6 +185,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
                 {displayResults ? "Hide results" : "Show results"}
               </button> : null}
 
+              {/* Button to trigger flow execution */}
               <button
                 onClick={handleRun}
                 disabled={isRunning}
@@ -184,6 +196,8 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
               >
                 {isRunning ? 'Running...' : 'Run'}
               </button>
+
+              {/* Button to save current flow state */}
               <button
                 onClick={onSave}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 hover:cursor-pointer transition-all duration-200"
@@ -195,7 +209,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
         </ReactFlow>
       </div>
 
-      {/* Modal: Only show if editingNodeId, modalPosition, and componentType are all valid */}
+      {/* Show modal only when a node is being edited */}
       {editingNodeId && modalPosition && componentType && (
         <Modal
           componentType={componentType}
