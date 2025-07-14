@@ -7,16 +7,22 @@ the React front-end (or any other client).
 """
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 # Local helper functions
 from helpers import execute_flowsheet, print_hydraulic_report
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env variables into os.environ
 
 app = Flask(__name__)
+
+frontend_origin = os.getenv("FRONTEND_ORIGIN")
 
 # CORS: restrict to the front-end origin during development
 CORS(
     app,
-    resources={r"/api/*": {"origins": "http://localhost:3000"}},
+    resources={r"/api/*": {"origins": frontend_origin}},
     supports_credentials=True,
 )
 
@@ -25,7 +31,7 @@ CORS(
 # ──────────────────────────────────────────────────────────
 @app.after_request
 def add_cors_headers(response):           # noqa: D401
-    response.headers["Access-Control-Allow-Origin"]      = "http://localhost:3000"
+    response.headers["Access-Control-Allow-Origin"]      = frontend_origin
     response.headers["Access-Control-Allow-Headers"]     = "Content-Type,Authorization"
     response.headers["Access-Control-Allow-Methods"]     = "GET,POST,PUT,DELETE,OPTIONS"
     response.headers["Access-Control-Allow-Credentials"] = "true"
