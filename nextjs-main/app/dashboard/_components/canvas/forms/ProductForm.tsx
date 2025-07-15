@@ -186,7 +186,7 @@ export default function ProductForm({nodeId, onClose }: ProductFormProps) {
           min-width: 0;
         }
         .form-field-full {
-          grid-column: 1 / 3;
+          grid-column: 1 / 2;
         }
         label {
           font-weight: 600;

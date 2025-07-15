@@ -1,9 +1,11 @@
-import React from 'react';
-import Image from 'next/image';
+import React from 'react';  
+import Image from 'next/image'; // Next.js optimized image component
 
+// Functional component for the About page
 const AboutPage = () => {
   return (
     <main className="bg-gray-50">
+      
       {/* Hero Section */}
       <section className="relative bg-blue-900 text-white py-20">
         <div className="container mx-auto px-6 text-center">
@@ -14,9 +16,11 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Company Story */}
+      {/* Company Story Section */}
       <section className="py-16 px-6 container mx-auto">
         <div className="flex flex-col md:flex-row gap-12 items-center">
+          
+          {/* Left side: Company image */}
           <div className="md:w-1/2">
             <Image 
               src="/images/hydraulic-factory.jpg" 
@@ -26,6 +30,8 @@ const AboutPage = () => {
               className="rounded-lg shadow-xl"
             />
           </div>
+
+          {/* Right side: Company description */}
           <div className="md:w-1/2">
             <h2 className="text-3xl font-bold text-blue-800 mb-6">Our Story</h2>
             <p className="text-gray-700 mb-4">
@@ -34,6 +40,8 @@ const AboutPage = () => {
             <p className="text-gray-700 mb-4">
               With ISO 9001 certification and 50+ dedicated engineers, we deliver cutting-edge solutions for oil & gas, construction, and manufacturing sectors.
             </p>
+
+            {/* Quote box */}
             <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-600">
               <p className="italic text-blue-900">
                 "Precision in motion – powering industries with reliable hydraulic innovation."
@@ -43,17 +51,23 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Key Metrics */}
+      {/* Key Metrics Section */}
       <section className="bg-blue-800 text-white py-12">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          
+          {/* Metric 1 */}
           <div className="p-6">
             <p className="text-5xl font-bold mb-2">18+</p>
             <p className="text-xl">Years of Experience</p>
           </div>
+
+          {/* Metric 2 */}
           <div className="p-6">
             <p className="text-5xl font-bold mb-2">500+</p>
             <p className="text-xl">Clients Worldwide</p>
           </div>
+
+          {/* Metric 3 */}
           <div className="p-6">
             <p className="text-5xl font-bold mb-2">24/7</p>
             <p className="text-xl">Technical Support</p>
@@ -61,9 +75,11 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Core Values */}
+      {/* Core Values Section */}
       <section className="py-16 px-6 container mx-auto">
         <h2 className="text-3xl font-bold text-center text-blue-800 mb-12">Our Core Values</h2>
+        
+        {/* Values displayed in grid layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { title: "Innovation", icon: "⚙️", desc: "Continuous R&D in hydraulic technology" },
@@ -71,15 +87,18 @@ const AboutPage = () => {
             { title: "Safety", icon: "🛡️", desc: "ASME and ISO compliant systems" }
           ].map((item, index) => (
             <div key={index} className="bg-white p-8 rounded-xl shadow-md text-center hover:shadow-lg transition-shadow">
+              {/* Icon for the value */}
               <span className="text-4xl mb-4 inline-block">{item.icon}</span>
+              {/* Title of the value */}
               <h3 className="text-xl font-bold mb-3 text-blue-700">{item.title}</h3>
+              {/* Description of the value */}
               <p className="text-gray-600">{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Call To Action (CTA) Section */}
       <section className="bg-blue-600 text-white py-12 text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-6">Ready to Power Your Operations?</h2>
@@ -92,4 +111,4 @@ const AboutPage = () => {
   );
 };
 
-export default AboutPage;
+export default AboutPage; // Exporting the component as default

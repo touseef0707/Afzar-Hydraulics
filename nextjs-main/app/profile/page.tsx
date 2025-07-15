@@ -1,5 +1,6 @@
-'use client';
+'use client'; // Enables React Client Component behavior in Next.js
 
+// Import necessary hooks and libraries
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
@@ -9,26 +10,35 @@ import {
   updateProfile,
   AuthError
 } from 'firebase/auth';
-import { useAuth } from '@/context/AuthContext';
-import { useProjects } from '@/context/ProjectContext';
-import ProtectedRoute from '@/components/ProtectedRoute'; 
-import ProfileInfo from '@/app/profile/_components/ProfileInfo';  
-import SettingsPanel from '@/app/profile/_components/SettingsPanel'; 
-import ProjectsPanel from '@/app/profile/_components/ProjectsPanel';
-import { useLogout } from '@/hooks/useLogout';
+
+import { useAuth } from '@/context/AuthContext'; // Custom auth context
+import { useProjects } from '@/context/ProjectContext'; // Custom projects context
+import ProtectedRoute from '@/components/ProtectedRoute'; // Wrapper to protect route access
+import ProfileInfo from '@/app/profile/_components/ProfileInfo'; // Component to show profile info
+import SettingsPanel from '@/app/profile/_components/SettingsPanel'; // Component to manage settings
+import ProjectsPanel from '@/app/profile/_components/ProjectsPanel'; // Component to show projects
+import { useLogout } from '@/hooks/useLogout'; // Custom logout hook
 
 export default function ProfilePage() {
+  // Get user and loading state from auth context
   const { user, loading: authLoading } = useAuth();
+  
+  // Logout-related state and logic
   const { handleLogout, isLoading, error } = useLogout();
+  
+  // Get projects from context
   const { 
     projects: contextProjects, 
     loading: projectsLoading, 
     error: projectsError 
-  } = useProjects(); // Use the project context
+  } = useProjects();
+
   const router = useRouter();
+
+  // Manage which tab is active: profile, settings, or projects
   const [activeTab, setActiveTab] = useState<'profile' | 'settings' | 'projects'>('profile');
 
-  // Password-related states
+  // States for password update fields
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,31 +46,34 @@ export default function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
-  // Username-related states
+  // States for updating the username/display name
   const [username, setUsername] = useState(user?.displayName || '');
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuccess, setUsernameSuccess] = useState('');
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
+  // When user data updates, sync the username field
   useEffect(() => {
     if (user) {
       setUsername(user.displayName || '');
     }
   }, [user]);
 
-  // Redirect to login if not authenticated
+  // Redirect to login page if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
   }, [authLoading, user, router]);
 
+  // Handle input change for username
   const handleUsernameInputChange = (value: string) => {
     setUsername(value);
     setUsernameError('');
     setUsernameSuccess('');
   };
 
+  // Submit updated username
   const handleUsernameChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -78,7 +91,7 @@ export default function ProfilePage() {
     setUsernameSuccess('');
 
     try {
-      await updateProfile(user, { displayName: username.trim() });
+      await updateProfile(user, { displayName: username.trim() }); // Firebase update
       setUsernameSuccess("Username updated successfully!");
     } catch (err) {
       const error = err as AuthError;
@@ -89,9 +102,11 @@ export default function ProfilePage() {
     }
   };
 
+  // Submit new password update
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Basic validations
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('Please fill in all fields');
       return;
@@ -116,8 +131,11 @@ export default function ProfilePage() {
     setPasswordSuccess('');
 
     try {
+      // Reauthenticate the user
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       await reauthenticateWithCredential(user, credential);
+
+      // Update password
       await updatePassword(user, newPassword);
 
       setPasswordSuccess('Password changed successfully!');
@@ -127,6 +145,8 @@ export default function ProfilePage() {
     } catch (error: any) {
       console.error('Error changing password:', error);
       let errorMessage = 'Failed to change password. Please try again.';
+
+      // Handle known Firebase error codes
       switch (error.code) {
         case 'auth/wrong-password':
           errorMessage = 'Current password is incorrect';
@@ -146,7 +166,7 @@ export default function ProfilePage() {
     }
   };
 
-  // Format context projects to match the ProjectsPanel expectations
+  // Format project data for ProjectsPanel component
   const formattedProjects = contextProjects.map(project => ({
     id: project.id,
     title: project.name,
@@ -157,6 +177,7 @@ export default function ProfilePage() {
     createdAt: new Date(project.lastModified).getTime()
   }));
 
+  // Show loading spinner if auth or project data is loading
   if (authLoading || projectsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -165,19 +186,23 @@ export default function ProfilePage() {
     );
   }
 
+  // Return nothing if user is still undefined
   if (!user) {
     return null;
   }
 
+  // Main component return (when user is authenticated)
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white shadow rounded-lg overflow-hidden">
+            
+            {/* Profile header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
               <div className="flex flex-col sm:flex-row items-center">
                 <div className="h-24 w-24 rounded-full bg-white flex items-center justify-center text-blue-600 text-4xl font-bold mb-4 sm:mb-0 sm:mr-6">
-                  {user.email?.charAt(0).toUpperCase()}
+                  {user.email?.charAt(0).toUpperCase()} {/* Avatar letter */}
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold">{user.displayName || user.email}</h1>
@@ -189,6 +214,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Tab navigation */}
             <div className="border-b border-gray-200">
               <nav className="flex -mb-px">
                 <button
@@ -226,6 +252,7 @@ export default function ProfilePage() {
               </nav>
             </div>
 
+            {/* Render content based on active tab */}
             <div className="p-6">
               {activeTab === 'profile' && <ProfileInfo user={user} />}
               {activeTab === 'settings' && (
