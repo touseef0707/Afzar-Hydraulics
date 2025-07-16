@@ -104,6 +104,19 @@ const Navbar = () => {
                 )}
               </Link>
             )}
+
+            <Link 
+              href="/services" 
+              className={`relative px-3 py-2 text-sm font-medium group ${isActive('/services') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
+            >
+              Services
+              {isActive('/services') && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-400 animate-underline-dashed"></span>
+              )}
+              {!isActive('/services') && (
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
+              )}
+            </Link>
             
             <Link 
               href="/contact" 
@@ -308,4 +321,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar;                        

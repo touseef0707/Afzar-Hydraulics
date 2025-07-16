@@ -7,10 +7,12 @@ type Event = MouseEvent | TouchEvent;
  * occurs outside of the referenced element.
  * @param ref A React ref object pointing to the element to monitor.
  * @param handler The function to call when an outside click is detected.
+ * @param hasUnsavedChanges Boolean indicating if there are unsaved changes.
  */
 export const useClickOutside = (
-  ref: RefObject<HTMLElement | null>, // Accepts a ref that can be null
-  handler: (event: Event) => void
+  ref: RefObject<HTMLElement | null>,
+  handler: (event: Event) => void,
+  hasUnsavedChanges: boolean = false
 ) => {
   useEffect(() => {
     const listener = (event: Event) => {
@@ -18,6 +20,8 @@ export const useClickOutside = (
       if (!ref.current || ref.current.contains(event.target as Node)) {
         return;
       }
+      
+      // If there are unsaved changes, let the handler decide what to do
       handler(event);
     };
 
@@ -28,5 +32,5 @@ export const useClickOutside = (
       document.removeEventListener('mousedown', listener);
       document.removeEventListener('touchstart', listener);
     };
-  }, [ref, handler]);
+  }, [ref, handler, hasUnsavedChanges]);
 };

@@ -1,30 +1,21 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import useFlowStore from '@/store/FlowStore'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
-
-// Defines the props expected by the FeedForm component
-// flowId: Unique identifier for the flow
-// nodeId: Unique identifier for the node being edited
-// onClose: Callback function to close the form
-// fluidType: Optional preset fluid type (water, oil, or custom)
 type FeedFormProps = {
   flowId: string
   nodeId: string
   onClose: () => void
-  fluidType?: 'water' | 'oil' | 'custom' // Optional prop for preset values
-
+  fluidType?: 'water' | 'oil' | 'custom'
 }
 
-// Defines minimum, maximum and typical values for hydraulic parameters
-// Used for validation and displaying typical values in the form
 const HYDRAULIC_LIMITS = {
   pressure: { min: 0, max: 10000, typical: { water: 100, oil: 500, custom: Number.NaN } },
   viscosity: { min: 0.1, max: 10000, typical: { water: 1.0, oil: 50, custom: Number.NaN } },
   density: { min: 500, max: 2000, typical: { water: 998, oil: 850, custom: Number.NaN } }
 }
 
-// Fluid type presets
 const FLUID_PRESETS = {
   water: {
     pressure: 100,
@@ -39,37 +30,60 @@ const FLUID_PRESETS = {
 }
 
 export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: FeedFormProps) {
-  // State for form fields (pressure, viscosity, density)
   const [fields, setFields] = useState({ 
     pressure: '', 
     viscosity: '', 
     density: '' 
   })
-  // State for validation errors
+  const [initialValues, setInitialValues] = useState({
+    pressure: '',
+    viscosity: '',
+    density: ''
+  })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  // Loading state while fetching node data
   const [loading, setLoading] = useState(true)
-  // Current fluid type (water, oil, or custom)
   const [currentFluidType, setCurrentFluidType] = useState(fluidType)
+  const [showCloseWarning, setShowCloseWarning] = useState(false)
   
+  const formRef = useRef<HTMLFormElement>(null)
   const nodes = useFlowStore(state => state.nodes)
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
-  // Load node data when component mounts or nodeId changes
-  // Applies preset values if fluidType is specified and no existing params
+  const hasUnsavedChanges = useMemo(() => {
+    return (
+      fields.pressure !== initialValues.pressure ||
+      fields.viscosity !== initialValues.viscosity ||
+      fields.density !== initialValues.density
+    )
+  }, [fields, initialValues])
+
+  useClickOutside(formRef, () => {
+    if (hasUnsavedChanges) {
+      setShowCloseWarning(true)
+    } else {
+      onClose()
+    }
+  }, hasUnsavedChanges)
+
   useEffect(() => {
     const currentNode = nodes.find(node => node.id === nodeId)
     
     if (currentNode?.data?.params) {
-      setFields({
-        pressure: currentNode.data.params.pressure || '',
-        viscosity: currentNode.data.params.viscosity || '',
-        density: currentNode.data.params.density || '',
-      })
+      const initial = {
+        pressure: currentNode.data.params.pressure?.toString() || '',
+        viscosity: currentNode.data.params.viscosity?.toString() || '',
+        density: currentNode.data.params.density?.toString() || '',
+      }
+      setFields(initial)
+      setInitialValues(initial)
     } else if (fluidType !== 'custom') {
-      // Applies predefined fluid property values based on fluid type
-      // Resets errors when preset is applied
       applyPreset(fluidType)
+      const presetValues = {
+        pressure: FLUID_PRESETS[fluidType].pressure.toString(),
+        viscosity: FLUID_PRESETS[fluidType].viscosity.toString(),
+        density: FLUID_PRESETS[fluidType].density.toString()
+      }
+      setInitialValues(presetValues)
     }
     
     setLoading(false)
@@ -86,14 +100,12 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       setErrors({})
     }
   }
-  // Handles input changes and updates form state
-  // Auto-detects if current values match any preset configuration
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newFields = { ...fields, [e.target.name]: e.target.value }
     setFields(newFields)
     setErrors({ ...errors, [e.target.name]: '' })
     
-    // Auto-detect if values match a preset
     if (currentFluidType !== 'custom') {
       const currentValues = {
         pressure: parseFloat(newFields.pressure) || 0,
@@ -117,66 +129,10 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     }
   }
   
-  // Validates form inputs against hydraulic limits
-  // Checks for required fields, valid numbers, and physical constraints
-  // Returns error messages for invalid inputs
   function validate() {
-    // const err: { [key: string]: string } = {}
-    // const values = {
-    //   pressure: parseFloat(fields.pressure),
-    //   viscosity: parseFloat(fields.viscosity),
-    //   density: parseFloat(fields.density)
-    // }
-    
-    // // Validate pressure
-    // if (!fields.pressure.trim()) {
-    //   err.pressure = 'Pressure is required'
-    // } else if (isNaN(values.pressure)) {
-    //   err.pressure = 'Must be a valid number'
-    // } else if (values.pressure < HYDRAULIC_LIMITS.pressure.min) {
-    //   err.pressure = `Pressure must be ≥ ${HYDRAULIC_LIMITS.pressure.min} kPa`
-    // } else if (values.pressure > HYDRAULIC_LIMITS.pressure.max) {
-    //   err.pressure = `Pressure must be ≤ ${HYDRAULIC_LIMITS.pressure.max} kPa`
-    // }
-    
-    // // Validate viscosity
-    // if (!fields.viscosity.trim()) {
-    //   err.viscosity = 'Viscosity is required'
-    // } else if (isNaN(values.viscosity)) {
-    //   err.viscosity = 'Must be a valid number'
-    // } else if (values.viscosity < HYDRAULIC_LIMITS.viscosity.min) {
-    //   err.viscosity = `Viscosity must be ≥ ${HYDRAULIC_LIMITS.viscosity.min} cP`
-    // } else if (values.viscosity > HYDRAULIC_LIMITS.viscosity.max) {
-    //   err.viscosity = `Viscosity must be ≤ ${HYDRAULIC_LIMITS.viscosity.max} cP`
-    // }
-    
-    // // Validate density
-    // if (!fields.density.trim()) {
-    //   err.density = 'Density is required'
-    // } else if (isNaN(values.density)) {
-    //   err.density = 'Must be a valid number'
-    // } else if (values.density < HYDRAULIC_LIMITS.density.min) {
-    //   err.density = `Density must be ≥ ${HYDRAULIC_LIMITS.density.min} kg/m³`
-    // } else if (values.density > HYDRAULIC_LIMITS.density.max) {
-    //   err.density = `Density must be ≤ ${HYDRAULIC_LIMITS.density.max} kg/m³`
-    // }
-    
-    // // Cross-validate physical relationships
-    // if (!err.viscosity && !err.density) {
-    //   const kinematicViscosity = values.viscosity / values.density
-    //   if (kinematicViscosity < 0.01) {
-    //     err.viscosity = 'Viscosity too low for this density (check units)'
-    //   } else if (kinematicViscosity > 100) {
-    //     err.viscosity = 'Viscosity unusually high for this density'
-    //   }
-    // }
-    
     return {}
   }
 
-  // Handles form submission
-  // Validates inputs, converts to numeric values, and updates node params
-  // Closes the form on successful submission
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const err = validate()
@@ -189,119 +145,152 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       pressure: parseFloat(fields.pressure),
       viscosity: parseFloat(fields.viscosity),
       density: parseFloat(fields.density),
-      fluidType: currentFluidType // Save the detected fluid type
+      fluidType: currentFluidType
     }
     
     updateNodeParams(nodeId, numericFields)
     onClose()
   }
 
+  const handleConfirmClose = () => {
+    setShowCloseWarning(false)
+    onClose()
+  }
+
+  const handleCancelClose = () => {
+    setShowCloseWarning(false)
+  }
+
   if (loading) return <div className="form-loading">Loading...</div>
 
-  // Renders the feed parameter form with:
-  // - Fluid type selector (preset buttons)
-  // - Input fields for pressure, viscosity, and density
-  // - Form actions (cancel/save buttons)
   return (
-    <form onSubmit={handleSubmit} className="feed-form-flat">
-      <h2 className="form-title">Feed Parameters</h2>
-      
-      {/* Fluid type selector */}
-      <div className="fluid-preset-selector">
-        <label>Fluid Type:</label>
-        <div className="preset-buttons">
-          <button 
-            type="button"
-            className={`preset-btn ${currentFluidType === 'water' ? 'active' : ''}`}
-            onClick={() => applyPreset('water')}
-          >
-            Water
-          </button>
-          <button 
-            type="button"
-            className={`preset-btn ${currentFluidType === 'oil' ? 'active' : ''}`}
-            onClick={() => applyPreset('oil')}
-          >
-            Oil
-          </button>
-          <button 
-            type="button"
-            className={`preset-btn ${currentFluidType === 'custom' ? 'active' : ''}`}
-            onClick={() => setCurrentFluidType('custom')}
-          >
-            Custom
-          </button>
-        </div>
-      </div>
-      
-      <div className="form-grid">
-        <div className="form-field">
-          <label htmlFor="pressure">
-            Pressure (kPag)
-            <span className="hint">Typical: {HYDRAULIC_LIMITS.pressure.typical[currentFluidType] || 'varies'} kPa</span>
-          </label>
-          <input
-            id="pressure"
-            name="pressure"
-            type="number"
-            value={fields.pressure}
-            onChange={handleChange}
-            placeholder={`Enter pressure (${HYDRAULIC_LIMITS.pressure.min}-${HYDRAULIC_LIMITS.pressure.max} kPa)`}
-            className={errors.pressure ? 'input-error' : ''}
-            autoFocus 
-            step="0.1"
-            min={HYDRAULIC_LIMITS.pressure.min}
-            max={HYDRAULIC_LIMITS.pressure.max}
-          />
-          {errors.pressure && <span className="error-text">{errors.pressure}</span>}
+    <>
+      <form ref={formRef} onSubmit={handleSubmit} className="feed-form-flat">
+        <h2 className="form-title">Feed Parameters</h2>
+        
+        <div className="fluid-preset-selector">
+          <label>Fluid Type:</label>
+          <div className="preset-buttons">
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'water' ? 'active' : ''}`}
+              onClick={() => applyPreset('water')}
+            >
+              Water
+            </button>
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'oil' ? 'active' : ''}`}
+              onClick={() => applyPreset('oil')}
+            >
+              Oil
+            </button>
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'custom' ? 'active' : ''}`}
+              onClick={() => setCurrentFluidType('custom')}
+            >
+              Custom
+            </button>
+          </div>
         </div>
         
-        <div className="form-field">
-          <label htmlFor="viscosity">
-            Dynamic Viscosity (cP)
-            <span className="hint">Typical: {HYDRAULIC_LIMITS.viscosity.typical[currentFluidType] || 'varies'} cP</span>
-          </label>
-          <input
-            id="viscosity"
-            name="viscosity"
-            type="number"
-            value={fields.viscosity}
-            onChange={handleChange}
-            placeholder={`Enter viscosity (${HYDRAULIC_LIMITS.viscosity.min}-${HYDRAULIC_LIMITS.viscosity.max} cP)`}
-            className={errors.viscosity ? 'input-error' : ''}
-            step="0.01"
-            min={HYDRAULIC_LIMITS.viscosity.min}
-            max={HYDRAULIC_LIMITS.viscosity.max}
-          />
-          {errors.viscosity && <span className="error-text">{errors.viscosity}</span>}
+        <div className="form-grid">
+          <div className="form-field">
+            <label htmlFor="pressure">
+              Pressure (kPag)
+              <span className="hint">Typical: {HYDRAULIC_LIMITS.pressure.typical[currentFluidType] || 'varies'} kPa</span>
+            </label>
+            <input
+              id="pressure"
+              name="pressure"
+              type="number"
+              value={fields.pressure}
+              onChange={handleChange}
+              placeholder={`Enter pressure (${HYDRAULIC_LIMITS.pressure.min}-${HYDRAULIC_LIMITS.pressure.max} kPa)`}
+              className={errors.pressure ? 'input-error' : ''}
+              autoFocus 
+              step="0.1"
+              min={HYDRAULIC_LIMITS.pressure.min}
+              max={HYDRAULIC_LIMITS.pressure.max}
+            />
+            {errors.pressure && <span className="error-text">{errors.pressure}</span>}
+          </div>
+          
+          <div className="form-field">
+            <label htmlFor="viscosity">
+              Dynamic Viscosity (cP)
+              <span className="hint">Typical: {HYDRAULIC_LIMITS.viscosity.typical[currentFluidType] || 'varies'} cP</span>
+            </label>
+            <input
+              id="viscosity"
+              name="viscosity"
+              type="number"
+              value={fields.viscosity}
+              onChange={handleChange}
+              placeholder={`Enter viscosity (${HYDRAULIC_LIMITS.viscosity.min}-${HYDRAULIC_LIMITS.viscosity.max} cP)`}
+              className={errors.viscosity ? 'input-error' : ''}
+              step="0.01"
+              min={HYDRAULIC_LIMITS.viscosity.min}
+              max={HYDRAULIC_LIMITS.viscosity.max}
+            />
+            {errors.viscosity && <span className="error-text">{errors.viscosity}</span>}
+          </div>
+          
+          <div className="form-field form-field-full">
+            <label htmlFor="density">
+              Density (kg/m³)
+              <span className="hint">Typical: {HYDRAULIC_LIMITS.density.typical[currentFluidType] || 'varies'} kg/m³</span>
+            </label>
+            <input
+              id="density"
+              name="density"
+              type="number"
+              value={fields.density}
+              onChange={handleChange}
+              placeholder={`Enter density (${HYDRAULIC_LIMITS.density.min}-${HYDRAULIC_LIMITS.density.max} kg/m³)`}
+              className={errors.density ? 'input-error' : ''}
+              step="0.1"
+              min={HYDRAULIC_LIMITS.density.min}
+              max={HYDRAULIC_LIMITS.density.max}
+            />
+            {errors.density && <span className="error-text">{errors.density}</span>}
+          </div>
         </div>
         
-        <div className="form-field form-field-full">
-          <label htmlFor="density">
-            Density (kg/m³)
-            <span className="hint">Typical: {HYDRAULIC_LIMITS.density.typical[currentFluidType] || 'varies'} kg/m³</span>
-          </label>
-          <input
-            id="density"
-            name="density"
-            type="number"
-            value={fields.density}
-            onChange={handleChange}
-            placeholder={`Enter density (${HYDRAULIC_LIMITS.density.min}-${HYDRAULIC_LIMITS.density.max} kg/m³)`}
-            className={errors.density ? 'input-error' : ''}
-            step="0.1"
-            min={HYDRAULIC_LIMITS.density.min}
-            max={HYDRAULIC_LIMITS.density.max}
-          />
-          {errors.density && <span className="error-text">{errors.density}</span>}
+        <div className="form-actions">
+          <button type="button" onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} className="btn-cancel">
+            Cancel
+          </button>
+          <button type="submit" className="btn-save">Save</button>
         </div>
-      </div>
-      
-      <div className="form-actions">
-        <button type="button" onClick={onClose} className="btn-cancel">Cancel</button>
-        <button type="submit" className="btn-save">Save</button>
-      </div>
-      
+      </form>
+
+      {showCloseWarning && (
+        <div className="warning-modal-overlay">
+          <div className="warning-modal">
+            <h3>Are you sure you want to close?</h3>
+            <p>Your changes remain unsaved.</p>
+            <div className="warning-modal-actions">
+              <button 
+                type="button" 
+                className="btn-cancel"
+                onClick={handleCancelClose}
+              >
+                No, keep editing
+              </button>
+              <button 
+                type="button" 
+                className="btn-confirm"
+                onClick={handleConfirmClose}
+              >
+                Yes, close without saving
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         .feed-form-flat {
           padding: 0;
@@ -443,6 +432,52 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
           background: #e5e7eb;
           color: #1e293b;
         }
+        .warning-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .warning-modal {
+          background: white;
+          padding: 24px;
+          border-radius: 8px;
+          max-width: 400px;
+          width: 90%;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .warning-modal h3 {
+          margin-top: 0;
+          color: #1e293b;
+          font-size: 1.2rem;
+        }
+        .warning-modal p {
+          margin-bottom: 24px;
+          color: #64748b;
+        }
+        .warning-modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+        }
+        .btn-confirm {
+          background: #dc2626;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+        .btn-confirm:hover {
+          background: #b91c1c;
+        }
         @media (max-width: 600px) {
           .form-grid {
             grid-template-columns: 1fr;
@@ -456,6 +491,6 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
           }
         }
       `}</style>
-    </form>
+    </>
   )
 }

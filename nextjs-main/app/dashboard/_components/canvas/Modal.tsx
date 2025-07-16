@@ -3,6 +3,9 @@
 import FeedForm from './forms/FeedForm'
 import ProductForm from './forms/ProductForm'
 import PipeForm from './forms/PipeForm'
+import ValveForm from './forms/ValveForm'
+import SplitterForm from './forms/SplitterForm'
+import PumpForm from './forms/PumpForm'
 
 // Defines the props for the ComponentModal
 // componentType: Determines which form to render (feed, product, or pipe)
@@ -10,7 +13,7 @@ import PipeForm from './forms/PipeForm'
 // nodeId: Identifier for the node being edited
 // onClose: Callback to close the modal
 type ComponentModalProps = {
-  componentType: 'feed' | 'product' | 'pipe'
+  componentType: 'feed' | 'product' | 'pipe' | 'valve' | 'splitter' | 'pump'
   flowId: string
   nodeId: string
   onClose: () => void
@@ -36,6 +39,13 @@ export default function ComponentModal({
         return <ProductForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
       case 'pipe':
         return <PipeForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
+      case 'valve':
+        return <ValveForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
+      case 'splitter':
+        return <SplitterForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
+      case 'pump':
+        return <PumpForm flowId={flowId} nodeId={nodeId} onClose={onClose} />
+
       default:
         return <div>Please select a valid component type.</div>
     }
