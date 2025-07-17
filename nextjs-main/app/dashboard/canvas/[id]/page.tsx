@@ -4,8 +4,15 @@ import Canvas from '@/app/dashboard/_components/canvas/Canvas';
 // Importing the sidebar component for canvas tools, controls, or navigation
 import CanvasSidebar from '@/app/dashboard/_components/canvas/CanvasSidebar';
 
+interface Props {
+  params: {
+    id: string;
+  };
+}
+
+
 // Async server component to render a specific canvas page based on dynamic route parameter (id)
-export default async function CanvasPage({ params }: { params: { id: string } }) {
+export default async function CanvasPage({ params }: Props) {
   // Destructuring the flow ID from route params
   const { id: flowId } = params;
 
