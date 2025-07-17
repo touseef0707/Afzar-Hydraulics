@@ -68,8 +68,14 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
     const flowData = { nodes, edges, flowId };
     try {
       const response = await run(flowData);
-      console.log("Run successful:", response);
-      showToast("Flow executed successfully!", "success");
+      if (response.order) {
+        setDisplayResults(true);
+        showToast("Flow executed successfully!", "success");
+      } 
+      else{
+        setDisplayResults(false);
+        showToast(response, "error");
+      }
     } catch (error) {
       console.error("Run failed:", error);
       showToast(runError || "Failed to execute flow", "error");

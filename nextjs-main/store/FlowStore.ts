@@ -219,12 +219,17 @@ const useFlowStore = create<RFState>((set, get) => ({
         credentials: 'include'
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
       const result = await response.json();
-      set({ runResponse: result });
-      set({ runOnce: true});
+      
+      if (response.ok) {
+        set({ runResponse: result });
+        set({ runOnce: true});
+      } else {
+        set({runError: result.error || "Unknown error"})
+        set({ runResponse: null });
+        set({ runOnce: false});
+        return result.error;
+      }
       return result;
     } catch (err: any) {
       set({ runError: err.message || "Unknown error" });

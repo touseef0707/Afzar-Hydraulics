@@ -57,6 +57,12 @@ def traversal_order(
 
     return order
 
+def validate_order(order, nodes_raw):
+    expected_sequence = ["feed", "pipe", "product"]
+    actual_sequence = [nodes_raw[nid]["data"]["nodeType"] for nid in order]
+
+    if actual_sequence != expected_sequence:
+        raise ValueError(f"Invalid node execution order: expected {expected_sequence}, got {actual_sequence}")
 
 # ──────────────────────────────────────────────────────────
 # 2.  Solver orchestration – walks the graph in order and
@@ -83,6 +89,8 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
     nodes_raw = {n["id"]: n for n in flowsheet["nodes"]}
     edges     = flowsheet["edges"]
     order     = traversal_order(flowsheet["nodes"], edges)
+
+    validate_order(order, nodes_raw)
 
     results: Dict[str, Any] = {}
 
