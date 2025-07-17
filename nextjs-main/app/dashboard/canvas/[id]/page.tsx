@@ -7,7 +7,7 @@ import CanvasSidebar from '@/app/dashboard/_components/canvas/CanvasSidebar';
 // Async server component to render a specific canvas page based on dynamic route parameter (id)
 export default async function CanvasPage({ params }: { params: { id: string } }) {
   // Destructuring the flow ID from route params
-  const { id: flowId } = await params;
+  const { id: flowId } = params;
 
   return (
     // Main layout wrapper: horizontal flex layout, full viewport height, gray background
