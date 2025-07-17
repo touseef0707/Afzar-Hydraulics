@@ -14,7 +14,7 @@ interface Props {
 // Async server component to render a specific canvas page based on dynamic route parameter (id)
 export default async function CanvasPage({ params }: Props) {
   // Destructuring the flow ID from route params
-  const { id: flowId } = params;
+  const { id } = params;
 
   return (
     // Main layout wrapper: horizontal flex layout, full viewport height, gray background
@@ -26,7 +26,7 @@ export default async function CanvasPage({ params }: Props) {
       {/* Main canvas area on the right */}
       <div className="flex-1 p-4">
         {/* Rendering the Canvas component and passing the flowId as a prop */}
-        <Canvas flowId={flowId} />
+        <Canvas flowId={id} />
       </div>
 
     </main>
