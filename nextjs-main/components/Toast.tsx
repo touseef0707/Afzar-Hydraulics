@@ -31,7 +31,7 @@ const ToastContext = createContext<ToastContextType | null>(null);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [position, setPosition] = useState<ToastPosition>('bottom-right');
+  const [position] = useState<ToastPosition>('bottom-right');
 
   const showToast = (
     content: string,

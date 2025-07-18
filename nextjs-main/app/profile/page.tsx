@@ -22,15 +22,15 @@ import { useLogout } from '@/hooks/useLogout'; // Custom logout hook
 export default function ProfilePage() {
   // Get user and loading state from auth context
   const { user, loading: authLoading } = useAuth();
-  
+
   // Logout-related state and logic
-  const { handleLogout, isLoading, error } = useLogout();
-  
+  const { handleLogout } = useLogout();
+
   // Get projects from context
-  const { 
-    projects: contextProjects, 
-    loading: projectsLoading, 
-    error: projectsError 
+  const {
+    projects: contextProjects,
+    loading: projectsLoading,
+    error: projectsError
   } = useProjects();
 
   const router = useRouter();
@@ -142,24 +142,33 @@ export default function ProfilePage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error changing password:', error);
       let errorMessage = 'Failed to change password. Please try again.';
 
-      // Handle known Firebase error codes
-      switch (error.code) {
-        case 'auth/wrong-password':
-          errorMessage = 'Current password is incorrect';
-          break;
-        case 'auth/requires-recent-login':
-          errorMessage = 'This operation requires recent authentication. Please log out and log in again.';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Password is too weak. Please choose a stronger password.';
-          break;
-        default:
-          errorMessage = error.message || errorMessage;
+      // Type guard: check if error is an object with a `code` property
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        typeof (error as any).code === 'string'
+      ) {
+        const code = (error as any).code;
+        switch (code) {
+          case 'auth/wrong-password':
+            errorMessage = 'Current password is incorrect';
+            break;
+          case 'auth/requires-recent-login':
+            errorMessage = 'This operation requires recent authentication. Please log out and log in again.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Password is too weak. Please choose a stronger password.';
+            break;
+          default:
+            errorMessage = (error as any).message || errorMessage;
+        }
       }
+
       setPasswordError(errorMessage);
     } finally {
       setIsUpdatingPassword(false);
@@ -197,7 +206,7 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white shadow rounded-lg overflow-hidden">
-            
+
             {/* Profile header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
               <div className="flex flex-col sm:flex-row items-center">
@@ -219,33 +228,30 @@ export default function ProfilePage() {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
-                    activeTab === 'profile'
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${activeTab === 'profile'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Profile
                 </button>
 
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
-                    activeTab === 'settings'
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${activeTab === 'settings'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Settings
                 </button>
 
                 <button
                   onClick={() => setActiveTab('projects')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${
-                    activeTab === 'projects'
+                  className={`py-4 px-6 text-center border-b-2 font-medium hover:cursor-pointer text-sm ${activeTab === 'projects'
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   My Projects
                 </button>
@@ -278,7 +284,7 @@ export default function ProfilePage() {
                 />
               )}
               {activeTab === 'projects' && (
-                <ProjectsPanel 
+                <ProjectsPanel
                   projects={formattedProjects}
                   loading={projectsLoading}
                   error={projectsError || ''}

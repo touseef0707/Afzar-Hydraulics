@@ -3,7 +3,6 @@
 import { SettingsPanelProps } from './types'; // Ensure this path is correct
 
 export default function SettingsPanel({
-  user, // Added user prop for initial username display
   currentPassword = '',
   newPassword = '',
   confirmPassword = '',

@@ -1,11 +1,16 @@
+
+
 // Importing the main canvas component where drawing or flow happens
 import Canvas from '@/app/dashboard/_components/canvas/Canvas';
 
 // Importing the sidebar component for canvas tools, controls, or navigation
 import CanvasSidebar from '@/app/dashboard/_components/canvas/CanvasSidebar';
 
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 // Async server component to render a specific canvas page based on dynamic route parameter (id)
-export default async function CanvasPage({ params }: { params: { id: string } }) {
+export default async function CanvasPage({ params }: PageProps) {
   // Destructuring the flow ID from route params
   const { id: flowId } = await params;
 

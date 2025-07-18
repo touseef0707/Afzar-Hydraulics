@@ -12,7 +12,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, loading } = useAuth();
   const pathname = usePathname();
-  const { handleLogout, isLoading, error } = useLogout();
+  const { handleLogout, isLoading } = useLogout();
 
   useEffect(() => {
     const handleScroll = () => {
