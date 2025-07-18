@@ -249,16 +249,15 @@ const Navbar = () => {
             {isActive('/about') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline-dashed"></span>}
           </Link>
           
-          {user && (
-            <Link 
-              href="/dashboard" 
-              className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/dashboard') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Dashboard
-              {isActive('/dashboard') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline-dashed"></span>}
-            </Link>
-          )}
+          <Link 
+            href="/services" 
+            className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/services') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
+
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Services
+            {isActive('/services') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline"></span>}
+          </Link>
           
           <Link 
             href="/contact" 
