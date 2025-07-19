@@ -12,7 +12,7 @@ export default function CanvasSidebar() {
   const router = useRouter();
   const params = useParams();
   const flowId = params?.id as string;
-  const { clearNodesAndEdges } = useFlowStore();
+  const { clearNodesAndEdges, clearRunResults } = useFlowStore();
 
   const {
     showWarning,
@@ -25,6 +25,7 @@ export default function CanvasSidebar() {
   const handleBack = () => {
     handleNavigationAttempt(() => {
       clearNodesAndEdges();
+      clearRunResults();
       router.push('/dashboard');
     });
   };
