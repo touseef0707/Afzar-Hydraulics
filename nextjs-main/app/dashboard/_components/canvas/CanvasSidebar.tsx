@@ -38,6 +38,7 @@ export default function CanvasSidebar() {
     saveFlow(flowId, showToast);
     setDirty(false);
     setShowWarning(false);
+    clearRunResults();
     router.push('/dashboard');
   };
 
