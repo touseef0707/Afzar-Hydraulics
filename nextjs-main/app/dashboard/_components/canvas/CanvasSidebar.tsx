@@ -43,10 +43,7 @@ export default function CanvasSidebar() {
 
 
   const handleCancelAndLeave = () => {
-    // Reset dirty state and close warning modal
-    setDirty(false);
     setShowWarning(false);
-    router.push('/dashboard');
   };
 
   return (
