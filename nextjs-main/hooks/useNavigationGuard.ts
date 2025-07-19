@@ -62,6 +62,7 @@ export function useNavigationGuard(flowId: string) {
   const handleBackNavigation = () => {
     handleNavigationAttempt(() => {
       clearNodesAndEdges();
+      clearRunResults();
       router.push('/dashboard');
     });
   };
