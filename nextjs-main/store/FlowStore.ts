@@ -75,6 +75,7 @@ export type RFState = {
   // Run functionality
   run: (flowdata: any) => Promise<any>;
   clearRunResults: () => void;
+  clearNodesAndEdges: () => void;
   setDisplayResults: (show: boolean) => void;
 
   // Private/internal methods (not exposed outside)
@@ -239,7 +240,12 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
-  clearRunResults: () => set({ runResponse: null, runError: null, runOnce: false }),
+  clearRunResults: () => set({ 
+    runResponse: null, 
+    runError: null, 
+    runOnce: false}),
+
+  clearNodesAndEdges: () => set({ nodes: [], edges: [], isDirty: false }),
 
   setDisplayResults: (show) => set({ displayResults: show }),
 

@@ -1,51 +1,34 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, GripVertical } from 'lucide-react';
 import { NODE_CONFIG, COLOR_CLASSES } from './flow_config';
-import useFlowStore from '@/store/FlowStore';
+import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 import SaveWarningModal from './SaveWarningModal';
-import { useToast } from '@/components/Toast';
+import useFlowStore from '@/store/FlowStore';
 
 export default function CanvasSidebar() {
   const router = useRouter();
   const params = useParams();
   const flowId = params?.id as string;
-  const { showToast } = useToast();
+  const { clearNodesAndEdges } = useFlowStore();
+  
+  const {
+    showWarning,
+    handleSaveAndLeave,
+    handleCancelAndLeave,
+    handleNavigationAttempt
+  } = useNavigationGuard(flowId);
 
-  // Zustand selector to check if there are unsaved changes in the flow
-  const isDirty = useFlowStore((state) => state.isDirty);
-  const setDirty = useFlowStore((state) => state.setDirty);
-  const saveFlow = useFlowStore((state) => state.saveFlow);
-  const clearRunResults = useFlowStore((state) => state.clearRunResults);
-
-  // Controls visibility of the unsaved changes warning modal
-  const [showWarning, setShowWarning] = useState(false);
 
   const handleBack = () => {
-    // If there are unsaved changes, show warning modal
-    if (isDirty) {
-      setShowWarning(true);
-    } else {
-      clearRunResults();
+    handleNavigationAttempt(() => {
+      clearNodesAndEdges();
       router.push('/dashboard');
-    }
+    });
   };
 
-  const handleSaveAndLeave = () => {
-    // Save the flow and then navigate back to dashboard
-    saveFlow(flowId, showToast);
-    setDirty(false);
-    setShowWarning(false);
-    clearRunResults();
-    router.push('/dashboard');
-  };
-
-
-  const handleCancelAndLeave = () => {
-    setShowWarning(false);
-  };
 
   return (
     <>
