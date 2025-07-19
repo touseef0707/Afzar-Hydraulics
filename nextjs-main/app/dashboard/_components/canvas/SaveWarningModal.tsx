@@ -3,9 +3,14 @@ import React from 'react';
 interface SaveWarningModalProps {
   onSave: () => void;
   onCancel: () => void;
+  onForceLeave: () => void; // Add this new prop
 }
 
-const SaveWarningModal: React.FC<SaveWarningModalProps> = ({ onSave, onCancel }) => (
+const SaveWarningModal: React.FC<SaveWarningModalProps> = ({
+  onSave,
+  onCancel,
+  onForceLeave
+}) => (
   <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
     <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
       <h2 className="text-xl font-bold mb-4 text-red-600">Unsaved Changes</h2>
@@ -20,10 +25,16 @@ const SaveWarningModal: React.FC<SaveWarningModalProps> = ({ onSave, onCancel })
           Cancel
         </button>
         <button
+          onClick={onForceLeave}
+          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+        >
+          Don't Save
+        </button>
+        <button
           onClick={onSave}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Save & Leave
+          Save
         </button>
       </div>
     </div>

@@ -13,14 +13,14 @@ export default function CanvasSidebar() {
   const params = useParams();
   const flowId = params?.id as string;
   const { clearNodesAndEdges } = useFlowStore();
-  
+
   const {
     showWarning,
     handleSaveAndLeave,
     handleCancelAndLeave,
-    handleNavigationAttempt
+    handleNavigationAttempt,
+    handleForceLeave,
   } = useNavigationGuard(flowId);
-
 
   const handleBack = () => {
     handleNavigationAttempt(() => {
@@ -29,13 +29,12 @@ export default function CanvasSidebar() {
     });
   };
 
-
   return (
     <>
-    {/* Sidebar container with node components */}
+      {/* Sidebar container with node components */}
       <aside className="w-64 h-full bg-white border-r border-gray-200 p-4 flex flex-col shadow-lg">
         <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-200">
-          
+
           <button
             onClick={handleBack}
             className="p-2 rounded-full hover:bg-gray-100 hover:cursor-pointer transition-colors"
@@ -84,6 +83,7 @@ export default function CanvasSidebar() {
         <SaveWarningModal
           onSave={handleSaveAndLeave}
           onCancel={handleCancelAndLeave}
+          onForceLeave={handleForceLeave}
         />
       )}
     </>

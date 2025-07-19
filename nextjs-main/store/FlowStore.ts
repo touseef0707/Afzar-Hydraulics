@@ -66,7 +66,7 @@ export type RFState = {
   saveFlow: (
     flowId: string,
     showToast?: (message: string, type: "success" | "error") => void
-  ) => void;
+  ) => Promise<void>;
   loadFlow: (flowId: string) => Promise<void>;
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
@@ -130,7 +130,7 @@ const useFlowStore = create<RFState>((set, get) => ({
 
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
 
-  saveFlow: (flowId: string, showToast?) => {
+  saveFlow: async (flowId: string, showToast?) => {
     try {
       const { nodes, edges } = get();
       const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
@@ -221,14 +221,14 @@ const useFlowStore = create<RFState>((set, get) => ({
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         set({ runResponse: result });
-        set({ runOnce: true});
+        set({ runOnce: true });
       } else {
-        set({runError: result.error || "Unknown error"})
+        set({ runError: result.error || "Unknown error" })
         set({ runResponse: null });
-        set({ runOnce: false});
+        set({ runOnce: false });
         return result.error;
       }
       return result;
@@ -240,10 +240,11 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
-  clearRunResults: () => set({ 
-    runResponse: null, 
-    runError: null, 
-    runOnce: false}),
+  clearRunResults: () => set({
+    runResponse: null,
+    runError: null,
+    runOnce: false
+  }),
 
   clearNodesAndEdges: () => set({ nodes: [], edges: [], isDirty: false }),
 

@@ -18,7 +18,7 @@ export function useNavigationGuard(flowId: string) {
       clearNodesAndEdges: state.clearNodesAndEdges
     }))
   );
-  
+
   const [showWarning, setShowWarning] = useState(false);
   const [navigationAction, setNavigationAction] = useState<(() => void) | null>(null);
 
@@ -45,11 +45,25 @@ export function useNavigationGuard(flowId: string) {
     setNavigationAction(null);
   };
 
-  const handleForceLeave = () => {
+  const handleForceLeave = async () => {
     setDirty(false);
-    setShowWarning(false);
     clearRunResults();
-    if (navigationAction) navigationAction();
+    clearNodesAndEdges();
+    setShowWarning(false);
+
+    // Wait for state updates to complete
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Execute navigation
+    router.push('/dashboard')
+    setNavigationAction(null);
+  };
+
+  const handleBackNavigation = () => {
+    handleNavigationAttempt(() => {
+      clearNodesAndEdges();
+      router.push('/dashboard');
+    });
   };
 
   useEffect(() => {
@@ -62,11 +76,7 @@ export function useNavigationGuard(flowId: string) {
     };
 
     const handlePopState = () => {
-      handleNavigationAttempt(() => {
-        window.history.pushState(null, '', window.location.pathname);
-        clearNodesAndEdges();
-        router.push('/dashboard');
-      });
+      handleBackNavigation();
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -79,13 +89,14 @@ export function useNavigationGuard(flowId: string) {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [isDirty, router]);
+  }, [isDirty]);
 
   return {
     showWarning,
     handleSaveAndLeave,
     handleCancelAndLeave,
     handleForceLeave,
-    handleNavigationAttempt
+    handleNavigationAttempt,
+    handleBackNavigation
   };
 }
