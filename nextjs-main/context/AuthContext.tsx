@@ -27,15 +27,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // 1. Log when the authentication check begins.
     console.log("[AuthContext] Initializing auth listener...");
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         // 2a. Log when a user is successfully identified.
         console.log(`[AuthContext] User is LOGGED IN:`, currentUser.email);
         setUser(currentUser);
+        
+        const token = await currentUser.getIdToken();
+        await manageSessionToken(token, 'SET');
       } else {
         // 2b. Log when no user is signed in.
         console.log("[AuthContext] User is LOGGED OUT.");
         setUser(null);
+        await manageSessionToken('', 'CLEAR');
       }
       
       setLoading(false);
@@ -47,6 +51,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+  const manageSessionToken = async (token: string, action: 'SET' | 'CLEAR') => {
+    try {
+      const response = await fetch('/api/session', {
+        method: action === 'SET' ? 'POST' : 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: action === 'SET' ? JSON.stringify({ token }) : undefined,
+      });
+      if (!response.ok) throw new Error('Session update failed');
+    } catch (error) {
+      console.error('Session management error:', error);
+    }
+  };
+
   const value = { user, loading };
 
   // Render children only after the initial auth check is complete.
@@ -57,3 +74,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+

@@ -13,7 +13,6 @@ import {
 
 import { useAuth } from '@/context/AuthContext'; // Custom auth context
 import { useProjects } from '@/context/ProjectContext'; // Custom projects context
-import ProtectedRoute from '@/components/ProtectedRoute'; // Wrapper to protect route access
 import ProfileInfo from '@/app/profile/_components/ProfileInfo'; // Component to show profile info
 import SettingsPanel from '@/app/profile/_components/SettingsPanel'; // Component to manage settings
 import ProjectsPanel from '@/app/profile/_components/ProjectsPanel'; // Component to show projects
@@ -202,7 +201,6 @@ export default function ProfilePage() {
 
   // Main component return (when user is authenticated)
   return (
-    <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -294,6 +292,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </ProtectedRoute>
+    
   );
 }

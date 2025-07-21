@@ -64,8 +64,8 @@ const Navbar = () => {
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className={`relative px-3 py-2 text-sm font-medium group ${isActive('/') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
             >
               Home
@@ -76,9 +76,9 @@ const Navbar = () => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
               )}
             </Link>
-            
-            <Link 
-              href="/about" 
+
+            <Link
+              href="/about"
               className={`relative px-3 py-2 text-sm font-medium group ${isActive('/about') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
             >
               About
@@ -89,10 +89,10 @@ const Navbar = () => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
               )}
             </Link>
-            
+
             {user && (
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className={`relative px-3 py-2 text-sm font-medium group ${isActive('/dashboard') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
               >
                 Dashboard
@@ -105,8 +105,8 @@ const Navbar = () => {
               </Link>
             )}
 
-            <Link 
-              href="/services" 
+            <Link
+              href="/services"
               className={`relative px-3 py-2 text-sm font-medium group ${isActive('/services') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
             >
               Services
@@ -117,9 +117,9 @@ const Navbar = () => {
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
               )}
             </Link>
-            
-            <Link 
-              href="/contact" 
+
+            <Link
+              href="/contact"
               className={`relative px-3 py-2 text-sm font-medium group ${isActive('/contact') ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
             >
               Contact
@@ -150,10 +150,10 @@ const Navbar = () => {
                   <span className="ml-2 text-sm font-medium text-gray-300 hidden sm:block">
                     {user.displayName || user.email}
                   </span>
-                  <svg 
-                    className={`ml-1 h-5 w-5 text-gray-400 transform transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : 'rotate-0'}`} 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
+                  <svg
+                    className={`ml-1 h-5 w-5 text-gray-400 transform transition-transform duration-200 ${isProfileMenuOpen ? 'rotate-180' : 'rotate-0'}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -173,21 +173,21 @@ const Navbar = () => {
                       onClick={onLogoutClick}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-150 hover:cursor-pointer"
                     >
-                      {isLoading?'Logging out...':'Log Out'}
+                      {isLoading ? 'Logging out...' : 'Log Out'}
                     </button>
                   </div>
                 )}
               </div>
             ) : (
               <>
-                <Link 
-                  href="/login" 
+                <Link
+                  href="/login"
                   className="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200 border border-gray-700 hover:border-blue-400 hover:cursor-pointer"
                 >
                   Login
                 </Link>
-                <Link 
-                  href="/signup" 
+                <Link
+                  href="/signup"
                   className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 border border-blue-600 hover:border-blue-700 hover:cursor-pointer"
                 >
                   Sign Up
@@ -231,26 +231,26 @@ const Navbar = () => {
       {/* Mobile Menu Content */}
       <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden bg-gray-800`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Home
             {isActive('/') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline"></span>}
           </Link>
-          
-          <Link 
-            href="/about" 
+
+          <Link
+            href="/about"
             className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/about') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             About
             {isActive('/about') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline-dashed"></span>}
           </Link>
-          
-          <Link 
-            href="/services" 
+
+          <Link
+            href="/services"
             className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/services') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
 
             onClick={() => setIsMobileMenuOpen(false)}
@@ -258,16 +258,25 @@ const Navbar = () => {
             Services
             {isActive('/services') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline"></span>}
           </Link>
-          
-          <Link 
-            href="/contact" 
+
+          {user && (<Link
+            href="/dashboard"
+            className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/dashboard') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            Dashboard
+            {isActive('/dashboard') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline"></span>}
+          </Link>)}
+
+          <Link
+            href="/contact"
             className={`block px-3 py-2 rounded-md text-base font-medium ${isActive('/contact') ? 'text-blue-400 bg-gray-900' : 'text-gray-300 hover:text-white hover:bg-gray-700'}`}
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Contact
             {isActive('/contact') && <span className="block h-0.5 mt-1 bg-blue-400 w-full animate-underline-dashed"></span>}
           </Link>
-          
+
           {user ? (
             <div className="pt-4 pb-3 border-t border-gray-700">
               <div className="flex items-center px-5">
