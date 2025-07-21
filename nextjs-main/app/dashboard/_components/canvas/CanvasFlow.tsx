@@ -80,7 +80,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
       console.error("Run failed:", error);
       showToast(runError || "Failed to execute flow", "error");
     }
-  }, [run, nodes, edges, flowId, runError, showToast, runOnce]);
+  }, [run, nodes, edges, flowId, runError, showToast, setDisplayResults]);
 
   // Warn user before page reload if there are unsaved change
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
   const { flowToScreenPosition, screenToFlowPosition } = useReactFlow();
 
   // Define custom node types for React Flow
-  const nodeTypes = useMemo(() => ({ custom: AppNode }), [AppNode]);
+  const nodeTypes = useMemo(() => ({ custom: AppNode }), []);
 
   // Find the node currently being edited (if any)
   const editingNode = useMemo(() => {

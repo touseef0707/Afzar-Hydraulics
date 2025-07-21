@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Project, useProjects } from '@/context/ProjectContext';
+import { Project } from '@/context/ProjectContext';
 import { ref, remove } from 'firebase/database';
 import { database } from '@/firebase/clientApp';
 import { Trash } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/Toast';
+import Image from 'next/image';
 
 // Format date to a more readable format
 const formatDate = (dateString: string) => {
@@ -46,7 +47,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
   const handleDelete = async () => {
     if (!project.id) return;
-    
+
     setIsDeleting(true);
     try {
       const projectRef = ref(database, `projects/${project.id}`);
@@ -79,14 +80,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Project Thumbnail */}
       <div className="relative h-40 bg-gray-200">
-        <img 
-          src={project.thumbnail || '/images/default-project.jpg'} 
+        <Image
+          src={project.thumbnail || '/images/default-project.jpg'}
           alt={`${project.name} thumbnail`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           onError={(e) => {
-            // Fallback if image fails to load
+            // Optional: suppress hydration errors by handling onError client-side
             (e.target as HTMLImageElement).src = '/images/default-project.jpg';
           }}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority // optional, if above-the-fold
         />
         <div className="absolute top-2 right-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}>
@@ -94,12 +98,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           </span>
         </div>
       </div>
-      
+
       {/* Project Info */}
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">{project.name}</h3>
         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
-        
+
         {/* Project Metadata */}
         <div className="flex flex-wrap gap-1 mb-3">
           {project.tags.slice(0, 3).map((tag, index) => (
@@ -113,14 +117,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             </span>
           )}
         </div>
-        
+
         {/* Project Stats */}
         <div className="flex justify-between text-xs text-gray-500 mb-3">
           <span>Nodes: {project.stats.nodeCount}</span>
           <span>Edges: {project.stats.edgeCount}</span>
           <span>Modified: {formatDate(project.lastModified)}</span>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Link href={`/dashboard/canvas/${project.id}`} className="flex-grow">
@@ -128,22 +132,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               Open Project
             </button>
           </Link>
-          <button 
-            onClick={() => setShowDeleteModal(true)} 
+          <button
+            onClick={() => setShowDeleteModal(true)}
             className="bg-red-500 hover:bg-red-600 hover:cursor-pointer text-white p-2 rounded-md transition-colors duration-200"
             aria-label="Delete project"
           >
             <Trash />
           </button>
         </div>
-        
+
         {/* Delete Confirmation Modal */}
         {showDeleteModal && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4 transition-all duration-300">
             <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Delete Project</h3>
               <p className="text-gray-700 mb-6">Are you sure you want to delete <span className="font-semibold">{project.name}</span>? This action cannot be undone.</p>
-              
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowDeleteModal(false)}

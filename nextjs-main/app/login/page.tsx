@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   AuthError
 } from 'firebase/auth';
-
+import { setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/clientApp'; // Firebase configuration
 import Link from 'next/link';
 import { useToast } from '@/components/Toast'; // Custom toast notification hook
@@ -51,6 +51,7 @@ const LoginPage = () => {
       }
       setError('');
       setGoogleLoading(true);
+      await setPersistence(auth, browserSessionPersistence);
       await signInWithPopup(auth, googleProvider);
       showToast("Successfully Signed In!", "success");
       router.push('/');
@@ -119,7 +120,7 @@ const LoginPage = () => {
             <button
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
             >
               {googleLoading ? (
                 <svg className="animate-spin h-5 w-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

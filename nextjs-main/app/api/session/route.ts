@@ -1,15 +1,15 @@
+// app/api/session/route.ts (server-side)
+
 import { NextResponse } from 'next/server'
 import { adminAuth } from '@/firebase/firebase-admin' 
 import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
   const { token } = await request.json()
-  console.log('token', token)
   try {
     // Set session expiration (5 days)
     const expiresIn = 60 * 60 * 24 * 5 * 1000
     const sessionCookie = await adminAuth.createSessionCookie(token, { expiresIn })
-    console.log('sessionCookie', sessionCookie)
     const cookiesStore = cookies(); 
     (await cookiesStore).set('__session', sessionCookie, {
       httpOnly: true,

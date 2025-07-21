@@ -1,5 +1,7 @@
+// firebase/clientApp.ts
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserSessionPersistence } from "firebase/auth";
+
 import { getDatabase, set, ref } from "firebase/database";
 
 const firebaseConfig = {
@@ -28,6 +30,9 @@ if (typeof window !== "undefined") {
   }
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({
+    prompt: 'select_account',
+  })
   database = getDatabase(app);
 }
 export { auth, googleProvider, database, ref, set, onValue, off };
