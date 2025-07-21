@@ -1,6 +1,7 @@
 // app/mobile-not-supported/page.tsx
 
 import { Monitor } from 'lucide-react';   // ✅ lucide icon
+import Link from 'next/link';
 
 export default function MobileNotSupported() {
   return (
@@ -15,12 +16,12 @@ export default function MobileNotSupported() {
         Please switch to a larger screen to continue.
       </p>
 
-      <a
+      <Link
         href="/"
         className="mt-8 inline-block rounded-md bg-indigo-500 px-6 py-3 text-white font-medium hover:bg-indigo-600 transition"
       >
         Back to home
-      </a>
+      </Link>
     </main>
   );
 }
