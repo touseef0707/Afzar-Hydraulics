@@ -1,6 +1,6 @@
 // firebase/clientApp.ts
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, setPersistence, browserSessionPersistence } from "firebase/auth";
+import { getAuth, GoogleAuthProvider} from "firebase/auth";
 
 import { getDatabase, set, ref } from "firebase/database";
 
