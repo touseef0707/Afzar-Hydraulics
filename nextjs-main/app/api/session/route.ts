@@ -1,7 +1,7 @@
 // app/api/session/route.ts (server-side)
 export const runtime = 'nodejs';
 import { NextResponse } from 'next/server'
-import { adminAuth } from '@/firebase/firebase-admin' 
+import { adminAuth } from '@/firebase/admin' 
 import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
