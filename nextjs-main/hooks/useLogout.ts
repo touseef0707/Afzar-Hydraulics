@@ -17,7 +17,6 @@ export const useLogout = () => {
       await signOut(auth);
       // Wait briefly to ensure auth state has propagated
       await new Promise(resolve => setTimeout(resolve, 100));
-      
       // Redirect
       router.push('/login');
     } catch (err) {

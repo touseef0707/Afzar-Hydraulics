@@ -5,6 +5,7 @@ import { useProjects } from '@/context/ProjectContext'; // Custom hook to access
 import ProjectGrid from './_components/projects/ProjectGrid'; // Component to display projects in grid
 import ProjectFilter, { FilterState } from './_components/projects/ProjectFilter'; // Filtering UI + types
 import CreateProjectButton from './_components/projects//CreateProjectButton'; // Button to create a new project
+import { useAuth } from '@/context/AuthContext';
  
 const DashboardPage = () => {
   // Destructure data, loading, and error states from the context
@@ -71,6 +72,11 @@ const DashboardPage = () => {
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
   };
+
+  const { user } = useAuth();
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">

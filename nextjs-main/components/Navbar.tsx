@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/useLogout';
+import { clearSessionCookie } from '@/lib/cookie';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,6 +25,7 @@ const Navbar = () => {
 
   const onLogoutClick = async () => {
     await handleLogout();
+    await clearSessionCookie();
     setIsProfileMenuOpen(false);
     setIsMobileMenuOpen(false);
   };
