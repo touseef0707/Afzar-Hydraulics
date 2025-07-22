@@ -52,7 +52,12 @@ const LoginPage = () => {
       setError('');
       setGoogleLoading(true);
       await setPersistence(auth, browserSessionPersistence);
+
       await signInWithPopup(auth, googleProvider);
+      
+      // waiting for some time before proceeding
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       showToast("Successfully Signed In!", "success");
       router.push('/');
     } catch (err) {

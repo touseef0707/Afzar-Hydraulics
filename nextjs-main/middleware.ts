@@ -18,6 +18,7 @@ export function middleware(request: NextRequest) {
         }
 
         const sessionCookie = request.cookies.get('__session')?.value;
+        console.log(sessionCookie)
 
         // Not logged in → kick to login (you can change the path)
         if (!sessionCookie) {
