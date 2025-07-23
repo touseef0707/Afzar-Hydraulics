@@ -8,10 +8,11 @@ import {
   signInWithPopup,
   AuthError
 } from 'firebase/auth';
-import { setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/clientApp'; // Firebase configuration
 import Link from 'next/link';
 import { useToast } from '@/components/Toast'; // Custom toast notification hook
+
+import { setSessionCookie } from '@/lib/cookie';
 
 const LoginPage = () => {
   // State management for form inputs and loading
@@ -30,7 +31,10 @@ const LoginPage = () => {
     try {
       setError('');
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCred.user.getIdToken();
+      await setSessionCookie(token);
+
       router.push('/');
       showToast("Successfully Signed In!", "success");
     } catch (err) {
@@ -51,13 +55,9 @@ const LoginPage = () => {
       }
       setError('');
       setGoogleLoading(true);
-      await setPersistence(auth, browserSessionPersistence);
-
-      await signInWithPopup(auth, googleProvider);
-      
-      // waiting for some time before proceeding
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const userCred = await signInWithPopup(auth, googleProvider);
+      const token = await userCred.user.getIdToken();
+      await setSessionCookie(token);
       showToast("Successfully Signed In!", "success");
       router.push('/');
     } catch (err) {
