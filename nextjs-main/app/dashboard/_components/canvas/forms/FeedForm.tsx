@@ -11,34 +11,24 @@ type FeedFormProps = {
 }
 
 const HYDRAULIC_LIMITS = {
-  pressure: { min: 0, max: 10000, typical: { water: 100, oil: 500, custom: Number.NaN } },
-  viscosity: { min: 0.1, max: 10000, typical: { water: 1.0, oil: 50, custom: Number.NaN } },
-  density: { min: 500, max: 2000, typical: { water: 998, oil: 850, custom: Number.NaN } }
+  pressure: { min: 0, max: 10000, typical: { water: 100, oil: 500, custom: Number.NaN } }
 }
 
 const FLUID_PRESETS = {
   water: {
-    pressure: 100,
-    viscosity: 1.0,
-    density: 998
+    pressure: 100
   },
   oil: {
-    pressure: 500,
-    viscosity: 50,
-    density: 850
+    pressure: 500
   }
 }
 
 export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: FeedFormProps) {
   const [fields, setFields] = useState({ 
-    pressure: '', 
-    viscosity: '', 
-    density: '' 
+    pressure: ''
   })
   const [initialValues, setInitialValues] = useState({
-    pressure: '',
-    viscosity: '',
-    density: ''
+    pressure: ''
   })
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [loading, setLoading] = useState(true)
@@ -50,11 +40,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
 
   const hasUnsavedChanges = useMemo(() => {
-    return (
-      fields.pressure !== initialValues.pressure ||
-      fields.viscosity !== initialValues.viscosity ||
-      fields.density !== initialValues.density
-    )
+    return fields.pressure !== initialValues.pressure
   }, [fields, initialValues])
 
   useClickOutside(formRef, () => {
@@ -70,18 +56,14 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     
     if (currentNode?.data?.params) {
       const initial = {
-        pressure: currentNode.data.params.pressure?.toString() || '',
-        viscosity: currentNode.data.params.viscosity?.toString() || '',
-        density: currentNode.data.params.density?.toString() || '',
+        pressure: currentNode.data.params.pressure?.toString() || ''
       }
       setFields(initial)
       setInitialValues(initial)
     } else if (fluidType !== 'custom') {
       applyPreset(fluidType)
       const presetValues = {
-        pressure: FLUID_PRESETS[fluidType].pressure.toString(),
-        viscosity: FLUID_PRESETS[fluidType].viscosity.toString(),
-        density: FLUID_PRESETS[fluidType].density.toString()
+        pressure: FLUID_PRESETS[fluidType].pressure.toString()
       }
       setInitialValues(presetValues)
     }
@@ -92,9 +74,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
   function applyPreset(type: 'water' | 'oil' | 'custom') {
     if (type !== 'custom') {
       setFields({
-        pressure: FLUID_PRESETS[type].pressure.toString(),
-        viscosity: FLUID_PRESETS[type].viscosity.toString(),
-        density: FLUID_PRESETS[type].density.toString()
+        pressure: FLUID_PRESETS[type].pressure.toString()
       })
       setCurrentFluidType(type)
       setErrors({})
@@ -107,21 +87,13 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     setErrors({ ...errors, [e.target.name]: '' })
     
     if (currentFluidType !== 'custom') {
-      const currentValues = {
-        pressure: parseFloat(newFields.pressure) || 0,
-        viscosity: parseFloat(newFields.viscosity) || 0,
-        density: parseFloat(newFields.density) || 0
-      }
+      const currentValue = parseFloat(newFields.pressure) || 0
       
       const isWaterPreset = 
-        Math.abs(currentValues.pressure - FLUID_PRESETS.water.pressure) < 5 &&
-        Math.abs(currentValues.viscosity - FLUID_PRESETS.water.viscosity) < 0.5 &&
-        Math.abs(currentValues.density - FLUID_PRESETS.water.density) < 5
+        Math.abs(currentValue - FLUID_PRESETS.water.pressure) < 5
         
       const isOilPreset = 
-        Math.abs(currentValues.pressure - FLUID_PRESETS.oil.pressure) < 50 &&
-        Math.abs(currentValues.viscosity - FLUID_PRESETS.oil.viscosity) < 5 &&
-        Math.abs(currentValues.density - FLUID_PRESETS.oil.density) < 10
+        Math.abs(currentValue - FLUID_PRESETS.oil.pressure) < 50
         
       if (isWaterPreset) setCurrentFluidType('water')
       else if (isOilPreset) setCurrentFluidType('oil')
@@ -143,8 +115,6 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     
     const numericFields = {
       pressure: parseFloat(fields.pressure),
-      viscosity: parseFloat(fields.viscosity),
-      density: parseFloat(fields.density),
       fluidType: currentFluidType
     }
     
@@ -215,46 +185,6 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
               max={HYDRAULIC_LIMITS.pressure.max}
             />
             {errors.pressure && <span className="error-text">{errors.pressure}</span>}
-          </div>
-          
-          <div className="form-field">
-            <label htmlFor="viscosity">
-              Dynamic Viscosity (cP)
-              <span className="hint">Typical: {HYDRAULIC_LIMITS.viscosity.typical[currentFluidType] || 'varies'} cP</span>
-            </label>
-            <input
-              id="viscosity"
-              name="viscosity"
-              type="number"
-              value={fields.viscosity}
-              onChange={handleChange}
-              placeholder={`Enter viscosity (${HYDRAULIC_LIMITS.viscosity.min}-${HYDRAULIC_LIMITS.viscosity.max} cP)`}
-              className={errors.viscosity ? 'input-error' : ''}
-              step="0.01"
-              min={HYDRAULIC_LIMITS.viscosity.min}
-              max={HYDRAULIC_LIMITS.viscosity.max}
-            />
-            {errors.viscosity && <span className="error-text">{errors.viscosity}</span>}
-          </div>
-          
-          <div className="form-field form-field-full">
-            <label htmlFor="density">
-              Density (kg/m³)
-              <span className="hint">Typical: {HYDRAULIC_LIMITS.density.typical[currentFluidType] || 'varies'} kg/m³</span>
-            </label>
-            <input
-              id="density"
-              name="density"
-              type="number"
-              value={fields.density}
-              onChange={handleChange}
-              placeholder={`Enter density (${HYDRAULIC_LIMITS.density.min}-${HYDRAULIC_LIMITS.density.max} kg/m³)`}
-              className={errors.density ? 'input-error' : ''}
-              step="0.1"
-              min={HYDRAULIC_LIMITS.density.min}
-              max={HYDRAULIC_LIMITS.density.max}
-            />
-            {errors.density && <span className="error-text">{errors.density}</span>}
           </div>
         </div>
         
@@ -343,7 +273,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
         }
         .form-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr;
           gap: 18px 18px;
           margin-bottom: 10px;
           width: 100%;
@@ -353,9 +283,6 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
           flex-direction: column;
           gap: 5px;
           min-width: 0;
-        }
-        .form-field-full {
-          grid-column: 1 / 3;
         }
         label {
           font-weight: 600;
@@ -479,13 +406,6 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
           background: #b91c1c;
         }
         @media (max-width: 600px) {
-          .form-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-          .form-field-full {
-            grid-column: 1 / 2;
-          }
           .preset-buttons {
             flex-wrap: wrap;
           }
