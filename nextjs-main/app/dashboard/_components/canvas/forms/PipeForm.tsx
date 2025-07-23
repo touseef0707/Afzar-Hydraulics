@@ -7,6 +7,7 @@ type PipeFormProps = {
   flowId: string
   nodeId: string
   onClose: () => void
+  fluidType?: 'water' | 'oil' | 'custom'
 }
 
 const MIN_DIAMETER = 0.001
@@ -19,27 +20,40 @@ const MIN_FLOW_RATE = 0.001
 const MAX_FLOW_RATE = 10000
 const MIN_DENSITY = 500
 const MAX_DENSITY = 2000
+const MIN_VISCOSITY = 0.1
+const MAX_VISCOSITY = 10000
 
-export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
+const FLUID_PRESETS = {
+  water: {
+    viscosity: 1.0,
+    density: 998
+  },
+  oil: {
+    viscosity: 50,
+    density: 850
+  }
+}
+
+export default function PipeForm({ nodeId, onClose, fluidType = 'custom' }: PipeFormProps) {
   const [fields, setFields] = useState({
     length: '',
     diameter: '',
     roughness: '',
-    volumetricFlowrate: '',
     massFlowRate: '',
-    fluidDensity: '1000'
+    viscosity: '',
+    density: ''
   })
   const [initialValues, setInitialValues] = useState({
     length: '',
     diameter: '',
     roughness: '',
-    volumetricFlowrate: '',
     massFlowRate: '',
-    fluidDensity: '1000'
+    viscosity: '',
+    density: ''
   })
   const [loading, setLoading] = useState(true)
-  const [showAdvanced, setShowAdvanced] = useState(false)
   const [showCloseWarning, setShowCloseWarning] = useState(false)
+  const [currentFluidType, setCurrentFluidType] = useState(fluidType)
   
   const formRef = useRef<HTMLFormElement>(null)
   const nodes = useFlowStore(state => state.nodes)
@@ -50,9 +64,9 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
       fields.length !== initialValues.length ||
       fields.diameter !== initialValues.diameter ||
       fields.roughness !== initialValues.roughness ||
-      fields.volumetricFlowrate !== initialValues.volumetricFlowrate ||
       fields.massFlowRate !== initialValues.massFlowRate ||
-      fields.fluidDensity !== initialValues.fluidDensity
+      fields.viscosity !== initialValues.viscosity ||
+      fields.density !== initialValues.density
     )
   }, [fields, initialValues])
 
@@ -72,57 +86,67 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
         length: currentNode.data.params.length?.toString() || '',
         diameter: currentNode.data.params.diameter?.toString() || '',
         roughness: currentNode.data.params.roughness?.toString() || '',
-        volumetricFlowrate: currentNode.data.params.volumetricFlowrate?.toString() || '',
         massFlowRate: currentNode.data.params.massFlowRate?.toString() || '',
-        fluidDensity: currentNode.data.params.fluidDensity?.toString() || '1000'
+        viscosity: currentNode.data.params.viscosity?.toString() || '',
+        density: currentNode.data.params.density?.toString() || ''
       }
       setFields(initial)
       setInitialValues(initial)
+    } else if (fluidType !== 'custom') {
+      applyPreset(fluidType)
+      const presetValues = {
+        length: '',
+        diameter: '',
+        roughness: '',
+        massFlowRate: '',
+        viscosity: FLUID_PRESETS[fluidType].viscosity.toString(),
+        density: FLUID_PRESETS[fluidType].density.toString()
+      }
+      setInitialValues(presetValues)
     } else {
       setInitialValues({
         length: '',
         diameter: '',
         roughness: '',
-        volumetricFlowrate: '',
         massFlowRate: '',
-        fluidDensity: '1000'
+        viscosity: '',
+        density: ''
       })
     }
     
     setLoading(false)
-  }, [nodeId, nodes])
+  }, [nodeId, nodes, fluidType])
+
+  function applyPreset(type: 'water' | 'oil' | 'custom') {
+    if (type !== 'custom') {
+      setFields(prev => ({
+        ...prev,
+        viscosity: FLUID_PRESETS[type].viscosity.toString(),
+        density: FLUID_PRESETS[type].density.toString()
+      }))
+      setCurrentFluidType(type)
+    }
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setFields(prev => ({ ...prev, [name]: value }))
     
-    if (name === 'volumetricFlowrate' || name === 'massFlowRate' || name === 'fluidDensity') {
-      calculateRelatedFields(name, value)
-    }
-  }
-
-  function calculateRelatedFields(changedField: string, value: string) {
-    const numValue = parseFloat(value) || 0
-    const density = parseFloat(fields.fluidDensity) || 1000
-    
-    try {
-      if (changedField === 'volumetricFlowrate' && numValue > 0) {
-        const massFlow = numValue * density
-        setFields(prev => ({ ...prev, massFlowRate: massFlow.toFixed(4) }))
-      } else if (changedField === 'massFlowRate' && numValue > 0) {
-        const volFlow = numValue / density
-        setFields(prev => ({ ...prev, volumetricFlowrate: volFlow.toFixed(4) }))
-      } else if (changedField === 'fluidDensity' && numValue > 0) {
-        if (fields.volumetricFlowrate) {
-          const massFlow = parseFloat(fields.volumetricFlowrate) * numValue
-          setFields(prev => ({ ...prev, massFlowRate: massFlow.toFixed(4) }))
-        } else if (fields.massFlowRate) {
-          const volFlow = parseFloat(fields.massFlowRate) / numValue
-          setFields(prev => ({ ...prev, volumetricFlowrate: volFlow.toFixed(4) }))
-        }
-      }
-    } catch (e) {
-      console.error("Calculation error:", e)
+    if (currentFluidType !== 'custom' && (name === 'viscosity' || name === 'density')) {
+      const currentViscosity = parseFloat(name === 'viscosity' ? value : fields.viscosity) || 0
+      const currentDensity = parseFloat(name === 'density' ? value : fields.density) || 0
+      
+      const isWaterPreset = 
+        Math.abs(currentViscosity - FLUID_PRESETS.water.viscosity) < 0.5 &&
+        Math.abs(currentDensity - FLUID_PRESETS.water.density) < 5
+        
+      const isOilPreset = 
+        Math.abs(currentViscosity - FLUID_PRESETS.oil.viscosity) < 5 &&
+        Math.abs(currentDensity - FLUID_PRESETS.oil.density) < 10
+        
+      if (isWaterPreset) setCurrentFluidType('water')
+      else if (isOilPreset) setCurrentFluidType('oil')
+      else setCurrentFluidType('custom')
     }
   }
 
@@ -138,7 +162,18 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
       return
     }
     
-    updateNodeParams(nodeId, fields)
+    const numericFields = {
+      ...fields,
+      length: parseFloat(fields.length),
+      diameter: parseFloat(fields.diameter),
+      roughness: parseFloat(fields.roughness),
+      massFlowRate: parseFloat(fields.massFlowRate),
+      viscosity: parseFloat(fields.viscosity),
+      density: parseFloat(fields.density),
+      fluidType: currentFluidType
+    }
+    
+    updateNodeParams(nodeId, numericFields)
     onClose()
   }
 
@@ -158,6 +193,33 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
       <form ref={formRef} onSubmit={handleSubmit} className="feed-form-flat">
         <h2 className="form-title">Pipe Parameters</h2>
         
+        <div className="fluid-preset-selector">
+          <label>Fluid Type:</label>
+          <div className="preset-buttons">
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'water' ? 'active' : ''}`}
+              onClick={() => applyPreset('water')}
+            >
+              Water
+            </button>
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'oil' ? 'active' : ''}`}
+              onClick={() => applyPreset('oil')}
+            >
+              Oil
+            </button>
+            <button 
+              type="button"
+              className={`preset-btn ${currentFluidType === 'custom' ? 'active' : ''}`}
+              onClick={() => setCurrentFluidType('custom')}
+            >
+              Custom
+            </button>
+          </div>
+        </div>
+        
         <div className="form-grid">
           <div className="form-field">
             <label htmlFor="length">Length (m)</label>
@@ -165,8 +227,6 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
               id="length"
               name="length"
               type="number"
-              min={MIN_LENGTH}
-              max={MAX_LENGTH}
               step="0.1"
               value={fields.length}
               onChange={handleChange}
@@ -180,8 +240,6 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
               id="diameter"
               name="diameter"
               type="number"
-              min={MIN_DIAMETER}
-              max={MAX_DIAMETER}
               step="0.001"
               value={fields.diameter}
               onChange={handleChange}
@@ -193,27 +251,11 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
             <input
               id="roughness"
               name="roughness"
-              type="number"
-              min={MIN_ROUGHNESS}
-              max={MAX_ROUGHNESS}
+              type="number"              
               step="0.001"
               value={fields.roughness}
               onChange={handleChange}
               placeholder={`${MIN_ROUGHNESS}-${MAX_ROUGHNESS}mm`} />
-          </div>
-          
-          <div className="form-field">
-            <label htmlFor="volumetricFlowrate">Volumetric Flow (m³/h)</label>
-            <input
-              id="volumetricFlowrate"
-              name="volumetricFlowrate"
-              type="number"
-              min={MIN_FLOW_RATE}
-              max={MAX_FLOW_RATE}
-              step="0.1"
-              value={fields.volumetricFlowrate}
-              onChange={handleChange}
-              placeholder={`${MIN_FLOW_RATE}-${MAX_FLOW_RATE}m³/h`} />
           </div>
           
           <div className="form-field">
@@ -222,37 +264,42 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
               id="massFlowRate"
               name="massFlowRate"
               type="number"
+              step="0.1"
               value={fields.massFlowRate}
               onChange={handleChange}
-              placeholder="Calculated automatically" />
+              placeholder={`${MIN_FLOW_RATE}-${MAX_FLOW_RATE}kg/h`} />
+          </div>
+          
+          <div className="form-field">
+            <label htmlFor="viscosity">
+              Dynamic Viscosity (cP)
+              <span className="hint">Typical: {currentFluidType !== 'custom' ? FLUID_PRESETS[currentFluidType].viscosity : 'varies'} cP</span>
+            </label>
+            <input
+              id="viscosity"
+              name="viscosity"
+              type="number"
+              step="0.01"
+              value={fields.viscosity}
+              onChange={handleChange}
+              placeholder={`${MIN_VISCOSITY}-${MAX_VISCOSITY}cP`} />
+          </div>
+          
+          <div className="form-field">
+            <label htmlFor="density">
+              Density (kg/m³)
+              <span className="hint">Typical: {currentFluidType !== 'custom' ? FLUID_PRESETS[currentFluidType].density : 'varies'} kg/m³</span>
+            </label>
+            <input
+              id="density"
+              name="density"
+              type="number"
+              step="0.1"
+              value={fields.density}
+              onChange={handleChange}
+              placeholder={`${MIN_DENSITY}-${MAX_DENSITY}kg/m³`} />
           </div>
         </div>
-        
-        <button 
-          type="button" 
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="btn-toggle-advanced"
-        >
-          {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
-        </button>
-        
-        {showAdvanced && (
-          <div className="advanced-fields">
-            <div className="form-field">
-              <label htmlFor="fluidDensity">Fluid Density (kg/m³)</label>
-              <input
-                id="fluidDensity"
-                name="fluidDensity"
-                type="number"
-                min={MIN_DENSITY}
-                max={MAX_DENSITY}
-                step="1"
-                value={fields.fluidDensity}
-                onChange={handleChange}
-                placeholder={`${MIN_DENSITY}-${MAX_DENSITY}kg/m³`} />
-            </div>
-          </div>
-        )}
         
         <div className="form-actions">
           <button 
@@ -311,6 +358,36 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
           color: #1e293b;
           letter-spacing: -0.5px;
         }
+        .fluid-preset-selector {
+          margin-bottom: 10px;
+        }
+        .fluid-preset-selector label {
+          display: block;
+          font-weight: 600;
+          color: #334155;
+          margin-bottom: 8px;
+        }
+        .preset-buttons {
+          display: flex;
+          gap: 8px;
+        }
+        .preset-btn {
+          padding: 6px 12px;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          background: #f8fafc;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+        }
+        .preset-btn:hover {
+          background: #e2e8f0;
+        }
+        .preset-btn.active {
+          background: #2563eb;
+          color: white;
+          border-color: #2563eb;
+        }
         .form-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -329,6 +406,12 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
           color: #334155;
           font-size: 1rem;
           margin-bottom: 2px;
+        }
+        .hint {
+          font-weight: normal;
+          color: #64748b;
+          font-size: 0.85rem;
+          margin-left: 8px;
         }
         input {
           padding: 11px 13px;
@@ -382,28 +465,6 @@ export default function PipeForm({ nodeId, onClose }: PipeFormProps) {
         .btn-cancel:hover {
           background: #e5e7eb;
           color: #1e293b;
-        }
-        .btn-toggle-advanced {
-          background: none;
-          border: none;
-          color: #2563eb;
-          font-size: 0.9rem;
-          font-weight: 500;
-          cursor: pointer;
-          text-align: left;
-          padding: 5px 0;
-          margin: 5px 0;
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-        .btn-toggle-advanced:hover {
-          text-decoration: underline;
-        }
-        .advanced-fields {
-          margin-top: 10px;
-          padding-top: 10px;
-          border-top: 1px solid #e2e8f0;
         }
         .warning-modal-overlay {
           position: fixed;
