@@ -155,27 +155,33 @@ export default function PipeForm({ nodeId, onClose, fluidType = 'custom' }: Pipe
   }
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const err = validate()
-    
-    if (Object.keys(err).length > 0) {
-      return
-    }
-    
-    const numericFields = {
-      ...fields,
-      length: parseFloat(fields.length),
-      diameter: parseFloat(fields.diameter),
-      roughness: parseFloat(fields.roughness),
-      massFlowRate: parseFloat(fields.massFlowRate),
-      viscosity: parseFloat(fields.viscosity),
-      density: parseFloat(fields.density),
-      fluidType: currentFluidType
-    }
-    
-    updateNodeParams(nodeId, numericFields)
-    onClose()
+  e.preventDefault()
+  const err = validate()
+  
+  if (Object.keys(err).length > 0) {
+    return
   }
+
+  // Convert mass flow rate (kg/h) to volumetric flow rate (m³/h)
+  const density = parseFloat(fields.density) || 1 // Avoid division by zero
+  const massFlowRate_kg_h = parseFloat(fields.massFlowRate)
+  const volumetricFlowRate_m3_h = massFlowRate_kg_h / density
+
+  const numericFields = {
+    ...fields,
+    length: parseFloat(fields.length),
+    diameter: parseFloat(fields.diameter),
+    roughness: parseFloat(fields.roughness),
+    massFlowRate: massFlowRate_kg_h, // Keep original for reference
+    volumetricFlowRate: volumetricFlowRate_m3_h, // Add converted value
+    viscosity: parseFloat(fields.viscosity),
+    density: density,
+    fluidType: currentFluidType
+  }
+  
+  updateNodeParams(nodeId, numericFields)
+  onClose()
+}
 
   const handleConfirmClose = () => {
     setShowCloseWarning(false)
