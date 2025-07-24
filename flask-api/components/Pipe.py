@@ -21,7 +21,8 @@ class Pipe:
         inner_diameter: float,      # m
         length: float,              # m
         roughness: float,           # mm
-        volumetric_flowrate: float, # m³ h-1
+        mass_flowrate: float,       # kg h-1
+        # volumetric_flowrate: float, # m³ h-1
         density: float,             # kg m-3
         viscosity_cp: float,        # cP
         *,
@@ -31,7 +32,7 @@ class Pipe:
         self.D          = inner_diameter
         self.L          = length
         self.epsilon    = roughness / 1000 # m
-        self.Q          = volumetric_flowrate
+        self.Q          = mass_flowrate / 1000 
         self.rho        = density
         self.mu_cp      = viscosity_cp
         self.mu_pa_s    = viscosity_cp * 1e-3
@@ -139,3 +140,6 @@ class Pipe:
 
     def _darcy_pressure_drop(self) -> float:
         return self.head_loss * self.rho * Pipe.g
+
+    def __repr__(self) -> str:
+        return f"Pipe(D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp})"

@@ -101,6 +101,7 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
         if ntype == "feed":
             # copy-safe access
             results[node_id] = dict(ndata.get("params", {}))
+            print(results[node_id])
 
 
         elif ntype == "pipe":
@@ -115,10 +116,11 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
                 inner_diameter      = float(p["diameter"]),
                 length              = float(p["length"]),
                 roughness           = float(p["roughness"]),
-                volumetric_flowrate = float(p["volumetricFlowrate"]),
-                density             = float(feed["density"]),
-                viscosity_cp        = float(feed["viscosity"]),
+                mass_flowrate       = float(p["massFlowRate"]),
+                density             = float(p["density"]),
+                viscosity_cp        = float(p["viscosity"]),
             )
+            
             results[node_id] = pipe.solve()
 
         elif ntype == "product":

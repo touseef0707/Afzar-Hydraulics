@@ -62,7 +62,7 @@ def run_flowsheet():                      # noqa: D401
     # 2 ─ Execute hydraulic calculations
     try:
         report = execute_flowsheet(flowsheet)
-        print_hydraulic_report(report)
+        # print_hydraulic_report(report)
     except ValueError as exc:
         return jsonify(error=str(exc)), 400
     except Exception:
