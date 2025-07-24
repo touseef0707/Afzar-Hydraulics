@@ -1,37 +1,34 @@
-from .base import Component
 from typing import Any, Iterable
+from .base import Component
 
 class Feed(Component):
     """
-    A component that acts as a data source for a pipeline.
-    It can wrap an iterable data source like a list or generator.
+    A component that acts as a pressurized data source for a pipeline system.
+    It provides both the data stream and the initial pressure condition.
     """
 
-    def __init__(self, name: str, data_source: Iterable[Any]):
+    def __init__(
+        self,
+        id: str,
+        fluid_type: str,
+        pressure: float,  # Pa
+    ):
         """
-        Initializes the Feed with a name and a data source.
+        Initializes the Feed with a id, data source, and initial pressure.
 
         Args:
-            name (str): The name of the component instance.
-            data_source (Iterable[Any]): An iterable object (e.g., list, generator)
-                                         that provides the data.
+            id (str): The id of the component instance.
+            data_source (Iterable[Any]): An iterable object providing the data.
+            pressure (float): Initial pressure in Pascals (kPa).
         """
-        super().__init__(name)
-        self.data_source = data_source
+        self.id=id
+        self.fluid_type = fluid_type
+        self.pressure = pressure  # kPa
 
-    def process(self, data=None) -> Iterable[Any]:
-        """
-        The process for a Feed is to yield its data.
-        This allows it to be used as the starting point in a processing chain.
-
-        Returns:
-            Iterable[Any]: The data from the source.
-        """
-        print(f"Feed '{self.name}' is providing data.")
-        # In a real-world scenario, this could be fetching data from a database,
-        # an API, or reading from a file.
-        return self.data_source
+    def process(self, data=None):
+        print(f"Feed '{self.id}' is providing data at {self.pressure} Pa.")
+        return data
 
     def __repr__(self) -> str:
         """Provides a developer-friendly representation of the Feed."""
-        return f"<Feed name='{self.name}'>"
+        return f"<Feed id='{self.id}', pressure={self.pressure} KPa , fluid_type={self.fluid_type}>"

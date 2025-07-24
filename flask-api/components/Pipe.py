@@ -15,11 +15,11 @@ class Pipe:
 
     def __init__(
         self,
+        id: str,
         inner_diameter: float,      # m
         length: float,              # m
         roughness: float,           # mm
         mass_flowrate: float,       # kg h-1
-        # volumetric_flowrate: float, # m³ h-1
         density: float,             # kg m-3
         viscosity_cp: float,        # cP
         *,
@@ -27,7 +27,7 @@ class Pipe:
         volumetric_flow_rate: Optional[float] = None, # m³/h
         friction_method: FrictionMethod = "auto"
     ) -> None:
-
+        self.id = id
         self.D          = inner_diameter
         self.L          = length
         self.epsilon    = roughness / 1000 # m
@@ -140,4 +140,4 @@ class Pipe:
         return self.head_loss * self.rho * Pipe.g
 
     def __repr__(self) -> str:
-        return f"Pipe(D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp})"
+        return f"Pipe(id={self.id}, D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp})"

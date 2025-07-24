@@ -91,8 +91,8 @@ def run_flowsheet():
             details=str(e)
         ), 500
 
-    # 3. Return success response
-    return jsonify(report), 200
+    # 3 ─ Success
+    return (report, 200)
 
 # ──────────────────────────────────────────────────────────
 # Enhanced health check

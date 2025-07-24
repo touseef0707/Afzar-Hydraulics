@@ -80,99 +80,59 @@ const formatPipeResult = (result: any) => {
 
     return (
         <div className="space-y-1">
-            <div className="border-b border-gray-500 pb-1 mb-1">
-                <LineItem label="Flow Regime" value={flow_regime} />
-                {reynolds_number !== undefined && (
-                    <LineItem 
-                        label="Reynolds Number" 
-                        value={Math.round(reynolds_number)} 
-                    />
-                )}
-            </div>
-
-            <div className="border-b border-gray-500 pb-1 mb-1">
-                {mass_flow_rate_kg_h !== undefined && (
-                    <LineItem 
-                        label="Mass Flow" 
-                        value={mass_flow_rate_kg_h} 
-                        unit="kg/h" 
-                        precision={1}
-                    />
-                )}
-                {volumetric_flow_rate_m3_h !== undefined && (
-                    <LineItem 
-                        label="Volumetric Flow" 
-                        value={volumetric_flow_rate_m3_h} 
-                        unit="m³/h" 
-                        precision={3}
-                    />
-                )}
-                {flow_velocity_m_s !== undefined && (
-                    <LineItem
-                        label="Flow Velocity"
-                        value={flow_velocity_m_s}
-                        unit="m/s"
-                        precision={3}
-                    />
-                )}
-            </div>
-
-            <div className="border-b border-gray-500 pb-1 mb-1">
-                {inlet_pressure_Pa !== undefined && (
-                    <LineItem
-                        label="Inlet Pressure"
-                        value={inlet_pressure_Pa / 1000}
-                        unit="kPa"
-                        precision={3}
-                    />
-                )}
-                {outlet_pressure_Pa !== undefined && (
-                    <LineItem
-                        label="Outlet Pressure"
-                        value={outlet_pressure_Pa / 1000}
-                        unit="kPa"
-                        precision={3}
-                    />
-                )}
-                {pressure_drop_Pa !== undefined && (
-                    <LineItem
-                        label="Pressure Drop"
-                        value={pressure_drop_Pa / 1000}
-                        unit="kPa"
-                        precision={3}
-                    />
-                )}
-            </div>
-
-            <div>
-                {head_loss_m !== undefined && (
-                    <LineItem label="Head Loss" value={head_loss_m} unit="m" precision={4} />
-                )}
-                {friction_factor !== undefined && (
-                    <LineItem
-                        label="Friction Factor"
-                        value={friction_factor}
-                        precision={6}
-                    />
-                )}
-            </div>
+            {head_loss_m !== undefined && (
+                <LineItem label="Head Loss" value={head_loss_m.toFixed(4)} unit="m" />
+            )}
+            {friction_factor !== undefined && (
+                <LineItem
+                    label="Friction Factor"
+                    value={friction_factor.toFixed(6)}
+                />
+            )}
+            {pressure_drop_Pa !== undefined && (
+                <LineItem
+                    label="Pressure Drop"
+                    value={(pressure_drop_Pa/1000).toFixed(2)}
+                    unit="kPa"
+                />
+            )}
+            {flow_velocity_m_s !== undefined && (
+                <LineItem
+                    label="Flow Velocity"
+                    value={flow_velocity_m_s.toFixed(3)}
+                    unit="m/s"
+                />
+            )}
+            {flow_regime && <LineItem label="Flow Regime" value={flow_regime} />}
+            {reynolds_number !== undefined && (
+                <LineItem
+                    label="Reynolds #"
+                    value={reynolds_number.toFixed(2)}
+                />
+            )}
         </div>
     );
 };
 
 const formatProductResult = (result: any) => {
-    const { pressure_Pa } = result;
-
+    const { pressure_drop_Pa, outlet_pressure_Pa } = result;
     return (
         <div className="space-y-1">
-            {pressure_Pa !== undefined && (
+            {pressure_drop_Pa !== undefined && (
                 <LineItem
-                    label="Final Pressure"
-                    value={pressure_Pa / 1000}
+                    label="Pressure Drop"
+                    value={(pressure_drop_Pa/1000).toFixed(2)}
                     unit="kPa"
-                    precision={3}
                 />
             )}
+            {outlet_pressure_Pa !== undefined && (
+                <LineItem
+                    label="Outlet Pressure"
+                    value={(outlet_pressure_Pa/1000).toFixed(2)}
+                    unit="kPa"
+                />
+            )}
+
         </div>
     );
 };
