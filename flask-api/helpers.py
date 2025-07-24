@@ -103,18 +103,11 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
         ntype = ndata["nodeType"]
         params = ndata.get("params", {})
 
-        try:
-            if ntype == "feed":
-                # Initialize system with feed conditions
-                feed_params = {
-                    "pressure": float(params.get("pressure", 0.0)),
-                    "temperature": float(params.get("temperature", 25.0)),
-                    "density": float(params.get("density", 998.0)),
-                    "viscosity": float(params.get("viscosity", 1.0)),
-                    "mass_flow_rate": float(params.get("massFlowRate", 0.0)),
-                }
-                current_pressure = feed_params["pressure"]
-                results[node_id] = feed_params
+        if ntype == "feed":
+            # copy-safe access
+            results[node_id] = dict(ndata.get("params", {}))
+            print(results[node_id])
+
 
             elif ntype == "pipe":
                 # Get upstream conditions
@@ -123,35 +116,16 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
                 )
                 feed = results[upstream_id]
 
-                # Convert mass flow rate (kg/h) to volumetric (m³/h)
-                density = float(params.get("density", feed["density"]))
-                mass_flow_kg_h = float(params.get("massFlowRate", feed["mass_flow_rate"]))
-                volumetric_flow_m3_h = mass_flow_kg_h / density if density > 0 else 0
-
-                # Create and solve pipe model
-                pipe = Pipe(
-                    inner_diameter=float(params["diameter"]),
-                    length=float(params["length"]),
-                    roughness=float(params["roughness"]),
-                    density=density,
-                    viscosity_cp=float(params.get("viscosity", feed["viscosity"])),
-                    mass_flow_rate=mass_flow_kg_h,
-                    friction_method="auto"
-                )
-                pipe_results = pipe.solve()
-
-                # Update system pressure
-                current_pressure -= pipe_results["pressure_drop_Pa"]
-                pipe_results["outlet_pressure_Pa"] = current_pressure
-                pipe_results["inlet_pressure_Pa"] = current_pressure + pipe_results["pressure_drop_Pa"]
-
-                results[node_id] = pipe_results
-
-                # Add warnings for extreme conditions
-                if pipe_results["reynolds_number"] > 100000:
-                    warnings.append(f"High turbulence in pipe {node_id} (Re = {pipe_results['reynolds_number']:.0f})")
-                if pipe_results["flow_velocity_m_s"] > 3.0:
-                    warnings.append(f"High velocity in pipe {node_id} ({pipe_results['flow_velocity_m_s']:.2f} m/s)")
+            pipe = Pipe(
+                inner_diameter      = float(p["diameter"]),
+                length              = float(p["length"]),
+                roughness           = float(p["roughness"]),
+                mass_flowrate       = float(p["massFlowRate"]),
+                density             = float(p["density"]),
+                viscosity_cp        = float(p["viscosity"]),
+            )
+            
+            results[node_id] = pipe.solve()
 
             elif ntype == "product":
                 upstream_id = next(

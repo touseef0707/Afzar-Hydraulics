@@ -111,4 +111,4 @@ const DashboardPage = () => {
   );
 };
 
-export default DashboardPage; // Export the dashboard component
+export default DashboardPage; 

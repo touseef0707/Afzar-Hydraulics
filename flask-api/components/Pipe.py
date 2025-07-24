@@ -18,27 +18,24 @@ class Pipe:
         inner_diameter: float,      # m
         length: float,              # m
         roughness: float,           # mm
-        density: float,             # kg/m³
+        mass_flowrate: float,       # kg h-1
+        # volumetric_flowrate: float, # m³ h-1
+        density: float,             # kg m-3
         viscosity_cp: float,        # cP
         *,
         mass_flow_rate: Optional[float] = None,       # kg/h
         volumetric_flow_rate: Optional[float] = None, # m³/h
         friction_method: FrictionMethod = "auto"
     ) -> None:
-        
-        # Validate flow rate inputs
-        if mass_flow_rate is None and volumetric_flow_rate is None:
-            raise ValueError("Either mass_flow_rate or volumetric_flow_rate must be provided")
-        if mass_flow_rate is not None and volumetric_flow_rate is not None:
-            raise ValueError("Provide only one of mass_flow_rate or volumetric_flow_rate")
 
-        self.D = inner_diameter
-        self.L = length
-        self.epsilon = roughness / 1000  # Convert mm to m
-        self.rho = density
-        self.mu_cp = viscosity_cp
-        self.mu_pa_s = viscosity_cp * 1e-3  # Convert cP to Pa·s
-        self._method = friction_method
+        self.D          = inner_diameter
+        self.L          = length
+        self.epsilon    = roughness / 1000 # m
+        self.Q          = mass_flowrate / 1000 
+        self.rho        = density
+        self.mu_cp      = viscosity_cp
+        self.mu_pa_s    = viscosity_cp * 1e-3
+        self._method    = friction_method
 
         # Calculate flow rates
         if mass_flow_rate is not None:
@@ -140,4 +137,7 @@ class Pipe:
         return (self.friction_factor * self.L * self.velocity ** 2) / (self.D * 2 * self.g)
 
     def _darcy_pressure_drop(self) -> float:
-        return self.head_loss * self.rho * self.g
+        return self.head_loss * self.rho * Pipe.g
+
+    def __repr__(self) -> str:
+        return f"Pipe(D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp})"

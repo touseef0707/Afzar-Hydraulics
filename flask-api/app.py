@@ -80,19 +80,7 @@ def run_flowsheet():
     try:
         start_time = datetime.utcnow()
         report = execute_flowsheet(flowsheet)
-        processing_time = (datetime.utcnow() - start_time).total_seconds()
-        
-        logger.info(
-            f"Calculated flowsheet in {processing_time:.3f}s with {len(report.get('warnings', []))} warnings"
-        )
-        print_hydraulic_report(report)
-        
-        # Add metadata to response
-        report["metadata"] = {
-            "processing_time_s": processing_time,
-            "timestamp": start_time.isoformat(),
-            "version": "1.0"
-        }
+        # print_hydraulic_report(report)
     except ValueError as exc:
         logger.warning(f"Validation error: {str(exc)}")
         return jsonify(error=str(exc)), 400

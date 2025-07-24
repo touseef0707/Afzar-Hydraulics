@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { ToastProvider } from '@/components/Toast';
 import { ProjectProvider } from '@/context/ProjectContext';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: 'Afzar Hydraulics',
@@ -26,6 +27,7 @@ export default function RootLayout({
               <main className="flex-grow">
                 <ToastProvider>
                   {children}
+                  <SpeedInsights />
                 </ToastProvider>
               </main>
               <Footer companyName="Afzar Hydraulics" />
