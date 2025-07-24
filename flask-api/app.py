@@ -70,7 +70,7 @@ def run_flowsheet():                      # noqa: D401
         return jsonify(error="Internal server error"), 500
 
     # 3 ─ Success
-    return jsonify(report), 200
+    return (report, 200)
 
 
 # ──────────────────────────────────────────────────────────

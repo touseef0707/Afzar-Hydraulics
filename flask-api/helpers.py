@@ -15,6 +15,8 @@ from collections import defaultdict, deque
 from typing import Dict, List, Any
 
 from components.Pipe import Pipe
+from components.Feed import Feed
+from components.Product import Product
 
 
 # ──────────────────────────────────────────────────────────
@@ -66,7 +68,7 @@ def validate_order(order, nodes_raw):
 
 # ──────────────────────────────────────────────────────────
 # 2.  Solver orchestration – walks the graph in order and
-#     runs Pipe calculations (extend with other unit ops)
+#     runs component calculations
 # ──────────────────────────────────────────────────────────
 def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -82,64 +84,97 @@ def execute_flowsheet(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
     -------
     dict
         {
-          "order":   [node_id, ...],
+          "order": [node_id, ...],
           "results": {node_id: result_dict, ...}
         }
     """
     nodes_raw = {n["id"]: n for n in flowsheet["nodes"]}
-    edges     = flowsheet["edges"]
-    order     = traversal_order(flowsheet["nodes"], edges)
+    edges = flowsheet["edges"]
+    order = traversal_order(flowsheet["nodes"], edges)
 
     validate_order(order, nodes_raw)
 
     results: Dict[str, Any] = {}
+    components: Dict[str, Any] = {}
 
     for node_id in order:
         ndata = nodes_raw[node_id]["data"]
         ntype = ndata["nodeType"]
+        params = ndata.get("params", {})
 
         if ntype == "feed":
-            # copy-safe access
-            results[node_id] = dict(ndata.get("params", {}))
-            print(results[node_id])
-
+            feed = Feed(
+                id=node_id,
+                fluid_type=params.get("fluid_type", "unknown"),
+                pressure=float(params.get("pressure", 0))
+            )
+            components[node_id] = feed
+            results[node_id] = {
+                "node_type": "feed",
+                "pressure": feed.pressure,
+                "fluid_type": feed.fluid_type
+            }
 
         elif ntype == "pipe":
-            p      = ndata["params"]
-            # find immediate upstream node (assume single inlet)
+            # Find upstream component (assume single inlet)
             upstream_id = next(
                 e["source"] for e in edges if e["target"] == node_id
             )
-            feed = results[upstream_id]
+            upstream_pressure = results[upstream_id]["pressure"]
 
             pipe = Pipe(
-                inner_diameter      = float(p["diameter"]),
-                length              = float(p["length"]),
-                roughness           = float(p["roughness"]),
-                mass_flowrate       = float(p["massFlowRate"]),
-                density             = float(p["density"]),
-                viscosity_cp        = float(p["viscosity"]),
+                id=node_id,
+                inner_diameter=float(params["diameter"]),
+                length=float(params["length"]),
+                roughness=float(params["roughness"]),
+                mass_flowrate=float(params["massFlowRate"]),
+                density=float(params["density"]),
+                viscosity_cp=float(params["viscosity"]),
             )
-            
-            results[node_id] = pipe.solve()
+            components[node_id] = pipe
+            pipe_results = pipe.solve()
+            pipe_results["node_type"] = "pipe"
+            pipe_results["inlet_pressure_Pa"] = upstream_pressure * 1000  #pa
+            pipe_results["outlet_pressure_Pa"] = upstream_pressure - pipe_results["pressure_drop_Pa"]
+            results[node_id] = pipe_results
 
         elif ntype == "product":
-            upstream_id = next(e["source"] for e in edges
-                               if e["target"] == node_id)
+            # Find upstream component (assume single inlet)
+            upstream_id = next(
+                e["source"] for e in edges if e["target"] == node_id
+            )
+            upstream_results = results[upstream_id]
 
-            # default to an empty dict when 'params' is missing
-            params = dict(ndata.get("params", {}))
-            params["pressure_drop_Pa"] = results[upstream_id]["pressure_drop_Pa"]
-            results[node_id] = params
+            product = Product(
+                id=node_id,
+                outlet_pressure=float(params.get("outlet_pressure", 0))
+            )
+            
+            # Calculate outlet pressure based on upstream and pressure drop
+            product.calculate_outlet_pressure(
+                inlet_pressure=upstream_results.get("inlet_pressure_Pa", 0),
+                pressure_drop=upstream_results.get("pressure_drop_Pa", 0)
+            )
+            
+            components[node_id] = product
+            results[node_id] = {
+                "node_type": "product",
+                "inlet_pressure_Pa": upstream_results.get("inlet_pressure_Pa", 0),
+                "pressure_drop_Pa": upstream_results.get("pressure_drop_Pa", 0),
+                "outlet_pressure_Pa": product.get_outlet_pressure(),
+            }
 
         else:
             raise NotImplementedError(f"Unknown node type '{ntype}'")
 
-    return {"order": order, "results": results}
+    return {
+        "order": order,
+        "results": results
+    }
 
 def print_hydraulic_report(report: dict):
     print("\n🔍 Hydraulic Simulation Report")
-    print("=" * 35)
+    print("=" * 50)
 
     order = report.get("order", [])
     results = report.get("results", {})
@@ -148,14 +183,15 @@ def print_hydraulic_report(report: dict):
         element_data = results.get(element_id, {})
         element_type = element_id.split("_")[0].capitalize()
         print(f"\n📌 {element_type} ({element_id}):")
-        print("-" * 35)
+        print("-" * 50)
         
         for key, value in element_data.items():
             # Format the key to be more readable
-            readable_key = key.replace("_", " ").capitalize()
+            readable_key = key.replace("_", " ").title()
             # Format floats with 4 decimal places
             if isinstance(value, float):
                 print(f"{readable_key:30}: {value:.4f}")
             else:
                 print(f"{readable_key:30}: {value}")
-    print("=" * 35 + "\n✅ Report generation complete.\n")
+    
+    print("=" * 50 + "\n✅ Report generation complete.\n")

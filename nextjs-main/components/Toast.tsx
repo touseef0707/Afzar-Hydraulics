@@ -100,10 +100,10 @@ function ToastItem({
 
   // Background colors
   const bgColorMap = {
-    success: 'bg-green-500',
+    success: 'bg-blue-500',
     error: 'bg-red-500',
     warning: 'bg-yellow-500',
-    info: 'bg-blue-500',
+    info: 'bg-indigo-500',
   };
 
   return (

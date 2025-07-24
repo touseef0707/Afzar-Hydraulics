@@ -71,8 +71,8 @@ const formatPipeResult = (result: any) => {
             {pressure_drop_Pa !== undefined && (
                 <LineItem
                     label="Pressure Drop"
-                    value={pressure_drop_Pa.toFixed(2)}
-                    unit="Pa"
+                    value={(pressure_drop_Pa/1000).toFixed(2)}
+                    unit="kPa"
                 />
             )}
             {flow_velocity_m_s !== undefined && (
@@ -86,7 +86,7 @@ const formatPipeResult = (result: any) => {
             {reynolds_number !== undefined && (
                 <LineItem
                     label="Reynolds #"
-                    value={Math.round(reynolds_number)}
+                    value={reynolds_number.toFixed(2)}
                 />
             )}
         </div>
@@ -95,16 +95,24 @@ const formatPipeResult = (result: any) => {
 
 // Format result data specific to 'product' node type
 const formatProductResult = (result: any) => {
-    const pressureDrop = result?.pressure_drop_Pa;
+    const { pressure_drop_Pa, outlet_pressure_Pa } = result;
     return (
         <div className="space-y-1">
-            {pressureDrop !== undefined && (
+            {pressure_drop_Pa !== undefined && (
                 <LineItem
                     label="Pressure Drop"
-                    value={pressureDrop.toFixed(2)}
-                    unit="Pa"
+                    value={(pressure_drop_Pa/1000).toFixed(2)}
+                    unit="kPa"
                 />
             )}
+            {outlet_pressure_Pa !== undefined && (
+                <LineItem
+                    label="Outlet Pressure"
+                    value={(outlet_pressure_Pa/1000).toFixed(2)}
+                    unit="kPa"
+                />
+            )}
+
         </div>
     );
 };
