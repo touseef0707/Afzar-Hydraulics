@@ -2,68 +2,51 @@
 
 import { FC } from "react";
 
+// Props definition for the NodeResult component
 interface NodeResultProps {
     result: any;
     nodeType?: string;
 }
 
+// Reusable UI row component to display a label, value, and optional unit
 const LineItem = ({
     label,
     value,
     unit,
-    precision = 2,
 }: {
     label: string;
     value: string | number;
     unit?: string;
-    precision?: number;
-}) => {
-    const formattedValue = typeof value === 'number' 
-        ? value.toFixed(precision) 
-        : value;
-        
-    return (
-        <div className="flex justify-between text-white/90 text-[11px] leading-tight gap-2">
-            <span className="text-gray-300 whitespace-nowrap">{label}:</span>
-            <span className="text-right whitespace-nowrap">
-                {formattedValue} {unit && <span className="text-gray-400">{unit}</span>}
-            </span>
-        </div>
-    );
-};
+}) => (
+    <div className="flex justify-between text-white/90 text-[11px] leading-tight gap-2">
+        <span className="text-gray-300 whitespace-nowrap">{label}:</span>
+        <span className="text-right whitespace-nowrap">
+            {value} {unit}
+        </span>
+    </div>
+);
 
+// Format result data specific to 'feed' node type
 const formatFeedResult = (result: any) => {
-    const { fluidType, density, viscosity, pressure, mass_flow_rate_kg_h } = result;
+    const { fluidType, density, viscosity, pressure } = result;
 
     return (
         <div className="space-y-1">
             {fluidType && <LineItem label="Fluid Type" value={fluidType} />}
             {density !== undefined && (
-                <LineItem label="Density" value={density} unit="kg/m³" precision={1} />
+                <LineItem label="Density" value={density} unit="kg/m³" />
             )}
             {viscosity !== undefined && (
-                <LineItem label="Viscosity" value={viscosity} unit="cP" precision={2} />
+                <LineItem label="Viscosity" value={viscosity} unit="cP" />
             )}
             {pressure !== undefined && (
-                <LineItem 
-                    label="Pressure" 
-                    value={pressure / 1000} 
-                    unit="kPa" 
-                    precision={3} 
-                />
-            )}
-            {mass_flow_rate_kg_h !== undefined && (
-                <LineItem 
-                    label="Mass Flow" 
-                    value={mass_flow_rate_kg_h} 
-                    unit="kg/h" 
-                    precision={1}
-                />
+                <LineItem label="Inlet Pressure P1" value={pressure} unit="kPa" />
             )}
         </div>
     );
 };
 
+// Format result data specific to 'pipe' node type
 const formatPipeResult = (result: any) => {
     const {
         head_loss_m,
@@ -72,10 +55,6 @@ const formatPipeResult = (result: any) => {
         flow_velocity_m_s,
         flow_regime,
         reynolds_number,
-        mass_flow_rate_kg_h,
-        volumetric_flow_rate_m3_h,
-        inlet_pressure_Pa,
-        outlet_pressure_Pa,
     } = result;
 
     return (
@@ -114,6 +93,7 @@ const formatPipeResult = (result: any) => {
     );
 };
 
+// Format result data specific to 'product' node type
 const formatProductResult = (result: any) => {
     const { pressure_drop_Pa, outlet_pressure_Pa } = result;
     return (
@@ -127,7 +107,7 @@ const formatProductResult = (result: any) => {
             )}
             {outlet_pressure_Pa !== undefined && (
                 <LineItem
-                    label="Outlet Pressure"
+                    label="Outlet Pressure P2"
                     value={(outlet_pressure_Pa/1000).toFixed(2)}
                     unit="kPa"
                 />
@@ -138,14 +118,10 @@ const formatProductResult = (result: any) => {
 };
 
 const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
-    if (!result || Object.keys(result).length === 0) {
-        return (
-            <div className="mt-2 bg-gray-600 rounded-md p-2 border border-gray-700 shadow-inner inline-block">
-                <span className="text-gray-300 text-[11px]">No data available</span>
-            </div>
-        );
-    }
+    // Don't render anything if result is undefined or null
+    if (!result) return null;
 
+    // Choose the correct formatter based on node type
     const renderContent = () => {
         switch (nodeType) {
             case "feed":
@@ -154,17 +130,22 @@ const NodeResult: FC<NodeResultProps> = ({ result, nodeType }) => {
                 return formatPipeResult(result);
             case "product":
                 return formatProductResult(result);
+
+            // Fallback: render raw JSON for unsupported node types
             default:
                 return (
                     <pre className="text-[11px] text-gray-300 whitespace-pre-wrap break-words">
-                        {JSON.stringify(result, null, 2)}
+                        {typeof result === "object"
+                            ? JSON.stringify(result, null, 2)
+                            : String(result)}
                     </pre>
                 );
         }
     };
 
+    // Wrapper around the rendered node result with styling
     return (
-        <div className="mt-2 bg-gray-600 rounded-md p-2 border border-gray-700 shadow-inner inline-block min-w-[200px]">
+        <div className="mt-2 bg-gray-600 rounded-md p-2 border border-gray-700 shadow-inner inline-block">
             {renderContent()}
         </div>
     );

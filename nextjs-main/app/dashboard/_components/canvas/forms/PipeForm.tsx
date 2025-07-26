@@ -198,7 +198,6 @@ export default function PipeForm({ nodeId, onClose, fluidType = 'custom' }: Pipe
     <>
       <form ref={formRef} onSubmit={handleSubmit} className="feed-form-flat">
         <h2 className="form-title">Pipe Parameters</h2>
-        
         <div className="fluid-preset-selector">
           <label>Fluid Type:</label>
           <div className="preset-buttons">
