@@ -40,7 +40,7 @@ const formatFeedResult = (result: any) => {
                 <LineItem label="Viscosity" value={viscosity} unit="cP" />
             )}
             {pressure !== undefined && (
-                <LineItem label="Pressure" value={pressure} unit="kPa" />
+                <LineItem label="Inlet Pressure P1" value={pressure} unit="kPa" />
             )}
         </div>
     );
@@ -107,7 +107,7 @@ const formatProductResult = (result: any) => {
             )}
             {outlet_pressure_Pa !== undefined && (
                 <LineItem
-                    label="Outlet Pressure"
+                    label="Outlet Pressure P2"
                     value={(outlet_pressure_Pa/1000).toFixed(2)}
                     unit="kPa"
                 />

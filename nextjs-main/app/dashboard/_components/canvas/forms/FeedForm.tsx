@@ -168,7 +168,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
         <div className="form-grid">
           <div className="form-field">
             <label htmlFor="pressure">
-              Pressure (kPag)
+              Inlet Pressure P1 (kPag)
               <span className="hint">Typical: {HYDRAULIC_LIMITS.pressure.typical[currentFluidType] || 'varies'} kPa</span>
             </label>
             <input
