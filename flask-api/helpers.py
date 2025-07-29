@@ -25,7 +25,7 @@ class CalculationMode(Enum):
 # Graph Traversal (unchanged)
 # ──────────────────────────────────────────────────────────
 def traversal_order(nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) -> List[str]:
-    """Same as before"""
+    """Determine processing order based on directed edges"""
     adj: Dict[str, List[str]] = defaultdict(list)
     in_deg: Dict[str, int] = defaultdict(int)
 
@@ -33,7 +33,7 @@ def traversal_order(nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) ->
         s, t = edge["source"], edge["target"]
         adj[s].append(t)
         in_deg[t] += 1
-        in_deg.setdefault(s, 0)  # ensure presence
+        in_deg.setdefault(s, 0)
 
     queue = deque([n for n, d in in_deg.items() if d == 0])
     order: List[str] = []
@@ -52,13 +52,21 @@ def traversal_order(nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]]) ->
     return order
 
 
-def validate_order(order, nodes_raw):
-    """Same as before"""
-    expected_sequence = ["feed", "pipe", "product"]
-    actual_sequence = [nodes_raw[nid]["data"]["nodeType"] for nid in order]
 
-    if actual_sequence != expected_sequence:
-        raise ValueError(f"Invalid node execution order: expected {expected_sequence}, got {actual_sequence}")
+def validate_order(order, nodes_raw, edges):
+    """Ensure that order contains 'feed' then 'product' and a connecting pipe edge exists"""
+    expected = ["feed", "product"]
+    actual = [nodes_raw[nid]["data"]["nodeType"] for nid in order]
+
+    if actual != expected:
+        raise ValueError(f"Expected order {expected}, got {actual}")
+
+    feed_id = order[0]
+    product_id = order[1]
+
+    matching_edge = next((e for e in edges if e["source"] == feed_id and e["target"] == product_id), None)
+    if not matching_edge:
+        raise ValueError("Missing edge (pipe) between feed and product")
 
 
 # ──────────────────────────────────────────────────────────
@@ -191,43 +199,39 @@ def to_float(value: Any) -> Optional[float]:
 # Improved Flowsheet Execution
 # ──────────────────────────────────────────────────────────
 def execute_flowsheet_extended(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Improved version that:
-    1. First creates all component instances
-    2. Then detects calculation mode based on instances
-    3. Performs the appropriate calculations
-    """
     nodes_raw = {n["id"]: n for n in flowsheet["nodes"]}
     edges = flowsheet["edges"]
     order = traversal_order(flowsheet["nodes"], edges)
-    
-    validate_order(order, nodes_raw)
-    
+
+    validate_order(order, nodes_raw, edges)
+
     results: Dict[str, Any] = {}
-    
-    # Get node IDs from the order
-    feed_id = next(nid for nid in order if nodes_raw[nid]["data"]["nodeType"] == "feed")
-    pipe_id = next(nid for nid in order if nodes_raw[nid]["data"]["nodeType"] == "pipe")
-    product_id = next(nid for nid in order if nodes_raw[nid]["data"]["nodeType"] == "product")
-    
-    # Get node data with proper null checks
+
+    feed_id = order[0]
+    product_id = order[1]
+    pipe_edge = next((e for e in edges if e["source"] == feed_id and e["target"] == product_id), None)
+
+    if not pipe_edge:
+        return {"error": "No connecting edge (pipe) found", "order": order, "results": {}, "calculation_mode": "error"}
+
+    # Extract component data
     feed_data = nodes_raw[feed_id]["data"]
-    pipe_data = nodes_raw[pipe_id]["data"]
     product_data = nodes_raw[product_id]["data"]
-    
+    pipe_data = pipe_edge["data"]  # from edge now
+
     feed_params = feed_data.get("params", {})
-    pipe_params = pipe_data.get("params", {})
     product_params = product_data.get("params", {})
-    
-    # Create component instances first
+    pipe_params = pipe_data
+
+    # Create component instances
     feed = Feed(
         id=feed_id,
-        fluid_type=feed_params.get("fluid_type", "unknown"),
+        fluid_type=feed_params.get("fluidType", "unknown"),
         pressure=to_float(feed_params.get("pressure"))
     )
-    
+
     pipe = Pipe(
-        id=pipe_id,
+        id=pipe_edge["id"],
         inner_diameter=to_float(pipe_params.get("diameter", 0)),
         length=to_float(pipe_params.get("length", 0)),
         roughness=to_float(pipe_params.get("roughness", 0)),
@@ -235,77 +239,58 @@ def execute_flowsheet_extended(flowsheet: Dict[str, Any]) -> Dict[str, Any]:
         density=to_float(pipe_params.get("density", 0)),
         viscosity_cp=to_float(pipe_params.get("viscosity", 0)),
     )
-    
+
     product = Product(
         id=product_id,
         outlet_pressure=to_float(product_params.get("pressure"))
     )
 
-    # print(feed, pipe, product)
-    
     try:
-        # Detect calculation mode based on component instances
         mode = detect_calculation_mode_from_instances(feed, pipe, product)
-        
-        # Perform calculations based on mode
+
         if mode == CalculationMode.OUTLET_PRESSURE:
-            if feed.pressure is None:
-                raise ValueError("Feed pressure is required for outlet pressure calculation")
-            if pipe.Q is None:
-                raise ValueError("Mass flow rate is required for outlet pressure calculation")
-                
+            if feed.pressure is None or pipe.Q is None:
+                raise ValueError("Missing pressure or flow for outlet pressure calc")
             pipe_results = solve_outlet_pressure(pipe, feed.pressure)
             product.set_outlet_pressure(pipe_results["outlet_pressure_Pa"])
-            
+
         elif mode == CalculationMode.INLET_PRESSURE:
-            if product.get_outlet_pressure() is None:
-                raise ValueError("Product pressure is required for inlet pressure calculation")
-            if pipe.mass_flowrate is None:
-                raise ValueError("Mass flow rate is required for inlet pressure calculation")
-                
+            if product.get_outlet_pressure() is None or pipe.mass_flowrate is None:
+                raise ValueError("Missing pressure or flow for inlet pressure calc")
             pipe_results = solve_inlet_pressure(pipe, product.get_outlet_pressure())
             feed.pressure = pipe_results["inlet_pressure_Pa"]
-            
+
         elif mode == CalculationMode.FLOW_RATE:
-            if feed.pressure is None:
-                raise ValueError("Feed pressure is required for flow rate calculation")
-            if product.get_outlet_pressure() is None:
-                raise ValueError("Product pressure is required for flow rate calculation")
-                
-            pipe_results = solve_flow_rate(
-                pipe,
-                feed.pressure,
-                product.get_outlet_pressure()
-            )
-            print(pipe_results)
-        
+            if feed.pressure is None or product.get_outlet_pressure() is None:
+                raise ValueError("Missing pressures for flow rate calc")
+            pipe_results = solve_flow_rate(pipe, feed.pressure, product.get_outlet_pressure())
+
         # Store results
         results[feed_id] = {
             "node_type": "feed",
             "pressure": feed.pressure,
             "fluid_type": feed.fluid_type
         }
-        
-        results[pipe_id] = {
+
+        results[pipe_edge["id"]] = {
             "node_type": "pipe",
             **pipe_results
         }
-        
+
         results[product_id] = {
             "node_type": "product",
             "inlet_pressure_Pa": pipe_results.get("inlet_pressure_Pa"),
             "outlet_pressure_Pa": pipe_results.get("outlet_pressure_Pa"),
             "pressure_drop_Pa": pipe_results.get("pressure_drop_Pa")
         }
-        
+
         return {
             "order": order,
             "results": results,
             "calculation_mode": mode.name
         }
-        
+
     except Exception as e:
-        print(e)
         return {
             "error": str(e),
             "order": order,
