@@ -105,7 +105,7 @@ export default function ProductForm({ nodeId, onClose }: ProductFormProps) {
         
         <div className="form-grid">
           <div className="form-field">
-            <label htmlFor="pressure">Outlet Pressure (kPag)</label>
+            <label htmlFor="pressure">Outlet Pressure P2 (kPag)</label>
             <input
               id="pressure"
               name="pressure"
