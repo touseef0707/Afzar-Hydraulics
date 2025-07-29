@@ -2,6 +2,7 @@
 import useFlowStore from '@/store/FlowStore'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import CancelWarning from '../CancelWarning'
 
 type ProductFormProps = {
   flowId: string
@@ -180,11 +181,7 @@ export default function ProductForm({ nodeId, onClose }: ProductFormProps) {
         )}
         
         <div className="form-actions">
-          <button 
-            type="button" 
-            onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} 
-            className="btn-cancel"
-          >
+          <button type="button" onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} className="btn-cancel">
             Cancel
           </button>
           <button type="submit" className="btn-save">Save</button>
@@ -192,28 +189,10 @@ export default function ProductForm({ nodeId, onClose }: ProductFormProps) {
       </form>
 
       {showCloseWarning && (
-        <div className="warning-modal-overlay">
-          <div className="warning-modal">
-            <h3>Are you sure you want to close?</h3>
-            <p>Your changes remain unsaved.</p>
-            <div className="warning-modal-actions">
-              <button 
-                type="button" 
-                className="btn-cancel"
-                onClick={handleCancelClose}
-              >
-                No, keep editing
-              </button>
-              <button 
-                type="button" 
-                className="btn-confirm"
-                onClick={handleConfirmClose}
-              >
-                Yes, close without saving
-              </button>
-            </div>
-          </div>
-        </div>
+        <CancelWarning
+          onCancel={handleCancelClose}
+          onConfirm={handleConfirmClose}
+        />
       )}
 
       <style jsx>{`

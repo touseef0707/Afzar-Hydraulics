@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import useFlowStore from '@/store/FlowStore'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { useShallow } from 'zustand/react/shallow'
+import CancelWarning from '../CancelWarning'
 
 // --- TYPE DEFINITIONS ---
 // Defines the shape of the data for a pipe, used to resolve TypeScript errors.
@@ -224,22 +225,18 @@ export default function PipeForm({ nodeId, edgeId, onClose, fluidType = 'custom'
         </div>
         
         <div className="form-actions">
-          <button type="button" onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} className="btn-cancel">Cancel</button>
+          <button type="button" onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} className="btn-cancel">
+            Cancel
+          </button>
           <button type="submit" className="btn-save">Save</button>
         </div>
       </form>
 
       {showCloseWarning && (
-        <div className="warning-modal-overlay">
-          <div className="warning-modal">
-            <h3>Unsaved Changes</h3>
-            <p>Are you sure you want to close? Your changes will be lost.</p>
-            <div className="warning-modal-actions">
-              <button type="button" className="btn-cancel" onClick={handleCancelClose}>Keep Editing</button>
-              <button type="button" className="btn-confirm" onClick={handleConfirmClose}>Close Anyway</button>
-            </div>
-          </div>
-        </div>
+        <CancelWarning
+          onCancel={handleCancelClose}
+          onConfirm={handleConfirmClose}
+        />
       )}
 
       <style jsx>{`
