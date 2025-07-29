@@ -73,8 +73,36 @@ export default function CanvasFlow({ flowId }: { flowId: string }) {
 
   // --- LOGIC FOR ACTIONS ---
   const handleRun = useCallback(async () => {
-    // (Your implementation for running the flow)
+    const flowData = { nodes, edges, flowId };
+    try {
+      const response = await run(flowData);
+      if (response.order) {
+        setDisplayResults(true);
+        showToast("Flow executed successfully!", "success");
+      } 
+      else{
+        setDisplayResults(false);
+        showToast(response, "error");
+      }
+    } catch (error) {
+      console.error("Run failed:", error);
+      showToast(runError || "Failed to execute flow", "error");
+    }
   }, [run, nodes, edges, flowId, runError, showToast, setDisplayResults]);
+
+   // Warn user before page reload if there are unsaved change
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
 
   const onSave = useCallback(() => {
     if (flowId) saveFlow(flowId, showToast);
