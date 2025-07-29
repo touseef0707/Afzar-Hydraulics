@@ -19,7 +19,17 @@ import { database } from "@/firebase/clientApp";
 
 // --- Utility Function ---
 const sanitizeForFirebase = (data: any): any => {
-  if (Array.isArray(data)) return data.map(item => sanitizeForFirebase(item));
+  // Handle NaN values in numbers
+  if (typeof data === 'number' && isNaN(data)) {
+    return null; // or 0 if you prefer to keep it as a number
+  }
+  
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return data.map(item => sanitizeForFirebase(item));
+  }
+  
+  // Handle objects
   if (data !== null && typeof data === "object") {
     const sanitizedObject: { [key: string]: any } = {};
     for (const key in data) {
@@ -32,6 +42,8 @@ const sanitizeForFirebase = (data: any): any => {
     }
     return sanitizedObject;
   }
+  
+  // Return all other values as-is
   return data;
 };
 
@@ -160,31 +172,32 @@ const useFlowStore = create<RFState>((set, get) => ({
   // --- MODIFIED saveFlow ---
   // This ensures every edge is explicitly typed before being sent to the database.
   saveFlow: async (flowId: string, showToast?) => {
-    try {
-      const { nodes, edges } = get();
-      const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
-      
-      // Ensure every edge has the 'pipe' type before saving.
-      const edgesToSave = edges.map(edge => ({
+  try {
+    const { nodes, edges } = get();
+    const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
+    
+    const flowData = {
+      nodes: Array.isArray(nodes) ? sanitizeForFirebase(nodes) : [],
+      edges: Array.isArray(edges) ? sanitizeForFirebase(edges.map(edge => ({
         ...edge,
-        type: 'pipe',
-      }));
+        type: 'pipe' // Ensure all edges have the pipe type
+      }))) : [],
+      updatedAt: Date.now() // Add timestamp
+    };
 
-      const flowData = {
-        nodes: sanitizeForFirebase(nodes),
-        edges: sanitizeForFirebase(edgesToSave),
-      };
+    // Save to both locations
+    const dbRef = ref(database);
+    await fbSet(ref(database, `flows/${formattedFlowId}`), flowData);
+    await fbSet(ref(database, `projects/${flowId}/flow`), formattedFlowId);
 
-      const projectFlowRef = ref(database, `projects/${flowId}/flow`);
-      fbSet(projectFlowRef, formattedFlowId);
-      const flowDataRef = ref(database, `flows/${formattedFlowId}`);
-      await fbSet(flowDataRef, flowData);
-      set({ isDirty: false });
-      showToast?.("Flow saved successfully!", "success");
-    } catch (error) {
-      showToast?.("Failed to save flow", "error");
-    }
-  },
+    set({ isDirty: false });
+    showToast?.("Flow saved successfully!", "success");
+  } catch (error) {
+    console.error("Failed to save flow:", error);
+    showToast?.("Failed to save flow", "error");
+    throw error;
+  }
+},
 
   // --- MODIFIED loadFlow ---
   // This "upgrades" any old data from the database to ensure it has the correct type.

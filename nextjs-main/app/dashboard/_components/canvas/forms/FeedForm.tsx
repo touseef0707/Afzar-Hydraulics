@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import useFlowStore from '@/store/FlowStore'
 import { useClickOutside } from '@/hooks/useClickOutside'
+import CancelWarning from '../CancelWarning'
 
 type FeedFormProps = {
   flowId: string
@@ -24,7 +25,7 @@ const FLUID_PRESETS = {
 }
 
 export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: FeedFormProps) {
-  const [fields, setFields] = useState({ 
+  const [fields, setFields] = useState({
     pressure: ''
   })
   const [initialValues, setInitialValues] = useState({
@@ -34,7 +35,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
   const [loading, setLoading] = useState(true)
   const [currentFluidType, setCurrentFluidType] = useState(fluidType)
   const [showCloseWarning, setShowCloseWarning] = useState(false)
-  
+
   const formRef = useRef<HTMLFormElement>(null)
   const nodes = useFlowStore(state => state.nodes)
   const updateNodeParams = useFlowStore(state => state.updateNodeParams)
@@ -53,7 +54,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
 
   useEffect(() => {
     const currentNode = nodes.find(node => node.id === nodeId)
-    
+
     if (currentNode?.data?.params) {
       const initial = {
         pressure: currentNode.data.params.pressure?.toString() || ''
@@ -67,7 +68,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       }
       setInitialValues(presetValues)
     }
-    
+
     setLoading(false)
   }, [nodeId, nodes, fluidType])
 
@@ -85,22 +86,22 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     const newFields = { ...fields, [e.target.name]: e.target.value }
     setFields(newFields)
     setErrors({ ...errors, [e.target.name]: '' })
-    
+
     if (currentFluidType !== 'custom') {
       const currentValue = parseFloat(newFields.pressure) || 0
-      
-      const isWaterPreset = 
+
+      const isWaterPreset =
         Math.abs(currentValue - FLUID_PRESETS.water.pressure) < 5
-        
-      const isOilPreset = 
+
+      const isOilPreset =
         Math.abs(currentValue - FLUID_PRESETS.oil.pressure) < 50
-        
+
       if (isWaterPreset) setCurrentFluidType('water')
       else if (isOilPreset) setCurrentFluidType('oil')
       else setCurrentFluidType('custom')
     }
   }
-  
+
   function validate() {
     return {}
   }
@@ -112,12 +113,12 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       setErrors(err)
       return
     }
-    
+
     const numericFields = {
       pressure: parseFloat(fields.pressure),
       fluidType: currentFluidType
     }
-    
+
     updateNodeParams(nodeId, numericFields)
     onClose()
   }
@@ -137,34 +138,34 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
     <>
       <form ref={formRef} onSubmit={handleSubmit} className="feed-form-flat">
         <h2 className="form-title">Feed Parameters</h2>
-        
+
         <div className="fluid-preset-selector">
           <label>Fluid Type:</label>
           <div className="preset-buttons">
-            <button 
+            <button
               type="button"
-              className={`preset-btn ${currentFluidType === 'water' ? 'active' : ''}`}
+              className={`preset-btn text-black ${currentFluidType === 'water' ? 'active' : ''}`}
               onClick={() => applyPreset('water')}
             >
               Water
             </button>
-            <button 
+            <button
               type="button"
-              className={`preset-btn ${currentFluidType === 'oil' ? 'active' : ''}`}
+              className={`preset-btn text-black ${currentFluidType === 'oil' ? 'active' : ''}`}
               onClick={() => applyPreset('oil')}
             >
               Oil
             </button>
-            <button 
+            <button
               type="button"
-              className={`preset-btn ${currentFluidType === 'custom' ? 'active' : ''}`}
+              className={`preset-btn black ${currentFluidType === 'custom' ? 'active' : ''}`}
               onClick={() => setCurrentFluidType('custom')}
             >
               Custom
             </button>
           </div>
         </div>
-        
+
         <div className="form-grid">
           <div className="form-field">
             <label htmlFor="pressure">
@@ -179,7 +180,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
               onChange={handleChange}
               placeholder={`Enter pressure (${HYDRAULIC_LIMITS.pressure.min}-${HYDRAULIC_LIMITS.pressure.max} kPa)`}
               className={errors.pressure ? 'input-error' : ''}
-              autoFocus 
+              autoFocus
               step="0.1"
               min={HYDRAULIC_LIMITS.pressure.min}
               max={HYDRAULIC_LIMITS.pressure.max}
@@ -187,7 +188,7 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
             {errors.pressure && <span className="error-text">{errors.pressure}</span>}
           </div>
         </div>
-        
+
         <div className="form-actions">
           <button type="button" onClick={() => hasUnsavedChanges ? setShowCloseWarning(true) : onClose()} className="btn-cancel">
             Cancel
@@ -197,28 +198,10 @@ export default function FeedForm({ nodeId, onClose, fluidType = 'custom' }: Feed
       </form>
 
       {showCloseWarning && (
-        <div className="warning-modal-overlay">
-          <div className="warning-modal">
-            <h3>Are you sure you want to close?</h3>
-            <p>Your changes remain unsaved.</p>
-            <div className="warning-modal-actions">
-              <button 
-                type="button" 
-                className="btn-cancel"
-                onClick={handleCancelClose}
-              >
-                No, keep editing
-              </button>
-              <button 
-                type="button" 
-                className="btn-confirm"
-                onClick={handleConfirmClose}
-              >
-                Yes, close without saving
-              </button>
-            </div>
-          </div>
-        </div>
+        <CancelWarning
+          onCancel={handleCancelClose}
+          onConfirm={handleConfirmClose}
+        />
       )}
 
       <style jsx>{`

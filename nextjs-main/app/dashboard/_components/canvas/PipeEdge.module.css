@@ -41,7 +41,7 @@
 }
 
 .edgeInterior {
-  stroke: var(--xy-flow-background-color, #ffffff);
+  stroke: var(--xy-flow-background-color);
   transition: stroke 0.2s ease-in-out;
 }
 

@@ -180,9 +180,9 @@ export default function PipeForm({ nodeId, edgeId, onClose, fluidType = 'custom'
         <div className="fluid-preset-selector">
           <label>Fluid Type:</label>
           <div className="preset-buttons">
-            <button type="button" className={`preset-btn ${currentFluidType === 'water' ? 'active' : ''}`} onClick={() => applyPreset('water')}>Water</button>
-            <button type="button" className={`preset-btn ${currentFluidType === 'oil' ? 'active' : ''}`} onClick={() => applyPreset('oil')}>Oil</button>
-            <button type="button" className={`preset-btn ${currentFluidType === 'custom' ? 'active' : ''}`} onClick={() => setCurrentFluidType('custom')}>Custom</button>
+            <button type="button" className={`preset-btn text-black ${currentFluidType === 'water' ? 'active' : ''}`} onClick={() => applyPreset('water')}>Water</button>
+            <button type="button" className={`preset-btn text-black ${currentFluidType === 'oil' ? 'active' : ''}`} onClick={() => applyPreset('oil')}>Oil</button>
+            <button type="button" className={`preset-btn text-black ${currentFluidType === 'custom' ? 'active' : ''}`} onClick={() => setCurrentFluidType('custom')}>Custom</button>
           </div>
         </div>
         

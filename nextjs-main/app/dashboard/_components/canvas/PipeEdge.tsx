@@ -4,6 +4,8 @@
 import { getBezierPath, Position, EdgeLabelRenderer, EdgeProps } from "@xyflow/react";
 import useFlowStore from "@/store/FlowStore";
 import styles from './PipeEdge.module.css'; // Using the same CSS module
+import { useShallow } from "zustand/shallow";
+import NodeResult from "./NodeResult";
 
 interface PipeEdgeProps extends EdgeProps {
   data?: {
@@ -12,6 +14,8 @@ interface PipeEdgeProps extends EdgeProps {
     color?: string;
   };
 }
+
+
 
 export default function PipeEdge({
   id,
@@ -32,6 +36,18 @@ export default function PipeEdge({
     color = "#888",
   } = data;
 
+  const {
+    runResponse,
+    displayResults
+  } = useFlowStore(
+    useShallow(state => ({
+      runResponse: state.runResponse,
+      displayResults: state.displayResults
+    }))
+  );
+
+  const nodeResult = runResponse?.results?.[id];
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -41,17 +57,18 @@ export default function PipeEdge({
     targetPosition,
   });
 
-  const onEdgeClick = () => {
+  const handleRightClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     setEditingEdgeId(id);
   };
 
   const borderThickness = 3;
-  const innerDiameter = Math.max(1, diameter - (borderThickness * 2));
+  const innerDiameter = Math.max(1, 20 - (borderThickness * 2));
 
   return (
     <g
       className={`${styles.edgeGroup} ${selected ? styles.selected : ''}`}
-      onClick={onEdgeClick}
+      onContextMenu={handleRightClick}
     >
       {/* --- SVG DEFINITIONS --- */}
       {/* This <defs> block is NOT visible but defines the gradient for the CSS to use. */}
@@ -75,7 +92,6 @@ export default function PipeEdge({
         d={edgePath}
         fill="none"
         stroke={color}
-        strokeWidth={diameter}
       />
       <path
         className={styles.edgeInterior}
@@ -100,12 +116,28 @@ export default function PipeEdge({
               pointerEvents: "auto",
             }}
             className={`${styles.edgeLabel} nodrag nopan`}
-            onClick={(e) => {
+            onContextMenu={(e) => {
               e.stopPropagation();
-              onEdgeClick();
+              handleRightClick(e);
             }}
           >
             {label}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+
+      {displayResults && nodeResult && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY + 76}px)`,
+              pointerEvents: "auto",
+              zIndex: 10
+            }}
+            className="nodrag nopan"
+          >
+            <NodeResult result={nodeResult} nodeType="pipe" />
           </div>
         </EdgeLabelRenderer>
       )}
