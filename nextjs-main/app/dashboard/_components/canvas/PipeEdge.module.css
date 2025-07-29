@@ -1,0 +1,96 @@
+/* src/components/PipeEdge.module.css - Improved for realistic fluid flow */
+
+/* Animation for the fluid's forward movement */
+@keyframes flow-animation {
+  to {
+    stroke-dashoffset: -40; /* Increased distance for a smoother loop */
+  }
+}
+
+/* Animation for the pulsating/wave effect */
+@keyframes wave-motion {
+  0% {
+    stroke-dasharray: 5 35; /* Small visible part, long gap */
+  }
+  50% {
+    stroke-dasharray: 25 15; /* Longer visible part, shorter gap */
+  }
+  100% {
+    stroke-dasharray: 5 35;
+  }
+}
+
+.edgeGroup {
+  cursor: pointer;
+  transition: filter 0.2s ease-in-out;
+}
+
+/* A more noticeable glow on hover */
+.edgeGroup:hover {
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6)); /* Brighter indigo glow */
+}
+
+/* --- PATH STYLES --- */
+
+.edgeHitbox {
+  stroke: transparent;
+}
+
+.edgeCasing {
+  transition: stroke 0.2s ease-in-out;
+}
+
+.edgeInterior {
+  stroke: var(--xy-flow-background-color, #ffffff);
+  transition: stroke 0.2s ease-in-out;
+}
+
+/* The animated path that simulates flow */
+.edgeFlow {
+  /* Use the SVG gradient defined in the React component */
+  stroke: url(#gradient-flow);
+  stroke-dasharray: 5 35;
+  stroke-dashoffset: 0;
+  stroke-linecap: round; /* Makes the ends of the dashes rounded */
+
+  /* Combine two animations for a complex effect */
+  animation: 
+    flow-animation 1.5s linear infinite,
+    wave-motion 2s ease-in-out infinite;
+  
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* --- STATE-BASED STYLES --- */
+
+/* When the edge group is hovered, make the flow visible */
+.edgeGroup:hover .edgeFlow {
+  opacity: 1;
+}
+
+/* When the edge is selected, make the casing brighter and ensure flow is visible */
+.edgeGroup.selected .edgeCasing {
+  stroke: #4f46e5; /* A bright, solid indigo */
+}
+
+.edgeGroup.selected .edgeFlow {
+  opacity: 1; /* Always show flow when selected */
+}
+
+/* --- LABEL STYLES (Unchanged) --- */
+.edgeLabel {
+  background: #eef2ff;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3730a3;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.edgeLabel:hover {
+  background: #e0e7ff;
+  transform: scale(1.05);
+}

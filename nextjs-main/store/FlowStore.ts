@@ -13,7 +13,6 @@ import {
   OnConnect,
   applyNodeChanges,
   applyEdgeChanges,
-  MarkerType,
 } from "@xyflow/react";
 import { ref, set as fbSet, get as fbGet } from "firebase/database";
 import { database } from "@/firebase/clientApp";
@@ -48,6 +47,7 @@ export type RFState = {
   nodes: CustomNode[];
   edges: Edge[];
   editingNodeId: string | null;
+  editingEdgeId: string | null; // ID of the edge being edited
   isDirty: boolean;
   runResponse: any | null;
   runError: string | null;
@@ -70,7 +70,9 @@ export type RFState = {
   loadFlow: (flowId: string) => Promise<void>;
   deleteNode: (nodeId: string) => void;
   updateNodeParams: (nodeId: string, params: object) => void;
+  updateEdgeData: (edgeId: string, data: object) => void; // Action to update edge data
   setEditingNodeId: (nodeId: string | null) => void;
+  setEditingEdgeId: (edgeId: string | null) => void; // Action to set the editing edge
 
   // Run functionality
   run: (flowdata: any) => Promise<any>;
@@ -78,7 +80,7 @@ export type RFState = {
   clearNodesAndEdges: () => void;
   setDisplayResults: (show: boolean) => void;
 
-  // Private/internal methods (not exposed outside)
+  // Private/internal methods
   _filterFlowData: (flowdata: any) => any;
 };
 
@@ -86,6 +88,7 @@ const useFlowStore = create<RFState>((set, get) => ({
   nodes: [],
   edges: [],
   editingNodeId: null,
+  editingEdgeId: null,
   isDirty: false,
   runResponse: null,
   runError: null,
@@ -93,7 +96,6 @@ const useFlowStore = create<RFState>((set, get) => ({
   displayResults: true,
   runOnce: false,
 
-  // Flow management actions
   setDirty: (dirty) => set({ isDirty: dirty }),
 
   onNodesChange: (changes: NodeChange[]) => {
@@ -107,41 +109,76 @@ const useFlowStore = create<RFState>((set, get) => ({
     set({ edges: applyEdgeChanges(changes, get().edges), isDirty: true });
   },
 
+  // --- MODIFIED onConnect ---
+  // Ensures new connections have the correct type and defaults.
   onConnect: (connection: Connection) => {
+    const newEdge = {
+      ...connection,
+      type: "pipe",
+      data: {
+        label: "", // Start with no label
+        diameter: 20, // Start with a thick, clickable diameter
+        color: "#64748b",
+      },
+    };
     set({
-      edges: addEdge(
-        {
-          ...connection,
-          markerEnd: { type: MarkerType.ArrowClosed },
-          animated: true,
-        },
-        get().edges
-      ),
+      edges: addEdge(newEdge, get().edges),
       isDirty: true,
     });
   },
 
-  addNode: (node: CustomNode) =>
-    set({ nodes: [...get().nodes, node], isDirty: true }),
-
+  addNode: (node: CustomNode) => set({ nodes: [...get().nodes, node], isDirty: true }),
   setNodes: (nodes: CustomNode[]) => set({ nodes, isDirty: true }),
-
   setEdges: (edges: Edge[]) => set({ edges, isDirty: true }),
-
   setEditingNodeId: (nodeId: string | null) => set({ editingNodeId: nodeId }),
+  setEditingEdgeId: (edgeId: string | null) => set({ editingEdgeId: edgeId }),
 
+  updateNodeParams: (nodeId: string, params: object) => {
+    set({
+      nodes: get().nodes.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, data: { ...node.data, params: { ...node.data.params, ...params } } };
+        }
+        return node;
+      }),
+      isDirty: true,
+    });
+  },
+  
+  updateEdgeData: (edgeId: string, newData: object) => {
+    set({
+      edges: get().edges.map((edge) => {
+        if (edge.id === edgeId) {
+          return { ...edge, data: { ...edge.data, ...newData } };
+        }
+        return edge;
+      }),
+      isDirty: true,
+    });
+  },
+
+  // --- MODIFIED saveFlow ---
+  // This ensures every edge is explicitly typed before being sent to the database.
   saveFlow: async (flowId: string, showToast?) => {
     try {
       const { nodes, edges } = get();
       const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
+      
+      // Ensure every edge has the 'pipe' type before saving.
+      const edgesToSave = edges.map(edge => ({
+        ...edge,
+        type: 'pipe',
+      }));
+
       const flowData = {
-        nodes: Array.isArray(nodes) ? sanitizeForFirebase(nodes) : [],
-        edges: Array.isArray(edges) ? sanitizeForFirebase(edges) : [],
+        nodes: sanitizeForFirebase(nodes),
+        edges: sanitizeForFirebase(edgesToSave),
       };
+
       const projectFlowRef = ref(database, `projects/${flowId}/flow`);
       fbSet(projectFlowRef, formattedFlowId);
       const flowDataRef = ref(database, `flows/${formattedFlowId}`);
-      fbSet(flowDataRef, flowData);
+      await fbSet(flowDataRef, flowData);
       set({ isDirty: false });
       showToast?.("Flow saved successfully!", "success");
     } catch (error) {
@@ -149,6 +186,8 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
+  // --- MODIFIED loadFlow ---
+  // This "upgrades" any old data from the database to ensure it has the correct type.
   loadFlow: async (flowId: string) => {
     const formattedFlowId = "fid_" + flowId.replace(/^-/, "");
     const flowDataRef = ref(database, `flows/${formattedFlowId}`);
@@ -156,15 +195,20 @@ const useFlowStore = create<RFState>((set, get) => ({
       const snapshot = await fbGet(flowDataRef);
       if (snapshot.exists()) {
         const data = snapshot.val();
+        
+        // Ensure every loaded edge is given the 'pipe' type.
+        const loadedEdges = (Array.isArray(data.edges) ? data.edges : []).map((edge: Edge) => ({
+          ...edge,
+          type: 'pipe',
+        }));
+
         set({
           nodes: Array.isArray(data.nodes) ? data.nodes : [],
-          edges: Array.isArray(data.edges) ? data.edges : [],
+          edges: loadedEdges,
           isDirty: false,
         });
-        console.log("Flow loaded successfully");
       } else {
         set({ nodes: [], edges: [], isDirty: false });
-        console.log("No flow data found for this ID.");
       }
     } catch (error) {
       set({ nodes: [], edges: [], isDirty: false });
@@ -181,54 +225,27 @@ const useFlowStore = create<RFState>((set, get) => ({
       isDirty: true,
     });
   },
-
-  updateNodeParams: (nodeId: string, params: object) => {
-    set({
-      nodes: get().nodes.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              params: { ...node.data.params, ...params }
-            }
-          };
-        }
-        return node;
-      }),
-      isDirty: true,
-    });
-  },
-
-  // Run functionality implementation
+  
   run: async (flowdata: any) => {
     set({ isRunning: true, runError: null });
     try {
       const filteredData = get()._filterFlowData(flowdata);
-
       const apiUrl = process.env.NEXT_PUBLIC_FLASK_API_URL;
       if (!apiUrl) {
         throw new Error("FLASK_API_URL is not defined in environment variables");
       }
       const response = await fetch(`${apiUrl}/api/run`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(filteredData),
         mode: 'cors',
         credentials: 'include'
       });
-
       const result = await response.json();
-
       if (response.ok) {
-        set({ runResponse: result });
-        set({ runOnce: true });
+        set({ runResponse: result, runOnce: true });
       } else {
-        set({ runError: result.error || "Unknown error" })
-        set({ runResponse: null });
-        set({ runOnce: false });
+        set({ runError: result.error || "Unknown error", runResponse: null, runOnce: false });
         return result.error;
       }
       return result;
@@ -240,37 +257,21 @@ const useFlowStore = create<RFState>((set, get) => ({
     }
   },
 
-  clearRunResults: () => set({
-    runResponse: null,
-    runError: null,
-    runOnce: false
-  }),
-
+  clearRunResults: () => set({ runResponse: null, runError: null, runOnce: false }),
   clearNodesAndEdges: () => set({ nodes: [], edges: [], isDirty: false }),
-
   setDisplayResults: (show) => set({ displayResults: show }),
-
-  // Internal method for filtering flow data
+  
   _filterFlowData: (flowdata: any): any => {
     if (!flowdata) return flowdata;
-
-    // Filter nodes
     const filteredNodes = flowdata.nodes?.map((node: any) => {
       const { measured, position, type, selected, dragging, ...filteredNode } = node;
       return filteredNode;
     }) || [];
-
-    // Filter edges
     const filteredEdges = flowdata.edges?.map((edge: any) => {
       const { animated, ...filteredEdge } = edge;
       return filteredEdge;
     }) || [];
-
-    return {
-      ...flowdata,
-      nodes: filteredNodes,
-      edges: filteredEdges
-    };
+    return { ...flowdata, nodes: filteredNodes, edges: filteredEdges };
   }
 }));
 
