@@ -23,7 +23,7 @@ class Feed(Component):
         """
         self.id=id
         self.fluid_type = fluid_type
-        self.pressure = pressure  # kPa
+        self.pressure = (pressure * 1000) if pressure is not None else None
 
     def process(self, data=None):
         print(f"Feed '{self.id}' is providing data at {self.pressure} Pa.")

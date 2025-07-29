@@ -222,6 +222,13 @@ const useFlowStore = create<RFState>((set, get) => ({
 
       const result = await response.json();
 
+      if (result.error) {
+        set({ runError: result.error || "Unknown error" })
+        set({ runResponse: null });
+        set({ runOnce: false });
+        return result.error;
+      }
+
       if (response.ok) {
         set({ runResponse: result });
         set({ runOnce: true });
@@ -231,6 +238,7 @@ const useFlowStore = create<RFState>((set, get) => ({
         set({ runOnce: false });
         return result.error;
       }
+      
       return result;
     } catch (err: any) {
       set({ runError: err.message || "Unknown error" });

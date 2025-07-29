@@ -10,7 +10,7 @@ class Product(Component):
     def __init__(
         self,
         id: str,
-        outlet_pressure: float,  # Pa
+        outlet_pressure: float,  
     ):
         """
         Initializes the Product with a id and outlet pressure.
@@ -20,7 +20,7 @@ class Product(Component):
             outlet_pressure (float): Outlet pressure in Pascals (Pa).
         """
         self.id=id
-        self.outlet_pressure = outlet_pressure  # Pa
+        self.outlet_pressure = (outlet_pressure * 1000) if outlet_pressure is not None else None
 
     def process(self, data: Iterable[Any]) -> None:
         """

@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const showToast = (
     content: string,
     type: ToastType = 'info',
-    duration: number = 3000
+    duration: number = 5000
   ) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, content, type, duration }]);

@@ -32,6 +32,7 @@ class Pipe:
         self.D          = inner_diameter
         self.L          = length
         self.epsilon    = roughness / 1000 # m
+        self.mass_flowrate = mass_flowrate
         self.Q          = mass_flowrate / 1000 
         self.rho        = density
         self.mu_cp      = viscosity_cp
@@ -142,4 +143,4 @@ class Pipe:
         return self.head_loss * self.rho * Pipe.g
 
     def __repr__(self) -> str:
-        return f"Pipe(id={self.id}, D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp})"
+        return f"<Pipe id={self.id}, D={self.D}, L={self.L}, epsilon={self.epsilon}, Q={self.Q}, rho={self.rho}, mu_cp={self.mu_cp}>"

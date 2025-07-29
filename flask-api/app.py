@@ -10,7 +10,7 @@ from flask_cors import CORS
 import os
 
 # Local helper functions
-from helpers import execute_flowsheet, print_hydraulic_report
+from helpers import execute_flowsheet_extended
 from dotenv import load_dotenv
 
 load_dotenv()  # Load .env variables into os.environ
@@ -61,7 +61,8 @@ def run_flowsheet():                      # noqa: D401
 
     # 2 ─ Execute hydraulic calculations
     try:
-        report = execute_flowsheet(flowsheet)
+        print(flowsheet)
+        report = execute_flowsheet_extended(flowsheet)
         # print_hydraulic_report(report)
     except ValueError as exc:
         return jsonify(error=str(exc)), 400

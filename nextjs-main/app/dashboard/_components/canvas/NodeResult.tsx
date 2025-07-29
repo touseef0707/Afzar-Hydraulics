@@ -40,7 +40,7 @@ const formatFeedResult = (result: any) => {
                 <LineItem label="Viscosity" value={viscosity} unit="cP" />
             )}
             {pressure !== undefined && (
-                <LineItem label="Pressure" value={pressure} unit="kPa" />
+                <LineItem label="Pressure" value={(pressure/1000).toFixed(2)} unit="kPa" />
             )}
         </div>
     );
