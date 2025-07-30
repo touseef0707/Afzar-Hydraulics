@@ -8,7 +8,7 @@ A simulation and information platform developed for **Afzar Consultants LLC**, f
 
 The repository is organized into two main directories:
 
-- **`flask-backend/`** – Contains the Flask-based backend for simulations.  
+- **`flask-api/`** – Contains the Flask-based backend for simulations.  
   🛠️ Deployed via **Render**.
 
 - **`nextjs-main/`** – Contains the Next.js-based frontend website.  
