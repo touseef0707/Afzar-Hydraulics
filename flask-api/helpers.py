@@ -138,7 +138,9 @@ def solve_flow_rate(pipe: Pipe,
     """Case 3: Calculate maximum possible flow rate given pressure difference"""
     # Initial guesses
     min_flow = 0
-    max_flow = 10000  # kg/h, arbitrary large value
+    max_flow = 1000000  # kg/h, arbitrary large value
+
+    # RZM: Consider flow corresponding to 10m/s velocity as the max flow
     best_flow = 0
     best_diff = float('inf')
     
@@ -151,19 +153,23 @@ def solve_flow_rate(pipe: Pipe,
         "density": pipe.rho,
         "viscosity_cp": pipe.mu_cp,
     }
-    
+    iterations = 0
+    actual_drop = inlet_pressure - outlet_pressure
+
+    # RZM: boolean flag for iteration success
     for _ in range(max_iter):
+        iterations += 1
+
         test_flow = (min_flow + max_flow) / 2
-        pipe_params["massFlowRate"] = test_flow
+        pipe_params["mass_flowrate"] = test_flow
         
         test_pipe = Pipe(**pipe_params)
         pipe_results = test_pipe.solve()
         calculated_drop = pipe_results["pressure_drop_Pa"]
-        actual_drop = inlet_pressure - outlet_pressure
         
         diff = abs(calculated_drop - actual_drop)
         
-        if diff < tol:
+        if diff <= tol:
             break
             
         if calculated_drop < actual_drop:
@@ -177,8 +183,11 @@ def solve_flow_rate(pipe: Pipe,
     
     # Update the original pipe with calculated flow rate
     pipe.mass_flowrate = best_flow
+    pipe.Q = best_flow / 1000
     pipe_results = pipe.solve()
-    
+    print(pipe_results)
+    print(best_flow)
+    print(iterations)
     return {
         **pipe_results,
         "inlet_pressure_Pa": inlet_pressure,

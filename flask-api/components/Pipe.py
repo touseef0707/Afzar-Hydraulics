@@ -22,7 +22,7 @@ class Pipe:
         inner_diameter: float,      # m
         length: float,              # m
         roughness: float,           # mm
-        mass_flowrate: float,       # kg h-1
+        mass_flowrate: Optional[float],  # kg h-1 (now Optional)
         density: float,             # kg m-3
         viscosity_cp: float,        # cP
         *,
@@ -33,7 +33,7 @@ class Pipe:
         self.L          = length
         self.epsilon    = roughness / 1000 # m
         self.mass_flowrate = mass_flowrate
-        self.Q          = mass_flowrate / 1000 
+        self.Q          = mass_flowrate / 1000 if mass_flowrate is not None else None  # Modified
         self.rho        = density
         self.mu_cp      = viscosity_cp
         self.mu_pa_s    = viscosity_cp * 1e-3
@@ -54,25 +54,33 @@ class Pipe:
     # ──────────────────────────────
     def solve(self) -> Dict[str, float]:
         """Runs every calculation and returns results as a dict."""
-        self.area               = self._cross_sectional_area()
-        self.velocity           = self._flow_velocity()
-        self.reynolds           = self._reynolds_number()
-        self.regime             = self._classify_regime()
-        self.friction_factor    = self._darcy_friction_factor()
-        self.relative_roughness = self.epsilon / self.D
-        self.head_loss          = self._darcy_head_loss()
-        self.pressure_drop      = self._darcy_pressure_drop()
-
-        return {
+        self.area = self._cross_sectional_area()
+        self.velocity = self._flow_velocity()
+        
+        results = {
             "cross_sectional_area_m2": self.area,
-            "flow_velocity_m_s":       self.velocity,
-            "reynolds_number":         self.reynolds,
-            "flow_regime":             self.regime,
-            "friction_factor":         self.friction_factor,
-            "relative_roughness":      self.relative_roughness,
-            "head_loss_m":             self.head_loss,
-            "pressure_drop_Pa":        self.pressure_drop,
+            "flow_velocity_m_s": self.velocity,
         }
+        
+        if self.velocity is not None:
+            self.reynolds = self._reynolds_number()
+            self.regime = self._classify_regime()
+            self.friction_factor = self._darcy_friction_factor()
+            self.relative_roughness = self.epsilon / self.D
+            self.head_loss = self._darcy_head_loss()
+            self.pressure_drop = self._darcy_pressure_drop()
+        
+            results.update({
+                "mass_flowrate": self.mass_flowrate,
+                "reynolds_number": self.reynolds,
+                "flow_regime": self.regime,
+                "friction_factor": self.friction_factor,
+                "relative_roughness": self.relative_roughness,
+                "head_loss_m": self.head_loss,
+                "pressure_drop_Pa": self.pressure_drop,
+            })
+    
+        return results
 
     # ──────────────────────────────
     # ─── Individual calculations ──
@@ -81,7 +89,9 @@ class Pipe:
         r = self.D / 2
         return math.pi * (r**2)
 
-    def _flow_velocity(self) -> float:
+    def _flow_velocity(self) -> Optional[float]:
+        if self.Q is None:
+            return None
         q_m3_s = self.Q / 3600          # convert h-1 → s-1
         return q_m3_s / self.area
 

@@ -40,7 +40,7 @@ const formatFeedResult = (result: any) => {
                 <LineItem label="Viscosity" value={viscosity} unit="cP" />
             )}
             {pressure !== undefined && (
-                <LineItem label="Inlet Pressure P1" value={(pressure/1000).toFixed(2)} unit="kPa" />
+                <LineItem label="Inlet Pressure P1" value={(pressure / 1000).toFixed(2)} unit="kPa" />
             )}
         </div>
     );
@@ -55,10 +55,14 @@ const formatPipeResult = (result: any) => {
         flow_velocity_m_s,
         flow_regime,
         reynolds_number,
+        mass_flowrate,
     } = result;
 
     return (
         <div className="space-y-1">
+            {mass_flowrate !== undefined && (
+                <LineItem label="Mass Flowrate" value={mass_flowrate.toFixed(4)} unit="kg/h" />
+            )}
             {head_loss_m !== undefined && (
                 <LineItem label="Head Loss" value={head_loss_m.toFixed(4)} unit="m" />
             )}
@@ -71,7 +75,7 @@ const formatPipeResult = (result: any) => {
             {pressure_drop_Pa !== undefined && (
                 <LineItem
                     label="Pressure Drop"
-                    value={(pressure_drop_Pa/1000).toFixed(2)}
+                    value={(pressure_drop_Pa / 1000).toFixed(2)}
                     unit="kPa"
                 />
             )}
@@ -101,14 +105,14 @@ const formatProductResult = (result: any) => {
             {pressure_drop_Pa !== undefined && (
                 <LineItem
                     label="Pressure Drop"
-                    value={(pressure_drop_Pa/1000).toFixed(2)}
+                    value={(pressure_drop_Pa / 1000).toFixed(2)}
                     unit="kPa"
                 />
             )}
             {outlet_pressure_Pa !== undefined && (
                 <LineItem
                     label="Outlet Pressure P2"
-                    value={(outlet_pressure_Pa/1000).toFixed(2)}
+                    value={(outlet_pressure_Pa / 1000).toFixed(2)}
                     unit="kPa"
                 />
             )}
