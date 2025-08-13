@@ -61,7 +61,7 @@ def run_flowsheet():                      # noqa: D401
 
     # 2 ─ Execute hydraulic calculations
     try:
-        print(flowsheet)
+        # print(flowsheet)
         report = execute_flowsheet_extended(flowsheet)
         # print_hydraulic_report(report)
     except ValueError as exc:
