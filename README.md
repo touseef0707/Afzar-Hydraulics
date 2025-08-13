@@ -172,6 +172,3 @@ Licensed under the [MIT License](LICENSE).
 📧 [touseefahmed0707@gmail.com](mailto:touseefahmed0707@gmail.com)
 
 ---
-
-If you’d like, I can also make a **diagram** showing the Firebase, Flask, and Next.js connection flow so onboarding devs can visualize it in 10 seconds.
-Would you like me to add that visual to the guide?
