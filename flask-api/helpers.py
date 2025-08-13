@@ -1,5 +1,5 @@
 """
-extended_helpers.py
+helpers.py
 -------------------
 Improved version that first creates component instances and then uses them to detect calculation mode.
 """
